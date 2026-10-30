@@ -34,6 +34,8 @@
     .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .cart-btn { background: #0f172a; color: white; position: relative; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
     .cart-badge { background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; position: absolute; top: -5px; right: -5px; }
+    
+    .purchases-history-btn { background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
 
     .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
     h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
@@ -43,7 +45,7 @@
     .btn-success { background: var(--success); color: white; }
     .btn-danger { background: var(--danger); color: white; }
     .btn-refresh { background: #475569; color: white; }
-    .btn-copy { background: var(--primary); color: white; padding: 8px 14px; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; }
+    .btn-copy { background: var(--primary); color: white; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; }
 
     .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
     .category-card { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
@@ -51,18 +53,6 @@
     .category-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; background: #f8fafc; padding: 8px; }
     .category-card h3 { margin: 10px 0 5px; color: var(--text); font-size: 1.2rem; }
     .category-card p { color: #64748b; font-size: 0.85rem; margin: 0; }
-
-    .purchase-section { margin-bottom: 25px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 15px; }
-    .purchase-section h3 { margin: 0 0 15px; color: var(--primary); font-size: 1.15rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-    
-    .purchase-items-grid { display: flex; flex-direction: column; gap: 12px; }
-    .purchase-ticket { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
-    .purchase-info { display: flex; flex-direction: column; gap: 4px; }
-    .purchase-info strong { font-size: 1.05rem; color: var(--text); }
-    .purchase-info small { color: #64748b; }
-    
-    .code-box-wrapper { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; border: 1px dashed #cbd5e1; }
-    .code-text { font-family: monospace; font-size: 1.15rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
 
     /* نوافذ منبثقة (Modals) */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
@@ -75,9 +65,16 @@
     .sub-product-info span { color: var(--success); font-weight: bold; font-size: 1.1rem; }
     .sub-product-info small { display: block; color: #64748b; font-size: 0.75rem; margin-top: 2px; }
 
-    /* عناصر السلة */
+    /* عناصر السلة والمشتريات التفاعلية */
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
     .cart-total-box { margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold; }
+
+    .history-category-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border); padding: 14px 18px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+    .history-category-row:hover { border-color: var(--primary); background: #f1f5f9; }
+
+    .purchase-ticket { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+    .code-box-wrapper { display: flex; align-items: center; gap: 8px; background: white; padding: 6px 10px; border-radius: 6px; border: 1px dashed #cbd5e1; }
+    .code-text { font-family: monospace; font-size: 1.05rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
 
     .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
   </style>
@@ -133,6 +130,10 @@
         <small id="clientEmailHeader" style="color: #64748b;"></small>
       </div>
       <div class="header-actions">
+        <!-- زر سجل المشتريات التفاعلي -->
+        <button class="purchases-history-btn" onclick="openPurchasesHistoryModal()">
+          📦 مشترياتي
+        </button>
         <!-- زر سلة المشتريات -->
         <button class="cart-btn" onclick="openCartModal()">
           🛒 السلة <span id="cartCountBadge" class="cart-badge">0</span>
@@ -166,13 +167,6 @@
       <h2>🎮 اختر القسم لعرض الفئات المتوفرة</h2>
       <div id="categoriesContainer" class="categories-grid">جاري تحميل الأقسام...</div>
     </div>
-
-    <div class="card">
-      <h2>📦 سجل مشترياتي (الأكواد الرقمية المصنفة)</h2>
-      <div id="clientPurchasesContainer">
-        <p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>
-      </div>
-    </div>
   </div>
 
 </div>
@@ -186,7 +180,7 @@
   </div>
 </div>
 
-<!-- نافذة سلة المشتريات (Cart Modal) -->
+<!-- نافذة سلة المشتريات -->
 <div id="cartModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeCartModal()">✕</button>
@@ -202,6 +196,17 @@
   </div>
 </div>
 
+<!-- نافذة سجل المشتريات التفاعلي -->
+<div id="purchasesHistoryModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePurchasesHistoryModal()">✕</button>
+    <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:10px;">📦 سجل مشترياتي</h3>
+    <div id="purchasesHistoryContent" style="max-height: 60vh; overflow-y: auto; margin-top: 15px;">
+      <p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>
+    </div>
+  </div>
+</div>
+
 <script>
   const SHEET_DB_URL = "https://sheetdb.io/api/v1/sxofjkjdy6bji";
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXWw0QkmtsrFETPrg4XCFvKLBCBvLTI8YRjxLZyLQORHl_u7psBB_yXTLonysaJ2ou/exec";
@@ -211,7 +216,8 @@
   let globalClient = null;
   let generatedOtp = "";
   let tempEmail = "";
-  let shoppingCart = []; // مصفوفة سلة المشتريات
+  let shoppingCart = [];
+  let myPurchasedCards = [];
 
   window.onload = function() {
     if (currentClientEmail) {
@@ -372,7 +378,14 @@
       globalInventory = await invRes.json();
 
       renderCategories(globalInventory);
-      renderPurchases(globalInventory, clientName);
+      
+      const clientNameTrim = clientName.trim();
+      myPurchasedCards = Array.isArray(globalInventory) ? globalInventory.filter(c => {
+        const status = c.status || c.Status || "";
+        const soldTo = c.soldTo || c.SoldTo || "";
+        return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientNameTrim;
+      }) : [];
+
     } catch (err) {
       console.log("جارٍ إعادة المحاولة...");
     }
@@ -462,7 +475,7 @@
     document.getElementById('categoryModal').style.display = 'none';
   }
 
-  // --- دوام سلة المشتريات ---
+  // --- دوال سلة المشتريات ---
   function addToCart(type, value, price) {
     shoppingCart.push({ type, value, price });
     updateCartUI();
@@ -511,7 +524,7 @@
     document.getElementById('cartModal').style.display = 'none';
   }
 
-  // إتمام الشراء لكل محتويات السلة دفعة واحدة
+  // إتمام الشراء لكل محتويات السلة بكل دقة ودون تداخل
   async function checkoutCart() {
     if (!shoppingCart.length) return alert('السلة فارغة!');
 
@@ -524,7 +537,7 @@
 
     try {
       const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
-      const inventory = await invRes.json();
+      let inventory = await invRes.json();
 
       const clientId = globalClient.id || globalClient.Id || globalClient.ID;
       const clientName = globalClient.name || globalClient.Name;
@@ -533,7 +546,6 @@
       let currentBalance = clientBalance;
       const purchasedCodes = [];
 
-      // معالجة كل منتج في السلة
       for (const cartItem of shoppingCart) {
         const availableCards = Array.isArray(inventory) ? inventory.filter(c => {
           const status = c.status || c.Status || "";
@@ -552,8 +564,8 @@
         const cardCode = card.code || card.Code || "";
 
         currentBalance -= cartItem.price;
+        card.status = 'sold'; // تحديث محلي لمنع تكرار الاختيار في نفس الطلب
 
-        // تحديث كود المخزون في السحابة
         await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -570,14 +582,13 @@
         purchasedCodes.push(`${cartItem.type} (${cartItem.value}): ${cardCode}`);
       }
 
-      // تحديث رصيد الزبون الجديد في شيت customers
       await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { balance: currentBalance } })
       });
 
-      shoppingCart = []; // تفريغ السلة
+      shoppingCart = [];
       updateCartUI();
       closeCartModal();
 
@@ -587,6 +598,73 @@
       console.error(err);
       alert('حدث خطأ أثناء إتمام عملية الشراء.');
     }
+  }
+
+  // --- دوال سجل المشتريات التفاعلي الجديد ---
+  function openPurchasesHistoryModal() {
+    renderPurchasesHistoryCategories();
+    document.getElementById('purchasesHistoryModal').style.display = 'flex';
+  }
+
+  function closePurchasesHistoryModal() {
+    document.getElementById('purchasesHistoryModal').style.display = 'none';
+  }
+
+  function renderPurchasesHistoryCategories() {
+    const container = document.getElementById('purchasesHistoryContent');
+
+    if (!myPurchasedCards.length) {
+      container.innerHTML = `<p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>`;
+      return;
+    }
+
+    const groups = {};
+    myPurchasedCards.forEach(p => {
+      const type = p.type || p.Type || "أخرى";
+      if (!groups[type]) groups[type] = [];
+      groups[type].push(p);
+    });
+
+    container.innerHTML = Object.keys(groups).map(type => {
+      const items = groups[type];
+      return `
+        <div class="history-category-row" onclick='openCategoryPurchasesCodes("${type}", ${JSON.stringify(items).replace(/"/g, '&quot;')})'>
+          <div>
+            <strong style="font-size: 1.1rem; color: var(--primary);">📦 مشتريات قسم: ${type}</strong>
+            <small style="display: block; color: #64748b; margin-top: 2px;">عدد البطاقات المشتراة: ${items.length}</small>
+          </div>
+          <span style="font-weight: bold; color: var(--primary);">عرض الأكواد ⬅</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openCategoryPurchasesCodes(categoryType, items) {
+    const container = document.getElementById('purchasesHistoryContent');
+    container.innerHTML = `
+      <button onclick="renderPurchasesHistoryCategories()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer; margin-bottom:15px; padding:0; font-size:0.95rem;">⬅ العودة إلى الأقسام</button>
+      <h4 style="margin-top:0; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px;">أكواد قسم: ${categoryType}</h4>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        ${items.map(p => {
+          const pDate = p.soldDate || p.SoldDate || "";
+          const pValue = p.value || p.Value || "";
+          const pCode = p.code || p.Code || "";
+          const pPrice = parseFloat(p.soldPrice || p.SoldPrice || 0);
+          return `
+            <div class="purchase-ticket">
+              <div>
+                <strong>فئة: ${pValue}</strong>
+                <small style="display:block; color:#64748b;">التاريخ: ${pDate} | السعر: $${pPrice.toFixed(2)}</small>
+              </div>
+              <div class="code-box-wrapper">
+                <span class="code-text">${pCode}</span>
+                <button class="btn-copy" onclick="copyCodeToClipboard('${pCode}')">📋 نسخ</button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
   }
 
   function copyCodeToClipboard(codeText) {
@@ -649,56 +727,6 @@
     } catch (err) {
       alert('حدث خطأ أثناء عملية الشحن.');
     }
-  }
-
-  function renderPurchases(inventory, clientName) {
-    const container = document.getElementById('clientPurchasesContainer');
-    const myPurchases = Array.isArray(inventory) ? inventory.filter(c => {
-      const status = c.status || c.Status || "";
-      const soldTo = c.soldTo || c.SoldTo || "";
-      return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientName.trim();
-    }) : [];
-    
-    if (!myPurchases.length) {
-      container.innerHTML = `<p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>`;
-      return;
-    }
-
-    const purchaseGroups = {};
-    myPurchases.forEach(p => {
-      const pType = p.type || p.Type || "أخرى";
-      if (!purchaseGroups[pType]) purchaseGroups[pType] = [];
-      purchaseGroups[pType].push(p);
-    });
-
-    container.innerHTML = Object.keys(purchaseGroups).map(type => {
-      const items = purchaseGroups[type];
-      return `
-        <div class="purchase-section">
-          <h3><span>📦 مشتريات قسم: ${type}</span> <small style="font-size:0.85rem; color:#64748b;">(${items.length} بطاقة)</small></h3>
-          <div class="purchase-items-grid">
-            ${items.map(p => {
-              const pDate = p.soldDate || p.SoldDate || "";
-              const pValue = p.value || p.Value || "";
-              const pCode = p.code || p.Code || "";
-              const pPrice = parseFloat(p.soldPrice || p.SoldPrice || 0);
-              return `
-                <div class="purchase-ticket">
-                  <div class="purchase-info">
-                    <strong>الفئة: ${pValue}</strong>
-                    <small>تاريخ الشراء: ${pDate} | السعر: $${pPrice.toFixed(2)}</small>
-                  </div>
-                  <div class="code-box-wrapper">
-                    <span class="code-text">${pCode}</span>
-                    <button class="btn-copy" onclick="copyCodeToClipboard('${pCode}')">📋 نسخ الكود</button>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      `;
-    }).join('');
   }
 </script>
 </body>
