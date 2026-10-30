@@ -72,8 +72,8 @@
   <!-- شاشة تسجيل دخول الآدمن -->
   <div id="adminLoginScreen">
     <div class="admin-login-card">
-      <h2>🛡️ بوابة الآدمن المحمية</h2>
-      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل بريدك الإلكتروني وكلمة المرور الخاصة بالآدمن</p>
+      <h2>🛡️ بوابة الآدمن المميزة</h2>
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل بيانات حسابك الخاص للإدارة</p>
       <form onsubmit="adminLogin(event)">
         <input type="email" id="adminEmail" placeholder="admin@domain.com" required>
         <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
@@ -196,7 +196,7 @@
     <!-- تبويب الزبائن -->
     <div id="customersTab" class="tab-content">
       <div class="card">
-        <h2>إضافة زبون أو أدمن جديد</h2>
+        <h2>إضافة حساب جديد</h2>
         <form id="customerForm" onsubmit="addCustomer(event)">
           <div class="form-grid">
             <div>
@@ -223,7 +223,7 @@
               <label>الصلاحية (الدور)</label>
               <select id="custRole">
                 <option value="client">زبون عادي (Client)</option>
-                <option value="admin">مسؤول لوحة (Admin)</option>
+                <option value="HoViG">مسؤول مميز (HoViG)</option>
               </select>
             </div>
           </div>
@@ -231,7 +231,7 @@
         </form>
       </div>
       <div class="card">
-        <h2>إدارة الزبائن والأرصدة سحابياً</h2>
+        <h2>إدارة الحسابات والأرصدة سحابياً</h2>
         <table>
           <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>كلمة المرور</th><th>الصلاحية</th><th>الرصيد</th><th>الإجراءات</th></tr></thead>
           <tbody id="customerTable"><tr><td colspan="6" style="text-align:center;">جاري جلب البيانات...</td></tr></tbody>
@@ -284,8 +284,8 @@
       const adminUser = custs.find(c => {
         const cEmail = (c.email || c.Email || "").toString().trim().toLowerCase();
         const cPass = (c.password || c.Password || "").toString().trim();
-        const cRole = (c.role || c.Role || "").toString().trim().toLowerCase();
-        return cEmail === emailInput && cPass === passInput && cRole === 'admin';
+        const cRole = (c.role || c.Role || "").toString().trim();
+        return cEmail === emailInput && cPass === passInput && cRole === 'HoViG';
       });
 
       if (adminUser) {
@@ -293,7 +293,7 @@
         sessionStorage.setItem('logged_admin_email', emailInput);
         showDashboard();
       } else {
-        document.getElementById('adminErrorMsg').textContent = '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة، أو ليس لديك صلاحية أدمن!';
+        document.getElementById('adminErrorMsg').textContent = '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة، أو ليس لديك صلاحية HoViG!';
         btn.textContent = "تسجيل دخول الآدمن";
       }
     } catch (err) {
@@ -554,7 +554,7 @@
 
     document.getElementById('customerTable').innerHTML = Array.isArray(customers) && customers.length ? customers.map(c => {
       const cRole = c.role || c.Role || 'client';
-      const roleBadge = cRole === 'admin' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">Admin</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
+      const roleBadge = cRole === 'HoViG' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">HoViG</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
       return `
         <tr>
           <td><strong>${c.name}</strong></td>
