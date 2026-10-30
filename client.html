@@ -18,10 +18,13 @@
     body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
     .container { max-width: 1200px; margin: auto; }
     
-    #loginScreen { display: flex; justify-content: center; align-items: center; height: 80vh; }
-    .login-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--border); width: 100%; max-width: 400px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-align: center; }
-    .login-card input { width: 100%; padding: 12px; margin: 12px 0; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
-    .login-card button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; }
+    #loginScreen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+    .login-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--border); width: 100%; max-width: 420px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-align: center; }
+    .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
+    .login-card button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
+    
+    .switch-auth { margin-top: 15px; font-size: 0.9rem; color: #64748b; }
+    .switch-auth a { color: var(--primary); text-decoration: none; font-weight: bold; cursor: pointer; }
 
     #storeScreen { display: none; }
     
@@ -67,33 +70,51 @@
     .sub-product-info span { color: var(--success); font-weight: bold; font-size: 1.1rem; }
     .sub-product-info small { display: block; color: #64748b; font-size: 0.75rem; margin-top: 2px; }
 
-    .error { color: #dc2626; font-size: 0.85rem; margin-top: 10px; }
+    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
   </style>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- شاشة تسجيل الدخول والتحقق -->
+  <!-- شاشة المصادقة (تسجيل دخول أو إنشاء حساب) -->
   <div id="loginScreen">
     <div class="login-card">
-      <h2 style="color: var(--primary);">🔐 تسجيل دخول الزبون</h2>
       
-      <div id="step1Form">
+      <!-- نموذج تسجيل الدخول (خطوة 1) -->
+      <div id="loginView">
+        <h2 style="color: var(--primary);">🔐 تسجيل دخول الزبون</h2>
         <p style="color: #64748b; font-size: 0.9rem;">أدخل بريدك الإلكتروني وكلمة المرور</p>
-        <form onsubmit="handleStep1(event)">
+        <form onsubmit="handleLoginStep1(event)">
           <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required>
           <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
-          <button type="submit" id="step1Btn">التالي (إرسال كود التحقق)</button>
+          <button type="submit" id="loginBtn">التالي (إرسال كود التحقق)</button>
+        </form>
+        <div class="switch-auth">ليس لديك حساب؟ <a onclick="switchAuthView('register')">إنشاء حساب جديد</a></div>
+      </div>
+
+      <!-- نموذج التحقق من كود الـ OTP -->
+      <div id="otpView" style="display: none;">
+        <h2 style="color: var(--success);">🛡️ التحقق الأمني</h2>
+        <p style="color: var(--success); font-size: 0.9rem;">تم إرسال كود التحقق (6 أرقام) إلى بريدك الإلكتروني بنجاح!</p>
+        <form onsubmit="handleLoginStep2(event)">
+          <input type="text" id="otpInput" placeholder="أدخل الكود" maxlength="6" required style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.2rem;">
+          <button type="submit" style="background: var(--success);">تأكيد والدخول</button>
         </form>
       </div>
 
-      <div id="step2Form" style="display: none;">
-        <p style="color: var(--success); font-size: 0.9rem;">تم إرسال كود التحقق (6 أرقام) إلى بريدك الإلكتروني بنجاح!</p>
-        <form onsubmit="handleStep2(event)">
-          <input type="text" id="otpInput" placeholder="أدخل كود التحقق (OTP)" maxlength="6" required style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.2rem;">
-          <button type="submit" id="step2Btn" style="background: var(--success);">تأكيد والدخول</button>
+      <!-- نموذج إنشاء حساب جديد -->
+      <div id="registerView" style="display: none;">
+        <h2 style="color: var(--primary);">📝 إنشاء حساب جديد</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">أدخل بياناتك لتسجيل حسابك في المتجر</p>
+        <form onsubmit="handleRegister(event)">
+          <input type="text" id="regName" placeholder="الاسم الكامل" required>
+          <input type="text" id="regPhone" placeholder="رقم الهاتف" required>
+          <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
+          <input type="password" id="regPassword" placeholder="كلمة المرور" required>
+          <button type="submit" id="regBtn" class="btn-success">إنشاء الحساب الان</button>
         </form>
+        <div class="switch-auth">لديك حساب بالفعل؟ <a onclick="switchAuthView('login')">تسجيل الدخول</a></div>
       </div>
 
       <div id="errorMsg" class="error"></div>
@@ -124,23 +145,21 @@
       </div>
     </div>
 
-    <!-- صندوق شحن المحفظة برمز سري -->
+    <!-- شحن المحفظة برمز سري -->
     <div class="card" style="background: #f8fafc; border: 2px dashed var(--primary);">
       <h2 style="color: var(--primary);">💳 شحن المحفظة برمز سري</h2>
-      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">هل لديك كود شحن رصيد؟ أدخله هنا ليتم إضافته إلى رصيدك فوراً.</p>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">أدخل كود شحن الرصيد المكون من 15 خانة ليضاف إلى محفظتك فوراً.</p>
       <form onsubmit="topupWalletWithCode(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن (مثال: A1B2C3...)" style="flex: 1; min-width: 250px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase;" required>
+        <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن..." style="flex: 1; min-width: 250px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase;" required>
         <button type="submit" class="btn-success" style="padding: 10px 20px;">شحن الرصيد الآن</button>
       </form>
     </div>
 
-    <!-- قسم الأقسام الرئيسية -->
     <div class="card">
       <h2>🎮 اختر القسم لعرض الفئات المتوفرة</h2>
       <div id="categoriesContainer" class="categories-grid">جاري تحميل الأقسام...</div>
     </div>
 
-    <!-- قسم سجل المشتريات -->
     <div class="card">
       <h2>📦 سجل مشترياتي (الأكواد الرقمية المصنفة)</h2>
       <div id="clientPurchasesContainer">
@@ -151,7 +170,7 @@
 
 </div>
 
-<!-- نافذة منبثقة (Modal) لاختيار الفئات -->
+<!-- نافذة الفئات المنبثقة -->
 <div id="categoryModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -176,11 +195,70 @@
     }
   };
 
-  async function handleStep1(e) {
+  function switchAuthView(viewName) {
+    document.getElementById('loginView').style.display = viewName === 'login' ? 'block' : 'none';
+    document.getElementById('otpView').style.display = 'none';
+    document.getElementById('registerView').style.display = viewName === 'register' ? 'block' : 'none';
+    document.getElementById('errorMsg').textContent = '';
+  }
+
+  // إنشاء حساب جديد
+  async function handleRegister(e) {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value.trim().toLowerCase();
+    const password = document.getElementById('regPassword').value.trim();
+    const btn = document.getElementById('regBtn');
+    btn.textContent = "جاري إنشاء الحساب...";
+    document.getElementById('errorMsg').textContent = '';
+
+    try {
+      const checkRes = await fetch(`${SHEET_DB_URL}?sheet=customers`);
+      const customers = await checkRes.json();
+      if (Array.isArray(customers)) {
+        const exists = customers.find(c => (c.email || c.Email || "").toString().trim().toLowerCase() === email);
+        if (exists) {
+          document.getElementById('errorMsg').textContent = '⚠️ البريد الإلكتروني مسجل مسبقاً!';
+          btn.textContent = "إنشاء الحساب الان";
+          return;
+        }
+      }
+
+      const newCust = {
+        id: 'CUST_' + Date.now(),
+        name: name,
+        phone: phone,
+        email: email,
+        password: password,
+        balance: 0,
+        role: 'client'
+      };
+
+      const res = await fetch(`${SHEET_DB_URL}?sheet=customers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: [newCust] })
+      });
+
+      if (res.ok) {
+        alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
+        switchAuthView('login');
+      } else {
+        document.getElementById('errorMsg').textContent = '⚠️ فشل إنشاء الحساب.';
+      }
+    } catch (err) {
+      document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
+    } finally {
+      btn.textContent = "إنشاء الحساب الان";
+    }
+  }
+
+  async function handleLoginStep1(e) {
     e.preventDefault();
     tempEmail = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value.trim();
-    const btn = document.getElementById('step1Btn');
+    const btn = document.getElementById('loginBtn');
     btn.textContent = "جاري التحقق وإرسال الكود...";
     document.getElementById('errorMsg').textContent = '';
 
@@ -205,8 +283,8 @@
 
       if (otpData.status === "success") {
         generatedOtp = otpData.otp;
-        document.getElementById('step1Form').style.display = 'none';
-        document.getElementById('step2Form').style.display = 'block';
+        document.getElementById('loginView').style.display = 'none';
+        document.getElementById('otpView').style.display = 'block';
       } else {
         document.getElementById('errorMsg').textContent = '⚠️ فشل إرسال كود التحقق للإيميل.';
         btn.textContent = "التالي (إرسال كود التحقق)";
@@ -217,7 +295,7 @@
     }
   }
 
-  function handleStep2(e) {
+  function handleLoginStep2(e) {
     e.preventDefault();
     const enteredOtp = document.getElementById('otpInput').value.trim();
 
@@ -226,7 +304,7 @@
       sessionStorage.setItem('logged_client_email', currentClientEmail);
       showStoreScreen();
     } else {
-      document.getElementById('errorMsg').textContent = '⚠️ كود التحقق غير صحيح! أعد المحاولة.';
+      document.getElementById('errorMsg').textContent = '⚠️ كود التحقق غير صحيح!';
     }
   }
 
@@ -241,12 +319,7 @@
     currentClientEmail = null;
     document.getElementById('storeScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('step1Form').style.display = 'block';
-    document.getElementById('step2Form').style.display = 'none';
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('otpInput').value = '';
-    document.getElementById('step1Btn').textContent = "التالي (إرسال كود التحقق)";
+    switchAuthView('login');
   }
 
   async function initStoreData() {
@@ -258,7 +331,7 @@
       if (!Array.isArray(customers)) return;
 
       globalClient = customers.find(c => {
-        const cEmail = c.email || c.Email || c.EMAIL || "";
+        const cEmail = c.email || c.Email || "";
         return cEmail.toString().trim().toLowerCase() === currentClientEmail;
       });
 
@@ -349,8 +422,8 @@
     } else {
       subContainer.innerHTML = subKeys.map(k => {
         const g = subGroups[k];
-        const clientId = globalClient.id || globalClient.Id || globalClient.ID;
-        const clientName = globalClient.name || globalClient.Name || "زبون";
+        const clientId = globalClient.id || globalClient.Id;
+        const clientName = globalClient.name || globalClient.Name;
         const clientBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
 
         return `
@@ -381,7 +454,6 @@
     });
   }
 
-  // دالة شحن المحفظة باستخدام كود الشحن الفوري
   async function topupWalletWithCode(e) {
     e.preventDefault();
     const inputCode = document.getElementById('topupCodeInput').value.trim().toUpperCase();
@@ -391,7 +463,6 @@
       const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
       const inventory = await invRes.json();
 
-      // البحث عن الكود في المخزون ضمن أكواد الشحن المتاحة
       const topupCard = inventory.find(c => {
         const type = c.type || c.Type || "";
         const code = c.code || c.Code || "";
@@ -411,14 +482,12 @@
       const newBalance = currentBalance + topupAmount;
       const dateStr = new Date().toLocaleString('ar-EG');
 
-      // 1. تحديث رصيد الزبون
       await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { balance: newBalance } })
       });
 
-      // 2. تحديث حالة كود الشحن إلى مستخدم (sold)
       await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -511,7 +580,7 @@
       if (!availableCards.length) return alert('عذراً، نفدت كمية هذه الفئة!');
 
       const card = availableCards[0];
-      const cardId = card.id || card.Id || card.ID;
+      const cardId = card.id || card.Id;
       const cardCode = card.code || card.Code || "";
       const newBalance = parseFloat(clientBalance) - price;
       const saleDateStr = new Date().toLocaleString('ar-EG');
