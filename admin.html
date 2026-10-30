@@ -19,7 +19,6 @@
     * { box-sizing: border-box; font-family: system-ui, sans-serif; }
     body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
     
-    /* شاشة تسجيل دخول الآدمن */
     #adminLoginScreen { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--sidebar-bg); }
     .admin-login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
     .admin-login-card h2 { color: var(--sidebar-bg); margin-top: 0; margin-bottom: 8px; font-size: 1.8rem; }
@@ -27,7 +26,6 @@
     .admin-login-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
     .admin-login-card button:hover { background: var(--primary-dark); }
 
-    /* لوحة التحكم الرئيسية */
     #adminDashboard { display: none; min-height: 100vh; padding: 30px; max-width: 1300px; margin: auto; }
     
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px 30px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px; }
@@ -66,18 +64,16 @@
     th { background: #f9fafb; color: #374151; font-weight: 600; }
     tr:hover { background: #f9fafb; }
 
-    .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; }
-    .badge-available { background: #d1fae5; color: #065f46; }
     .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
   </style>
 </head>
 <body>
 
-  <!-- شاشة تسجيل دخول الآدمن المحمية -->
+  <!-- شاشة تسجيل دخول الآدمن -->
   <div id="adminLoginScreen">
     <div class="admin-login-card">
       <h2>🛡️ بوابة الآدمن المحمية</h2>
-      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل البريد الإلكتروني وكلمة المرور الخاصة بالآدمن</p>
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل بريدك الإلكتروني وكلمة المرور الخاصة بالآدمن</p>
       <form onsubmit="adminLogin(event)">
         <input type="email" id="adminEmail" placeholder="admin@domain.com" required>
         <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
@@ -87,7 +83,7 @@
     </div>
   </div>
 
-  <!-- لوحة التحكم الرئيسية (تظهر حصراً للآدمن المصرح له) -->
+  <!-- لوحة التحكم الرئيسية -->
   <div id="adminDashboard" class="container">
     <header>
       <div>
@@ -272,7 +268,6 @@
     }
   };
 
-  // تسجيل دخول الآدمن والتحقق من صلاحيته في جدول customers
   async function adminLogin(e) {
     e.preventDefault();
     const emailInput = document.getElementById('adminEmail').value.trim().toLowerCase();
@@ -289,7 +284,7 @@
       const adminUser = custs.find(c => {
         const cEmail = (c.email || c.Email || "").toString().trim().toLowerCase();
         const cPass = (c.password || c.Password || "").toString().trim();
-        const cRole = (c.role || c.Role || c.type || c.Type || "").toString().trim().toLowerCase();
+        const cRole = (c.role || c.Role || "").toString().trim().toLowerCase();
         return cEmail === emailInput && cPass === passInput && cRole === 'admin';
       });
 
@@ -552,13 +547,13 @@
       <tr>
         <td><strong>${groups[k].type}</strong></td>
         <td>${groups[k].value}</td>
-        <td><span class="badge badge-available">${groups[k].qty} متوفر</span></td>
+        <td><span class="badge badge-available" style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:12px; font-weight:bold;">${groups[k].qty} متوفر</span></td>
         <td>$${parseFloat(groups[k].sellPrice).toFixed(2)}</td>
       </tr>
     `).join('') : `<tr><td colspan="4" style="text-align:center; color:#9b9b9b;">المخزون فارغ</td></tr>`;
 
     document.getElementById('customerTable').innerHTML = Array.isArray(customers) && customers.length ? customers.map(c => {
-      const cRole = c.role || c.Role || c.type || c.Type || 'client';
+      const cRole = c.role || c.Role || 'client';
       const roleBadge = cRole === 'admin' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">Admin</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
       return `
         <tr>
