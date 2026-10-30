@@ -557,11 +557,13 @@
       const clientId = globalClient.id || globalClient.Id || globalClient.ID;
       const clientName = globalClient.name || globalClient.Name;
       const saleDateStr = new Date().toLocaleString('ar-EG');
+      const nowTimestamp = Date.now();
 
       let currentBalance = clientBalance;
       const purchasedCodes = [];
 
-      for (const cartItem of shoppingCart) {
+      for (let i = 0; i < shoppingCart.length; i++) {
+        const cartItem = shoppingCart[i];
         const availableCards = Array.isArray(inventory) ? inventory.filter(c => {
           const status = c.status || c.Status || "";
           const type = c.type || c.Type || "";
@@ -581,6 +583,9 @@
         currentBalance -= cartItem.price;
         card.status = 'sold';
 
+        // إضافة طابع زمني دقيق جداً لكل كود مباع لضمان ترتيبه فوق الأقدم بدقة
+        const exactSoldTimestamp = nowTimestamp + i;
+
         await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -589,7 +594,8 @@
               status: 'sold', 
               soldTo: clientName, 
               soldPrice: cartItem.price, 
-              soldDate: saleDateStr 
+              soldDate: saleDateStr,
+              addedTimestamp: exactSoldTimestamp // تحديث الطابع الزمني ليعكس وقت الشراء بدقة
             } 
           })
         });
@@ -655,11 +661,11 @@
   }
 
   function openCategoryPurchasesCodes(categoryType, items) {
-    // ترتيب الأكواد من الأحدث إلى الأقدم
+    // ترتيب الأكواد حصراً حسب الطابع الزمني (الوقت الأحدث الذي تم فيه الشراء يظهر في الأعلى بغض النظر عن الفئة)
     const sortedItems = items.sort((a, b) => {
-      const timeA = a.addedTimestamp || a.SoldTimestamp || new Date(a.soldDate || a.SoldDate || 0).getTime();
-      const timeB = b.addedTimestamp || b.SoldTimestamp || new Date(b.soldDate || b.SoldDate || 0).getTime();
-      return timeB - timeA;
+      const timeA = parseFloat(a.addedTimestamp || a.SoldTimestamp || new Date(a.soldDate || a.SoldDate || 0).getTime());
+      const timeB = parseFloat(b.addedTimestamp || b.SoldTimestamp || new Date(b.soldDate || b.SoldDate || 0).getTime());
+      return timeB - timeA; // الأحدث أولاً
     });
 
     const container = document.getElementById('purchasesHistoryContent');
