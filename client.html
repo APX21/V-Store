@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>متجر بطاقات الهدايا - واجهة الزبون</title>
+  <!-- استدعاء مكتبة Supabase الرسمية -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #2563eb;
@@ -54,7 +56,7 @@
     .category-card h3 { margin: 10px 0 5px; color: var(--text); font-size: 1.2rem; }
     .category-card p { color: #64748b; font-size: 0.85rem; margin: 0; }
 
-    /* نوافذ منبثقة (Modals) */
+    /* نوافذ منبثقة */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
     .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 550px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
     .modal-close { position: absolute; top: 15px; left: 15px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
@@ -126,18 +128,9 @@
         <small id="clientEmailHeader" style="color: #64748b;"></small>
       </div>
       <div class="header-actions">
-        <!-- زر شحن الرصيد -->
-        <button class="topup-btn" onclick="openTopupModal()">
-          💳 شحن الرصيد
-        </button>
-        <!-- زر سجل المشتريات -->
-        <button class="purchases-history-btn" onclick="openPurchasesHistoryModal()">
-          📦 مشترياتي
-        </button>
-        <!-- زر سلة المشتريات -->
-        <button class="cart-btn" onclick="openCartModal()">
-          🛒 السلة <span id="cartCountBadge" class="cart-badge">0</span>
-        </button>
+        <button class="topup-btn" onclick="openTopupModal()">💳 شحن الرصيد</button>
+        <button class="purchases-history-btn" onclick="openPurchasesHistoryModal()">📦 مشترياتي</button>
+        <button class="cart-btn" onclick="openCartModal()">🛒 السلة <span id="cartCountBadge" class="cart-badge">0</span></button>
         <button class="btn-refresh" onclick="initStoreData()">🔄</button>
         <button class="btn-danger" onclick="logoutClient()">🚪</button>
       </div>
@@ -146,7 +139,7 @@
     <div class="card" style="border: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
       <div>
         <h2 id="clientWelcomeName" style="border:none; margin:0; padding:0; color:var(--primary);">مرحباً بك</h2>
-        <p style="margin: 5px 0 0; color: #64748b;">محفظتك السحابية الخاصة.</p>
+        <p style="margin: 5px 0 0; color: #64748b;">قاعدة بيانات Supabase الآمنة.</p>
       </div>
       <div style="background: #dcfce7; padding: 10px 20px; border-radius: 8px; border: 1px solid #16a34a33; text-align: center;">
         <span style="font-size: 0.85rem; color: #166534; display: block;">رصيدك الحالي</span>
@@ -200,7 +193,7 @@
   </div>
 </div>
 
-<!-- نافذة سجل المشتريات الترتيبي المباشر -->
+<!-- نافذة سجل المشتريات -->
 <div id="purchasesHistoryModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closePurchasesHistoryModal()">✕</button>
@@ -212,7 +205,11 @@
 </div>
 
 <script>
-  const SHEET_DB_URL = "https://sheetdb.io/api/v1/sxofjkjdy6bji";
+  // تهيئة اتصال Supabase
+  const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
+  
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXWw0QkmtsrFETPrg4XCFvKLBCBvLTI8YRjxLZyLQORHl_u7psBB_yXTLonysaJ2ou/exec";
 
   let currentClientEmail = sessionStorage.getItem('logged_client_email');
@@ -247,15 +244,14 @@
     document.getElementById('errorMsg').textContent = '';
 
     try {
-      const checkRes = await fetch(`${SHEET_DB_URL}?sheet=customers`);
-      const customers = await checkRes.json();
-      if (Array.isArray(customers)) {
-        const exists = customers.find(c => (c.email || c.Email || "").toString().trim().toLowerCase() === email);
-        if (exists) {
-          document.getElementById('errorMsg').textContent = '⚠️ البريد مسجل مسبقاً!';
-          btn.textContent = "إنشاء الحساب الان";
-          return;
-        }
+      const { data: customers, error } = await supabaseClient.from('customers').select('*');
+      if (error) throw error;
+
+      const exists = customers.find(c => c.email.trim().toLowerCase() === email);
+      if (exists) {
+        document.getElementById('errorMsg').textContent = '⚠️ البريد مسجل مسبقاً!';
+        btn.textContent = "إنشاء الحساب الان";
+        return;
       }
 
       const newCust = {
@@ -265,18 +261,11 @@
         role: 'client'
       };
 
-      const res = await fetch(`${SHEET_DB_URL}?sheet=customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [newCust] })
-      });
+      const { error: insError } = await supabaseClient.from('customers').insert([newCust]);
+      if (insError) throw insError;
 
-      if (res.ok) {
-        alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
-        switchAuthView('login');
-      } else {
-        document.getElementById('errorMsg').textContent = '⚠️ فشل إنشاء الحساب.';
-      }
+      alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
+      switchAuthView('login');
     } catch (err) {
       document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
     } finally {
@@ -357,54 +346,47 @@
     if (!currentClientEmail) return;
 
     try {
-      const custRes = await fetch(`${SHEET_DB_URL}?sheet=customers`);
-      const customers = await custRes.json();
-      if (!Array.isArray(customers)) return;
+      const { data: customers, error } = await supabaseClient.from('customers').select('*');
+      if (error) throw error;
 
-      globalClient = customers.find(c => {
-        const cEmail = c.email || c.Email || "";
-        return cEmail.toString().trim().toLowerCase() === currentClientEmail;
-      });
-
+      globalClient = customers.find(c => c.email.toString().trim().toLowerCase() === currentClientEmail);
       if (!globalClient) {
         logoutClient();
         return;
       }
 
-      const clientName = globalClient.name || globalClient.Name || "زبون";
-      const clientBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
+      const clientName = globalClient.name || "زبون";
+      const clientBalance = parseFloat(globalClient.balance || 0);
 
       document.getElementById('clientWelcomeName').textContent = `أهلاً بك، ${clientName}`;
       document.getElementById('clientEmailHeader').textContent = `البريد: ${currentClientEmail}`;
       document.getElementById('clientBalanceDisplay').textContent = `$${clientBalance.toFixed(2)}`;
 
-      const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
-      globalInventory = await invRes.json();
+      const { data: inventory, error: invError } = await supabaseClient.from('inventory').select('*');
+      if (invError) throw invError;
+      globalInventory = inventory;
 
       renderCategories(globalInventory);
       
       const clientNameTrim = clientName.trim();
-      myPurchasedCards = Array.isArray(globalInventory) ? globalInventory.filter(c => {
-        const status = c.status || c.Status || "";
-        const soldTo = c.soldTo || c.SoldTo || "";
+      myPurchasedCards = globalInventory.filter(c => {
+        const status = c.status || "";
+        const soldTo = c.soldTo || "";
         return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientNameTrim;
-      }) : [];
+      });
 
     } catch (err) {
-      console.log("جارٍ إعادة المحاولة...");
+      console.error(err);
     }
   }
 
   function renderCategories(inventory) {
-    const available = Array.isArray(inventory) ? inventory.filter(c => {
-      const status = c.status || c.Status || "";
-      return status.toString().trim().toLowerCase() === 'available';
-    }) : [];
+    const available = inventory.filter(c => (c.status || "").toString().trim().toLowerCase() === 'available');
 
     const categoriesMap = {};
     available.forEach(c => {
-      const type = c.type || c.Type || "بطاقة";
-      const image = c.image || c.Image || "https://via.placeholder.com/150?text=Card";
+      const type = c.type || "بطاقة";
+      const image = c.image || "https://via.placeholder.com/150?text=Card";
       if (!categoriesMap[type]) {
         categoriesMap[type] = { type, image, count: 0 };
       }
@@ -434,16 +416,16 @@
   function openCategoryModal(categoryType) {
     document.getElementById('modalTitle').textContent = `فئات بطاقات: ${categoryType}`;
     
-    const available = Array.isArray(globalInventory) ? globalInventory.filter(c => {
-      const status = c.status || c.Status || "";
-      const type = c.type || c.Type || "";
-      return status.toString().trim().toLowerCase() === 'available' && type === categoryType;
-    }) : [];
+    const available = globalInventory.filter(c => {
+      const status = (c.status || "").toString().trim().toLowerCase();
+      const type = c.type || "";
+      return status === 'available' && type === categoryType;
+    });
 
     const subGroups = {};
     available.forEach(c => {
-      const value = c.value || c.Value || "";
-      const sellPrice = parseFloat(c.sellPrice || c.SellPrice || c.price || 0);
+      const value = c.value || "";
+      const sellPrice = parseFloat(c.sellPrice || 0);
       const key = `${categoryType}___${value}`;
       if (!subGroups[key]) {
         subGroups[key] = { type: categoryType, value, qty: 0, sellPrice };
@@ -479,16 +461,9 @@
     document.getElementById('categoryModal').style.display = 'none';
   }
 
-  // --- دوال نافذة شحن الرصيد ---
-  function openTopupModal() {
-    document.getElementById('topupModal').style.display = 'flex';
-  }
+  function openTopupModal() { document.getElementById('topupModal').style.display = 'flex'; }
+  function closeTopupModal() { document.getElementById('topupModal').style.display = 'none'; }
 
-  function closeTopupModal() {
-    document.getElementById('topupModal').style.display = 'none';
-  }
-
-  // --- دوال سلة المشتريات ---
   function addToCart(type, value, price) {
     shoppingCart.push({ type, value, price });
     updateCartUI();
@@ -540,7 +515,7 @@
   async function checkoutCart() {
     if (!shoppingCart.length) return alert('السلة فارغة!');
 
-    const clientBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
+    const clientBalance = parseFloat(globalClient.balance || 0);
     const totalPrice = shoppingCart.reduce((sum, item) => sum + item.price, 0);
 
     if (clientBalance < totalPrice) {
@@ -548,11 +523,11 @@
     }
 
     try {
-      const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
-      let inventory = await invRes.json();
+      const { data: inventory, error: invError } = await supabaseClient.from('inventory').select('*');
+      if (invError) throw invError;
 
-      const clientId = globalClient.id || globalClient.Id || globalClient.ID;
-      const clientName = globalClient.name || globalClient.Name;
+      const clientId = globalClient.id;
+      const clientName = globalClient.name;
       const saleDateStr = new Date().toLocaleString('ar-EG');
       const nowTimestamp = Date.now();
 
@@ -561,49 +536,41 @@
 
       for (let i = 0; i < shoppingCart.length; i++) {
         const cartItem = shoppingCart[i];
-        const availableCards = Array.isArray(inventory) ? inventory.filter(c => {
-          const status = c.status || c.Status || "";
-          const type = c.type || c.Type || "";
-          const value = c.value || c.Value || "";
-          return status.toString().trim().toLowerCase() === 'available' && type === cartItem.type && value === cartItem.value;
-        }).sort((a, b) => (a.addedTimestamp || 0) - (b.addedTimestamp || 0)) : [];
+        const availableCards = inventory.filter(c => {
+          const status = (c.status || "").toString().trim().toLowerCase();
+          return status === 'available' && c.type === cartItem.type && c.value === cartItem.value;
+        }).sort((a, b) => (a.addedTimestamp || 0) - (b.addedTimestamp || 0));
 
         if (!availableCards.length) {
-          alert(`⚠️ عذراً، نفدت كمية فئة (${cartItem.type} - ${cartItem.value}) أثناء معالجة الطلب!`);
+          alert(`⚠️ عذراً، نفدت كمية فئة (${cartItem.type} - ${cartItem.value}) أثناء المعالجة!`);
           break;
         }
 
         const card = availableCards[0];
-        const cardId = card.id || card.Id || card.ID;
-        const cardCode = card.code || card.Code || "";
+        const cardId = card.id;
+        const cardCode = card.code;
 
         currentBalance -= cartItem.price;
         card.status = 'sold';
-
         const exactSoldTimestamp = nowTimestamp + i;
 
-        await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            data: { 
-              status: 'sold', 
-              soldTo: clientName, 
-              soldPrice: cartItem.price, 
-              soldDate: saleDateStr,
-              addedTimestamp: exactSoldTimestamp
-            } 
-          })
-        });
+        // تحديث الكود في Supabase
+        const { error: updateErr } = await supabaseClient.from('inventory').update({
+          status: 'sold',
+          soldTo: clientName,
+          soldPrice: cartItem.price,
+          soldDate: saleDateStr,
+          addedTimestamp: exactSoldTimestamp
+        }).eq('id', cardId);
+
+        if (updateErr) throw updateErr;
 
         purchasedCodes.push(`${cartItem.type} (${cartItem.value}): ${cardCode}`);
       }
 
-      await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: { balance: currentBalance } })
-      });
+      // تحديث رصيد الزبون
+      const { error: custErr } = await supabaseClient.from('customers').update({ balance: currentBalance }).eq('id', clientId);
+      if (custErr) throw custErr;
 
       shoppingCart = [];
       updateCartUI();
@@ -617,7 +584,6 @@
     }
   }
 
-  // --- دوال سجل المشتريات المباشر (من الأحدث للأقدم بغض النظر عن الفئة) ---
   function openPurchasesHistoryModal() {
     renderPurchasesHistoryList();
     document.getElementById('purchasesHistoryModal').style.display = 'flex';
@@ -635,21 +601,20 @@
       return;
     }
 
-    // ترتيب كل المشتريات حصراً من الأحدث إلى الأقدم بناءً على الطابع الزمني
     const sortedPurchases = myPurchasedCards.sort((a, b) => {
-      const timeA = parseFloat(a.addedTimestamp || a.SoldTimestamp || new Date(a.soldDate || a.SoldDate || 0).getTime());
-      const timeB = parseFloat(b.addedTimestamp || b.SoldTimestamp || new Date(b.soldDate || b.SoldDate || 0).getTime());
-      return timeB - timeA; // الأحدث في الأعلى دائماً
+      const timeA = parseFloat(a.addedTimestamp || 0);
+      const timeB = parseFloat(b.addedTimestamp || 0);
+      return timeB - timeA;
     });
 
     container.innerHTML = `
       <div style="display: flex; flex-direction: column; gap: 10px;">
         ${sortedPurchases.map(p => {
-          const pType = p.type || p.Type || "بطاقة";
-          const pValue = p.value || p.Value || "";
-          const pDate = p.soldDate || p.SoldDate || "";
-          const pCode = p.code || p.Code || "";
-          const pPrice = parseFloat(p.soldPrice || p.SoldPrice || 0);
+          const pType = p.type || "بطاقة";
+          const pValue = p.value || "";
+          const pDate = p.soldDate || "";
+          const pCode = p.code || "";
+          const pPrice = parseFloat(p.soldPrice || 0);
 
           return `
             <div class="purchase-ticket">
@@ -671,9 +636,7 @@
   function copyCodeToClipboard(codeText) {
     navigator.clipboard.writeText(codeText).then(() => {
       alert(`✅ تم نسخ الكود بنجاح: ${codeText}`);
-    }).catch(err => {
-      alert('فشل نسخ الكود.');
-    });
+    }).catch(err => alert('فشل النسخ.'));
   }
 
   async function topupWalletWithCode(e) {
@@ -682,51 +645,44 @@
     if (!inputCode) return;
 
     try {
-      const topupRes = await fetch(`${SHEET_DB_URL}?sheet=topup`);
-      const topupList = await topupRes.json();
+      const { data: topupList, error: tError } = await supabaseClient.from('topup').select('*');
+      if (tError) throw tError;
 
-      const topupCard = Array.isArray(topupList) ? topupList.find(c => {
-        const code = c.code || c.Code || "";
-        const status = c.status || c.Status || "";
-        return code.toString().trim().toUpperCase() === inputCode && status.toString().trim().toLowerCase() === 'available';
-      }) : null;
+      const topupCard = topupList.find(c => {
+        const code = c.code || "";
+        const status = (c.status || "").toString().trim().toLowerCase();
+        return code.toString().trim().toUpperCase() === inputCode && status === 'available';
+      });
 
       if (!topupCard) {
         return alert('⚠️ كود الشحن غير صحيح، أو أنه مستخدم مسبقاً!');
       }
 
-      const cardId = topupCard.id || topupCard.Id || topupCard.ID;
-      const topupAmount = parseFloat(topupCard.sellPrice || topupCard.SellPrice || 0);
-      const clientId = globalClient.id || globalClient.Id || globalClient.ID;
-      const clientName = globalClient.name || globalClient.Name;
-      const currentBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
+      const cardId = topupCard.id;
+      const topupAmount = parseFloat(topupCard.sellPrice || 0);
+      const clientId = globalClient.id;
+      const clientName = globalClient.name;
+      const currentBalance = parseFloat(globalClient.balance || 0);
       const newBalance = currentBalance + topupAmount;
       const dateStr = new Date().toLocaleString('ar-EG');
 
-      await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: { balance: newBalance } })
-      });
-
-      await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=topup`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          data: { 
-            status: 'sold', 
-            soldTo: clientName, 
-            soldPrice: topupAmount, 
-            soldDate: dateStr 
-          } 
-        })
-      });
+      // تحديث رصيد الزبون
+      await supabaseClient.from('customers').update({ balance: newBalance }).eq('id', clientId);
+      
+      // تحديث حالة كود الشحن
+      await supabaseClient.from('topup').update({
+        status: 'sold',
+        soldTo: clientName,
+        soldPrice: topupAmount,
+        soldDate: dateStr
+      }).eq('id', cardId);
 
       document.getElementById('topupCodeInput').value = '';
       closeTopupModal();
       alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
       initStoreData();
     } catch (err) {
+      console.error(err);
       alert('حدث خطأ أثناء عملية الشحن.');
     }
   }
