@@ -32,9 +32,9 @@
     h1 { margin: 0; font-size: 1.5rem; color: #0f172a; }
 
     .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .topup-btn { background: var(--success); color: white; display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
     .cart-btn { background: #0f172a; color: white; position: relative; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
     .cart-badge { background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; position: absolute; top: -5px; right: -5px; }
-    
     .purchases-history-btn { background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
 
     .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
@@ -65,7 +65,6 @@
     .sub-product-info span { color: var(--success); font-weight: bold; font-size: 1.1rem; }
     .sub-product-info small { display: block; color: #64748b; font-size: 0.75rem; margin-top: 2px; }
 
-    /* عناصر السلة والمشتريات التفاعلية */
     .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
     .cart-total-box { margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold; }
 
@@ -130,7 +129,11 @@
         <small id="clientEmailHeader" style="color: #64748b;"></small>
       </div>
       <div class="header-actions">
-        <!-- زر سجل المشتريات التفاعلي -->
+        <!-- زر شحن الرصيد -->
+        <button class="topupbtn topup-btn" onclick="openTopupModal()">
+          💳 شحن الرصيد
+        </button>
+        <!-- زر سجل المشتريات -->
         <button class="purchases-history-btn" onclick="openPurchasesHistoryModal()">
           📦 مشترياتي
         </button>
@@ -138,8 +141,8 @@
         <button class="cart-btn" onclick="openCartModal()">
           🛒 السلة <span id="cartCountBadge" class="cart-badge">0</span>
         </button>
-        <button class="btn-refresh" onclick="initStoreData()">🔄 تحديث</button>
-        <button class="btn-danger" onclick="logoutClient()">🚪 خروج</button>
+        <button class="btn-refresh" onclick="initStoreData()">🔄</button>
+        <button class="btn-danger" onclick="logoutClient()">🚪</button>
       </div>
     </header>
 
@@ -152,15 +155,6 @@
         <span style="font-size: 0.85rem; color: #166534; display: block;">رصيدك الحالي</span>
         <div id="clientBalanceDisplay" style="font-weight: bold; color: var(--success); font-size: 1.4rem;">$0.00</div>
       </div>
-    </div>
-
-    <!-- شحن المحفظة برمز سري -->
-    <div class="card" style="background: #f8fafc; border: 2px dashed var(--primary);">
-      <h2 style="color: var(--primary);">💳 شحن المحفظة برمز سري</h2>
-      <form onsubmit="topupWalletWithCode(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن..." style="flex: 1; min-width: 250px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase;" required>
-        <button type="submit" class="btn-success" style="padding: 10px 20px;">شحن الرصيد الآن</button>
-      </form>
     </div>
 
     <div class="card">
@@ -177,6 +171,19 @@
     <button class="modal-close" onclick="closeModal()">✕</button>
     <h3 id="modalTitle" style="margin-top:0; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:10px;">فئات البطاقات</h3>
     <div id="modalSubProducts" class="sub-products-list"></div>
+  </div>
+</div>
+
+<!-- نافذة شحن الرصيد -->
+<div id="topupModal" class="modal-overlay">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeTopupModal()">✕</button>
+    <h3 style="margin-top:0; color:var(--success); border-bottom:1px solid var(--border); padding-bottom:10px;">💳 شحن المحفظة برمز سري</h3>
+    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">أدخل كود شحن الرصيد المكون من 15 خانة ليضاف إلى محفظتك فوراً.</p>
+    <form onsubmit="topupWalletWithCode(event)">
+      <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن..." style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 15px;" required>
+      <button type="submit" class="btn-success" style="width: 100%; padding: 12px; font-size: 1.1rem;">شحن الرصيد الآن</button>
+    </form>
   </div>
 </div>
 
@@ -475,6 +482,15 @@
     document.getElementById('categoryModal').style.display = 'none';
   }
 
+  // --- دوال نافذة شحن الرصيد ---
+  function openTopupModal() {
+    document.getElementById('topupModal').style.display = 'flex';
+  }
+
+  function closeTopupModal() {
+    document.getElementById('topupModal').style.display = 'none';
+  }
+
   // --- دوال سلة المشتريات ---
   function addToCart(type, value, price) {
     shoppingCart.push({ type, value, price });
@@ -524,7 +540,6 @@
     document.getElementById('cartModal').style.display = 'none';
   }
 
-  // إتمام الشراء لكل محتويات السلة بكل دقة ودون تداخل
   async function checkoutCart() {
     if (!shoppingCart.length) return alert('السلة فارغة!');
 
@@ -564,7 +579,7 @@
         const cardCode = card.code || card.Code || "";
 
         currentBalance -= cartItem.price;
-        card.status = 'sold'; // تحديث محلي لمنع تكرار الاختيار في نفس الطلب
+        card.status = 'sold';
 
         await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
           method: 'PUT',
@@ -600,7 +615,7 @@
     }
   }
 
-  // --- دوال سجل المشتريات التفاعلي الجديد ---
+  // --- دوال سجل المشتريات التفاعلي ---
   function openPurchasesHistoryModal() {
     renderPurchasesHistoryCategories();
     document.getElementById('purchasesHistoryModal').style.display = 'flex';
@@ -722,6 +737,7 @@
       });
 
       document.getElementById('topupCodeInput').value = '';
+      closeTopupModal();
       alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
       initStoreData();
     } catch (err) {
