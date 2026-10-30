@@ -118,7 +118,7 @@
 
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('inventoryTab', event)">📦 توريد أكواد المخزون</button>
-      <button class="tab-btn" onclick="switchTab('topupTab', event)">💳 توليد أكواد شحن الرصيد</button>
+      <button class="tab-btn" onclick="switchTab('topupTab', event)">💳 أكواد شحن الرصيد (Topup)</button>
       <button class="tab-btn" onclick="switchTab('customersTab', event)">👥 إدارة الزبائن والأرصدة</button>
       <button class="tab-btn" onclick="switchTab('logTab', event)">📋 سجل المبيعات والأرباح</button>
     </div>
@@ -172,11 +172,11 @@
       </div>
     </div>
 
-    <!-- تبويب توليد أكواد الشحن -->
+    <!-- تبويب شيت Topup المستقل -->
     <div id="topupTab" class="tab-content">
       <div class="card">
-        <h2>🔐 توليد أكواد شحن رصيد آمنة (15 خانة)</h2>
-        <p style="color: #6b7280; font-size: 0.9rem;">أدخل القيمة وعدد الأكواد لإنشائها وحفظها أوتوماتيكياً في المخزون.</p>
+        <h2>🔐 توليد أكواد شحن رصيد آمنة (شيت Topup المستقل)</h2>
+        <p style="color: #6b7280; font-size: 0.9rem;">أدخل القيمة وعدد الأكواد لإنشائها وحفظها مباشرة في جدول `topup`.</p>
         <form onsubmit="generateTopupCodes(event)">
           <div class="form-grid">
             <div>
@@ -188,8 +188,16 @@
               <input type="number" id="topupCount" placeholder="مثال: 5" min="1" max="50" required>
             </div>
           </div>
-          <button type="submit" class="btn-primary" style="margin-top: 20px;">⚡ توليد الأكواد وحفظها سحابياً</button>
+          <button type="submit" class="btn-primary" style="margin-top: 20px;">⚡ توليد وحفظ في شيت Topup</button>
         </form>
+      </div>
+
+      <div class="card">
+        <h2>📋 سجل ومتابعة أكواد الشحن (المتوفرة والمستخدمة)</h2>
+        <table>
+          <thead><tr><th>التاريخ</th><th>القيمة</th><th>الكود</th><th>الحالة</th><th>شُحن لـ (الزبون)</th><th>تاريخ الاستخدام</th></tr></thead>
+          <tbody id="topupTableSummary"><tr><td colspan="6" style="text-align:center;">جاري جلب أكواد الشحن...</td></tr></tbody>
+        </table>
       </div>
     </div>
 
@@ -255,6 +263,7 @@
   const API_URL = "https://sheetdb.io/api/v1/sxofjkjdy6bji";
 
   let inventory = [];
+  let topupList = [];
   let customers = [];
   let currentAdminEmail = sessionStorage.getItem('logged_admin_email');
 
@@ -324,6 +333,9 @@
       const invRes = await fetch(`${API_URL}?sheet=inventory`);
       inventory = await invRes.json();
 
+      const topupRes = await fetch(`${API_URL}?sheet=topup`);
+      topupList = await topupRes.json();
+
       const custRes = await fetch(`${API_URL}?sheet=customers`);
       customers = await custRes.json();
 
@@ -349,6 +361,7 @@
     return result;
   }
 
+  // حفظ أكواد الشحن في شيت topup المستقل
   async function generateTopupCodes(e) {
     e.preventDefault();
     const value = parseFloat(document.getElementById('topupValue').value);
@@ -366,8 +379,8 @@
       const secureCode = generateSecureCode();
       newTopups.push({
         id: 'TOPUP_' + (now + i),
-        type: 'Wallet Top-up',
-        value: `$${value} Balance`,
+        type: 'Balance Topup',
+        value: `$${value}`,
         costPrice: 0,
         sellPrice: value,
         image: 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png',
@@ -382,14 +395,14 @@
     }
 
     try {
-      const response = await fetch(`${API_URL}?sheet=inventory`, {
+      const response = await fetch(`${API_URL}?sheet=topup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: newTopups })
       });
 
       if (response.ok) {
-        alert(`✅ تم توليد وحفظ ${count} أكواد شحن بقيمة $${value} بنجاح!`);
+        alert(`✅ تم توليد وحفظ ${count} أكواد شحن بقيمة $${value} في شيت topup بنجاح!`);
         document.getElementById('topupValue').value = '';
         document.getElementById('topupCount').value = '';
         await fetchAllData();
@@ -524,21 +537,28 @@
   }
 
   function renderAll() {
-    const available = Array.isArray(inventory) ? inventory.filter(c => c.status === 'available') : [];
-    const sold = Array.isArray(inventory) ? inventory.filter(c => c.status === 'sold') : [];
-    const invValue = available.reduce((sum, c) => sum + parseFloat(c.sellPrice || 0), 0);
-    const totalProfit = sold.reduce((sum, c) => sum + (parseFloat(c.soldPrice || 0) - parseFloat(c.costPrice || 0)), 0);
+    const available = Array.isArray(inventory) ? inventory.filter(c => (c.status || c.Status) === 'available') : [];
+    const sold = Array.isArray(inventory) ? inventory.filter(c => (c.status || c.Status) === 'sold') : [];
+    const invValue = available.reduce((sum, c) => sum + parseFloat(c.sellPrice || c.SellPrice || 0), 0);
+    
+    // أرباح البطاقات العادية + أرباح أكواد التوب أب (إن وجدت مبيعات لها)
+    const topupSold = Array.isArray(topupList) ? topupList.filter(t => (t.status || t.Status) === 'sold') : [];
+    const totalSoldItems = [...sold, ...topupSold];
+    const totalProfit = totalSoldItems.reduce((sum, c) => sum + (parseFloat(c.soldPrice || c.SoldPrice || 0) - parseFloat(c.costPrice || c.CostPrice || 0)), 0);
 
-    document.getElementById('statAvailable').textContent = available.length;
+    document.getElementById('statAvailable').textContent = available.length + (Array.isArray(topupList) ? topupList.filter(t => (t.status || t.Status) === 'available').length : 0);
     document.getElementById('statInventoryValue').textContent = '$' + invValue.toFixed(2);
     document.getElementById('statProfit').textContent = '$' + totalProfit.toFixed(2);
     document.getElementById('statCustomers').textContent = Array.isArray(customers) ? customers.length : 0;
 
     const groups = {};
     available.forEach(c => {
-      if (c.type === 'Wallet Top-up') return;
-      const key = `${c.type}___${c.value}`;
-      if (!groups[key]) groups[key] = { type: c.type, value: c.value, qty: 0, sellPrice: c.sellPrice, image: c.image };
+      const type = c.type || c.Type;
+      const value = c.value || c.Value;
+      const sellPrice = c.sellPrice || c.SellPrice;
+      const image = c.image || c.Image;
+      const key = `${type}___${value}`;
+      if (!groups[key]) groups[key] = { type, value, qty: 0, sellPrice, image };
       groups[key].qty++;
     });
     
@@ -551,6 +571,23 @@
         <td>$${parseFloat(groups[k].sellPrice).toFixed(2)}</td>
       </tr>
     `).join('') : `<tr><td colspan="4" style="text-align:center; color:#9b9b9b;">المخزون فارغ</td></tr>`;
+
+    // عرض جدول شيت topup في لوحة الآدمن لمتابعة من استخدامه
+    document.getElementById('topupTableSummary').innerHTML = Array.isArray(topupList) && topupList.length ? topupList.map(t => {
+      const status = t.status || t.Status || 'available';
+      const isSold = status.toLowerCase() === 'sold';
+      const statusBadge = isSold ? '<span style="background:#fee2e2; color:#991b1b; padding:3px 8px; border-radius:12px; font-weight:bold;">مستخدم</span>' : '<span style="background:#d1fae5; color:#065f46; padding:3px 8px; border-radius:12px; font-weight:bold;">متوفر</span>';
+      return `
+        <tr>
+          <td><small>${t.addedDate || t.AddedDate || ''}</small></td>
+          <td><strong>$${parseFloat(t.sellPrice || t.SellPrice || 0).toFixed(2)}</strong></td>
+          <td><span style="font-family:monospace; background:#f3f4f6; padding:3px 6px; border-radius:4px; font-weight:bold;">${t.code || t.Code || ''}</span></td>
+          <td>${statusBadge}</td>
+          <td style="color:var(--primary); font-weight:bold;">${t.soldTo || t.SoldTo || '-'}</td>
+          <td><small>${t.soldDate || t.SoldDate || '-'}</small></td>
+        </tr>
+      `;
+    }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد أكواد شحن مولدة</td></tr>`;
 
     document.getElementById('customerTable').innerHTML = Array.isArray(customers) && customers.length ? customers.map(c => {
       const cRole = c.role || c.Role || 'client';
@@ -573,14 +610,16 @@
       `;
     }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد حسابات مسجلة</td></tr>`;
 
-    document.getElementById('salesLogTable').innerHTML = sold.length ? sold.map(s => {
-      const profit = parseFloat(s.soldPrice || 0) - parseFloat(s.costPrice || 0);
+    document.getElementById('salesLogTable').innerHTML = totalSoldItems.length ? totalSoldItems.map(s => {
+      const profit = parseFloat(s.soldPrice || s.SoldPrice || 0) - parseFloat(s.costPrice || s.CostPrice || 0);
+      const sType = s.type || s.Type || 'منتج';
+      const sVal = s.value || s.Value || '';
       return `
         <tr>
-          <td><small>${s.soldDate}</small></td>
-          <td>${s.type} (${s.value})</td>
-          <td><strong>${s.soldTo}</strong></td>
-          <td>$${parseFloat(s.soldPrice || 0).toFixed(2)}</td>
+          <td><small>${s.soldDate || s.SoldDate || ''}</small></td>
+          <td>${sType} (${sVal})</td>
+          <td><strong>${s.soldTo || s.SoldTo || ''}</strong></td>
+          <td>$${parseFloat(s.soldPrice || s.SoldPrice || 0).toFixed(2)}</td>
           <td style="color:var(--success)">+$${profit.toFixed(2)}</td>
         </tr>
       `;
