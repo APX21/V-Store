@@ -223,7 +223,7 @@
               <label>الصلاحية (الدور)</label>
               <select id="custRole">
                 <option value="client">زبون عادي (Client)</option>
-                <option value="HoViG">مسؤول مميز (HoViG)</option>
+                <option value="galilohovig">مسؤول مميز (galilohovig)</option>
               </select>
             </div>
           </div>
@@ -285,7 +285,7 @@
         const cEmail = (c.email || c.Email || "").toString().trim().toLowerCase();
         const cPass = (c.password || c.Password || "").toString().trim();
         const cRole = (c.role || c.Role || "").toString().trim();
-        return cEmail === emailInput && cPass === passInput && cRole === 'HoViG';
+        return cEmail === emailInput && cPass === passInput && cRole === 'galilohovig';
       });
 
       if (adminUser) {
@@ -293,7 +293,7 @@
         sessionStorage.setItem('logged_admin_email', emailInput);
         showDashboard();
       } else {
-        document.getElementById('adminErrorMsg').textContent = '⚠️ البريد الإلكتروني أو كلمة المرور غير صحيحة، أو ليس لديك صلاحية HoViG!';
+        document.getElementById('adminErrorMsg').textContent = '⚠️ البريد أو كلمة المرور غير صحيحة، أو ليس لديك صلاحية galilohovig!';
         btn.textContent = "تسجيل دخول الآدمن";
       }
     } catch (err) {
@@ -554,7 +554,7 @@
 
     document.getElementById('customerTable').innerHTML = Array.isArray(customers) && customers.length ? customers.map(c => {
       const cRole = c.role || c.Role || 'client';
-      const roleBadge = cRole === 'HoViG' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">HoViG</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
+      const roleBadge = cRole === 'galilohovig' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">galilohovig</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
       return `
         <tr>
           <td><strong>${c.name}</strong></td>
