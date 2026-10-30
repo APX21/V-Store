@@ -145,7 +145,7 @@
       </div>
     </div>
 
-    <!-- شحن المحفظة برمز سري -->
+    <!-- شحن المحفظة برمز سري (مربوط بشيت topup) -->
     <div class="card" style="background: #f8fafc; border: 2px dashed var(--primary);">
       <h2 style="color: var(--primary);">💳 شحن المحفظة برمز سري</h2>
       <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">أدخل كود شحن الرصيد المكون من 15 خانة ليضاف إلى محفظتك فوراً.</p>
@@ -360,8 +360,7 @@
   function renderCategories(inventory) {
     const available = Array.isArray(inventory) ? inventory.filter(c => {
       const status = c.status || c.Status || "";
-      const type = c.type || c.Type || "";
-      return status.toString().trim().toLowerCase() === 'available' && type !== 'Wallet Top-up';
+      return status.toString().trim().toLowerCase() === 'available';
     }) : [];
 
     const categoriesMap = {};
@@ -422,7 +421,7 @@
     } else {
       subContainer.innerHTML = subKeys.map(k => {
         const g = subGroups[k];
-        const clientId = globalClient.id || globalClient.Id;
+        const clientId = globalClient.id || globalClient.Id || globalClient.ID;
         const clientName = globalClient.name || globalClient.Name;
         const clientBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
 
@@ -454,41 +453,43 @@
     });
   }
 
+  // شحنة المحفظة من شيت topup المستقل مع التحديث الفوري للحالة بالـ ID
   async function topupWalletWithCode(e) {
     e.preventDefault();
     const inputCode = document.getElementById('topupCodeInput').value.trim().toUpperCase();
     if (!inputCode) return;
 
     try {
-      const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
-      const inventory = await invRes.json();
+      const topupRes = await fetch(`${SHEET_DB_URL}?sheet=topup`);
+      const topupList = await topupRes.json();
 
-      const topupCard = inventory.find(c => {
-        const type = c.type || c.Type || "";
+      const topupCard = Array.isArray(topupList) ? topupList.find(c => {
         const code = c.code || c.Code || "";
         const status = c.status || c.Status || "";
-        return type === 'Wallet Top-up' && code.toString().trim().toUpperCase() === inputCode && status.toLowerCase() === 'available';
-      });
+        return code.toString().trim().toUpperCase() === inputCode && status.toString().trim().toLowerCase() === 'available';
+      }) : null;
 
       if (!topupCard) {
         return alert('⚠️ كود الشحن غير صحيح، أو أنه مستخدم مسبقاً!');
       }
 
-      const cardId = topupCard.id || topupCard.Id;
+      const cardId = topupCard.id || topupCard.Id || topupCard.ID;
       const topupAmount = parseFloat(topupCard.sellPrice || topupCard.SellPrice || 0);
-      const clientId = globalClient.id || globalClient.Id;
+      const clientId = globalClient.id || globalClient.Id || globalClient.ID;
       const clientName = globalClient.name || globalClient.Name;
       const currentBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
       const newBalance = currentBalance + topupAmount;
       const dateStr = new Date().toLocaleString('ar-EG');
 
+      // 1. تحديث رصيد الزبون
       await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data: { balance: newBalance } })
       });
 
-      await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
+      // 2. تحديث كود الشحن في شيت topup إلى sold وتثبيت اسم الزبون
+      await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=topup`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -505,7 +506,8 @@
       alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
       initStoreData();
     } catch (err) {
-      alert('حدث خطأ أثناء عملية الشحنة.');
+      console.error(err);
+      alert('حدث خطأ أثناء عملية الشحن.');
     }
   }
 
@@ -514,8 +516,7 @@
     const myPurchases = Array.isArray(inventory) ? inventory.filter(c => {
       const status = c.status || c.Status || "";
       const soldTo = c.soldTo || c.SoldTo || "";
-      const type = c.type || c.Type || "";
-      return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientName.trim() && type !== 'Wallet Top-up';
+      return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientName.trim();
     }) : [];
     
     if (!myPurchases.length) {
@@ -580,7 +581,7 @@
       if (!availableCards.length) return alert('عذراً، نفدت كمية هذه الفئة!');
 
       const card = availableCards[0];
-      const cardId = card.id || card.Id;
+      const cardId = card.id || card.Id || card.ID;
       const cardCode = card.code || card.Code || "";
       const newBalance = parseFloat(clientBalance) - price;
       const saleDateStr = new Date().toLocaleString('ar-EG');
