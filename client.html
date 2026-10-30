@@ -130,7 +130,7 @@
       </div>
       <div class="header-actions">
         <!-- زر شحن الرصيد -->
-        <button class="topupbtn topup-btn" onclick="openTopupModal()">
+        <button class="topup-btn" onclick="openTopupModal()">
           💳 شحن الرصيد
         </button>
         <!-- زر سجل المشتريات -->
@@ -655,12 +655,19 @@
   }
 
   function openCategoryPurchasesCodes(categoryType, items) {
+    // ترتيب الأكواد من الأحدث إلى الأقدم
+    const sortedItems = items.sort((a, b) => {
+      const timeA = a.addedTimestamp || a.SoldTimestamp || new Date(a.soldDate || a.SoldDate || 0).getTime();
+      const timeB = b.addedTimestamp || b.SoldTimestamp || new Date(b.soldDate || b.SoldDate || 0).getTime();
+      return timeB - timeA;
+    });
+
     const container = document.getElementById('purchasesHistoryContent');
     container.innerHTML = `
       <button onclick="renderPurchasesHistoryCategories()" style="background:none; border:none; color:var(--primary); font-weight:bold; cursor:pointer; margin-bottom:15px; padding:0; font-size:0.95rem;">⬅ العودة إلى الأقسام</button>
       <h4 style="margin-top:0; color:var(--text); border-bottom:1px solid var(--border); padding-bottom:8px;">أكواد قسم: ${categoryType}</h4>
       <div style="display: flex; flex-direction: column; gap: 10px;">
-        ${items.map(p => {
+        ${sortedItems.map(p => {
           const pDate = p.soldDate || p.SoldDate || "";
           const pValue = p.value || p.Value || "";
           const pCode = p.code || p.Code || "";
