@@ -93,6 +93,7 @@
 
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('inventoryTab', event)">📦 إضافة أكواد (مخزون)</button>
+    <button class="tab-btn" onclick="switchTab('topupTab', event)">💳 توليد أكواد شحن الرصيد</button>
     <button class="tab-btn" onclick="switchTab('customersTab', event)">👥 الزبائن والأرصدة</button>
     <button class="tab-btn" onclick="switchTab('logTab', event)">📋 سجل العمليات والمبيعات</button>
   </div>
@@ -126,7 +127,7 @@
             <input type="number" step="0.01" id="sellPrice" required>
           </div>
           <div class="form-group-full">
-            <label>رابط صورة المنتج (URL) - يتم تذكر آخر رابط تلقائياً وقابل للتعديل</label>
+            <label>رابط صورة المنتج (URL) - يتم تذكر آخر رابط تلقائياً</label>
             <input type="url" id="cardImage" placeholder="https://example.com/image.png" required>
           </div>
           <div class="form-group-full">
@@ -143,6 +144,27 @@
         <thead><tr><th>المنتج</th><th>الفئة</th><th>الكمية</th><th>سعر البيع للزبون</th></tr></thead>
         <tbody id="inventorySummaryTable"><tr><td colspan="4" style="text-align:center;">جاري جلب البيانات...</td></tr></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- تبويب توليد أكواد شحن الرصيد (Top-up Codes) -->
+  <div id="topupTab" class="tab-content">
+    <div class="card">
+      <h2>🔐 توليد أكواد شحن رصيد آمنة ومحمية (15 خانة)</h2>
+      <p style="color: #64748b; font-size: 0.9rem;">أدخل القيمة وعدد الأكواد المطلوبة، وسيقوم النظام بتوليدها أوتوماتيكياً وحفظها في المخزون كبطاقات رصيد محفظة.</p>
+      <form onsubmit="generateTopupCodes(event)">
+        <div class="form-grid">
+          <div>
+            <label>قيمة كود الشحن ($)</label>
+            <input type="number" step="0.01" id="topupValue" placeholder="مثال: 10" required>
+          </div>
+          <div>
+            <label>عدد الأكواد المطلوبة</label>
+            <input type="number" id="topupCount" placeholder="مثال: 5" min="1" max="50" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 15px;">⚡ توليد الأكواد وحفظها سحابياً</button>
+      </form>
     </div>
   </div>
 
@@ -224,7 +246,6 @@
     if (ev && ev.target) ev.target.classList.add('active');
   }
 
-  // عند فتح الصفحة، استرجاع آخر رابط صورة تم إدخاله إن وجد
   window.onload = function() {
     fetchAllData();
     const lastImage = localStorage.getItem('last_card_image');
@@ -232,6 +253,68 @@
       document.getElementById('cardImage').value = lastImage;
     }
   };
+
+  // مولد أكواد شحن الرصيد الآمنة (15 خانة حروف وأرقام)
+  function generateSecureCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 15; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
+  async function generateTopupCodes(e) {
+    e.preventDefault();
+    const value = parseFloat(document.getElementById('topupValue').value);
+    const count = parseInt(document.getElementById('topupCount').value);
+
+    if (isNaN(value) || value <= 0 || isNaN(count) || count <= 0) {
+      return alert('الرجاء إدخال قيم صحيحة.');
+    }
+
+    const now = Date.now();
+    const dateStr = new Date().toLocaleString('ar-EG');
+    const newTopups = [];
+
+    for (let i = 0; i < count; i++) {
+      const secureCode = generateSecureCode();
+      newTopups.push({
+        id: 'TOPUP_' + (now + i),
+        type: 'Wallet Top-up',
+        value: `$${value} Balance`,
+        costPrice: 0,
+        sellPrice: value,
+        image: 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png',
+        code: secureCode,
+        status: 'available',
+        addedTimestamp: now + i,
+        addedDate: dateStr,
+        soldTo: "",
+        soldPrice: 0,
+        soldDate: ""
+      });
+    }
+
+    try {
+      const response = await fetch(`${API_URL}?sheet=inventory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: newTopups })
+      });
+
+      if (response.ok) {
+        alert(`✅ تم توليد وحفظ ${count} أكواد شحن بقيمة $${value} بنجاح!\n(يمكنك رؤيتها ومشاركتها مع الزبائن).`);
+        document.getElementById('topupValue').value = '';
+        document.getElementById('topupCount').value = '';
+        await fetchAllData();
+      } else {
+        alert('⚠️ فشل حفظ الأكواد في السيرفر.');
+      }
+    } catch (err) {
+      alert('خطأ في الاتصال بالشبكة.');
+    }
+  }
 
   async function addBulkCards(e) {
     e.preventDefault();
@@ -242,7 +325,6 @@
     const image = document.getElementById('cardImage').value.trim();
     const rawCodes = document.getElementById('cardCodesBatch').value;
 
-    // حفظ الرابط في الذاكرة المحلية (localStorage) ليظهر تلقائياً في المرة القادمة
     localStorage.setItem('last_card_image', image);
 
     const codeLines = rawCodes.split('\n').map(c => c.trim()).filter(c => c.length > 0);
@@ -278,8 +360,7 @@
       });
 
       if (response.ok) {
-        document.getElementById('cardCodesBatch').value = ''; // تفريغ الأكواد فقط والابقاء على الرابط أو تحديثه
-        // إعادة تحميل الرابط المخزن ليبقى ظاهراً وقابلاً للتعديل
+        document.getElementById('cardCodesBatch').value = '';
         document.getElementById('cardImage').value = localStorage.getItem('last_card_image') || '';
         alert(`تمت إضافة ${codeLines.length} كود مع الصورة بنجاح!`);
         await fetchAllData();
@@ -369,6 +450,7 @@
 
     const groups = {};
     available.forEach(c => {
+      if (c.type === 'Wallet Top-up') return; // لا نعرض أكواد الشحن في أقسام البطاقات العادية
       const key = `${c.type}___${c.value}`;
       if (!groups[key]) groups[key] = { type: c.type, value: c.value, qty: 0, sellPrice: c.sellPrice, image: c.image };
       groups[key].qty++;
