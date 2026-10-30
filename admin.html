@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم الآدمن - الإدارة المركزية</title>
+  <title>لوحة تحكم الآدمن - Supabase</title>
+  <!-- استدعاء مكتبة Supabase الرسمية -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #4f46e5;
@@ -23,27 +25,26 @@
     .admin-login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
     .admin-login-card h2 { color: var(--sidebar-bg); margin-top: 0; margin-bottom: 8px; font-size: 1.8rem; }
     .admin-login-card input { width: 100%; padding: 14px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
-    .admin-login-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
-    .admin-login-card button:hover { background: var(--primary-dark); }
+    .admin-login-card button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
 
     #adminDashboard { display: none; min-height: 100vh; padding: 30px; max-width: 1300px; margin: auto; }
     
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px 30px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px 30px; border-radius: 14px; border: 1px solid var(--border); flex-wrap: wrap; gap: 15px; }
     h1 { margin: 0; font-size: 1.6rem; color: #111827; }
 
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 30px; }
-    .stat-card { background: var(--card-bg); padding: 20px 25px; border-radius: 14px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); display: flex; flex-direction: column; justify-content: center; }
+    .stat-card { background: var(--card-bg); padding: 20px 25px; border-radius: 14px; border: 1px solid var(--border); display: flex; flex-direction: column; justify-content: center; }
     .stat-card span { font-size: 0.9rem; color: #6b7280; font-weight: 500; }
     .stat-card h3 { margin: 8px 0 0; font-size: 1.8rem; color: #111827; }
 
     .tabs { display: flex; gap: 12px; margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 12px; flex-wrap: wrap; }
     .tab-btn { background: white; border: 1px solid var(--border); padding: 10px 20px; font-weight: 600; cursor: pointer; color: #4b5563; border-radius: 8px; transition: all 0.2s; }
-    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+    .tab-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); padding: 25px; margin-bottom: 30px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); padding: 25px; margin-bottom: 30px; }
     h2 { font-size: 1.3rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 12px; color: #111827; }
 
     .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
@@ -52,8 +53,7 @@
     input, select, textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; background: #fafafa; }
     textarea { resize: vertical; min-height: 90px; font-family: monospace; }
 
-    button { cursor: pointer; border-radius: 8px; border: none; padding: 11px 20px; font-weight: 600; font-size: 0.95rem; transition: opacity 0.2s; }
-    button:hover { opacity: 0.9; }
+    button { cursor: pointer; border-radius: 8px; border: none; padding: 11px 20px; font-weight: 600; font-size: 0.95rem; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-success { background: var(--success); color: white; }
     .btn-danger { background: var(--danger); color: white; }
@@ -63,7 +63,6 @@
     th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
     th { background: #f9fafb; color: #374151; font-weight: 600; }
     tr:hover { background: #f9fafb; }
-
     .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
   </style>
 </head>
@@ -72,8 +71,8 @@
   <!-- شاشة تسجيل دخول الآدمن -->
   <div id="adminLoginScreen">
     <div class="admin-login-card">
-      <h2>🛡️ بوابة الآدمن المميزة</h2>
-      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل بيانات حسابك الخاص للإدارة</p>
+      <h2>🛡️ بوابة الآدمن</h2>
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">أدخل حساب الصلاحية العليا (galilohovig)</p>
       <form onsubmit="adminLogin(event)">
         <input type="email" id="adminEmail" placeholder="admin@domain.com" required>
         <input type="password" id="adminPassword" placeholder="كلمة المرور" required>
@@ -83,12 +82,12 @@
     </div>
   </div>
 
-  <!-- لوحة التحكم الرئيسية -->
+  <!-- لوحة التحكم -->
   <div id="adminDashboard" class="container">
     <header>
       <div>
-        <h1>⚙️ لوحة تحكم الآدمن المركزية</h1>
-        <small style="color: #6b7280;">نظام متجر بطاقات الهدايا السحابي الآمن</small>
+        <h1>⚙️ لوحة تحكم الآدمن المركزية (Supabase)</h1>
+        <small style="color: #6b7280;">نظام متجر بطاقات الهدايا الفائق السرعة</small>
       </div>
       <div style="display: flex; gap: 12px; align-items: center;">
         <button class="btn-refresh" onclick="fetchAllData()">🔄 تحديث البيانات</button>
@@ -126,8 +125,8 @@
     <!-- تبويب المخزون -->
     <div id="inventoryTab" class="tab-content active">
       <div class="card">
-        <h2>إضافة دفعة أكواد جديدة مع صورة المنتج</h2>
-        <form id="bulkForm" onsubmit="addBulkCards(event)">
+        <h2>إضافة دفعة أكواد جديدة</h2>
+        <form onsubmit="addBulkCards(event)">
           <div class="form-grid">
             <div>
               <label>اختر المنتج</label>
@@ -152,7 +151,7 @@
               <input type="number" step="0.01" id="sellPrice" required>
             </div>
             <div class="form-group-full">
-              <label>رابط صورة المنتج (URL) - يتم تذكر آخر رابط تلقائياً</label>
+              <label>رابط صورة المنتج (URL)</label>
               <input type="url" id="cardImage" placeholder="https://example.com/image.png" required>
             </div>
             <div class="form-group-full">
@@ -160,11 +159,11 @@
               <textarea id="cardCodesBatch" required></textarea>
             </div>
           </div>
-          <button type="submit" class="btn-success" style="margin-top: 20px;">📥 حفظ في غوغل شيتس وعرضها فوراً</button>
+          <button type="submit" class="btn-success" style="margin-top: 20px;">📥 حفظ في قاعدة البيانات</button>
         </form>
       </div>
       <div class="card">
-        <h2>المخزون الحالي المتوفر سحابياً</h2>
+        <h2>المخزون الحالي المتوفر</h2>
         <table>
           <thead><tr><th>المنتج</th><th>الفئة</th><th>الكمية</th><th>سعر البيع للزبون</th></tr></thead>
           <tbody id="inventorySummaryTable"><tr><td colspan="4" style="text-align:center;">جاري جلب البيانات...</td></tr></tbody>
@@ -172,11 +171,10 @@
       </div>
     </div>
 
-    <!-- تبويب شيت Topup المستقل -->
+    <!-- تبويب Topup -->
     <div id="topupTab" class="tab-content">
       <div class="card">
-        <h2>🔐 توليد أكواد شحن رصيد آمنة (شيت Topup المستقل)</h2>
-        <p style="color: #6b7280; font-size: 0.9rem;">أدخل القيمة وعدد الأكواد لإنشائها وحفظها مباشرة في جدول `topup`.</p>
+        <h2>🔐 توليد أكواد شحن رصيد</h2>
         <form onsubmit="generateTopupCodes(event)">
           <div class="form-grid">
             <div>
@@ -193,10 +191,10 @@
       </div>
 
       <div class="card">
-        <h2>📋 سجل ومتابعة أكواد الشحن (المتوفرة والمستخدمة)</h2>
+        <h2>📋 سجل ومتابعة أكواد الشحن</h2>
         <table>
           <thead><tr><th>التاريخ</th><th>القيمة</th><th>الكود</th><th>الحالة</th><th>شُحن لـ (الزبون)</th><th>تاريخ الاستخدام</th></tr></thead>
-          <tbody id="topupTableSummary"><tr><td colspan="6" style="text-align:center;">جاري جلب أكواد الشحن...</td></tr></tbody>
+          <tbody id="topupTableSummary"><tr><td colspan="6" style="text-align:center;">جاري جلب الأكواد...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -207,42 +205,27 @@
         <h2>إضافة حساب جديد</h2>
         <form id="customerForm" onsubmit="addCustomer(event)">
           <div class="form-grid">
+            <div><label>الاسم</label><input type="text" id="custName" required></div>
+            <div><label>رقم الهاتف</label><input type="text" id="custPhone" required></div>
+            <div><label>البريد الإلكتروني</label><input type="email" id="custEmail" required></div>
+            <div><label>كلمة المرور</label><input type="text" id="custPassword" required></div>
+            <div><label>رصيد المحفظة الابتدائي ($)</label><input type="number" step="0.01" id="custBalance" value="0" required></div>
             <div>
-              <label>الاسم</label>
-              <input type="text" id="custName" required>
-            </div>
-            <div>
-              <label>رقم الهاتف</label>
-              <input type="text" id="custPhone" required>
-            </div>
-            <div>
-              <label>البريد الإلكتروني</label>
-              <input type="email" id="custEmail" placeholder="client@domain.com" required>
-            </div>
-            <div>
-              <label>كلمة المرور</label>
-              <input type="text" id="custPassword" placeholder="كلمة المرور" required>
-            </div>
-            <div>
-              <label>رصيد المحفظة الابتدائي ($)</label>
-              <input type="number" step="0.01" id="custBalance" value="0" required>
-            </div>
-            <div>
-              <label>الصلاحية (الدور)</label>
+              <label>الصلاحية</label>
               <select id="custRole">
                 <option value="client">زبون عادي (Client)</option>
                 <option value="galilohovig">مسؤول مميز (galilohovig)</option>
               </select>
             </div>
           </div>
-          <button type="submit" class="btn-primary" style="margin-top: 20px;">حفظ الحساب سحابياً</button>
+          <button type="submit" class="btn-primary" style="margin-top: 20px;">حفظ الحساب</button>
         </form>
       </div>
       <div class="card">
-        <h2>إدارة الحسابات والأرصدة سحابياً</h2>
+        <h2>إدارة الحسابات والأرصدة</h2>
         <table>
-          <thead><tr><th>الاسم</th><th>البريد الإلكتروني</th><th>كلمة المرور</th><th>الصلاحية</th><th>الرصيد</th><th>الإجراءات</th></tr></thead>
-          <tbody id="customerTable"><tr><td colspan="6" style="text-align:center;">جاري جلب البيانات...</td></tr></tbody>
+          <thead><tr><th>الاسم</th><th>البريد</th><th>كلمة المرور</th><th>الصلاحية</th><th>الرصيد</th><th>الإجراءات</th></tr></thead>
+          <tbody id="customerTable"><tr><td colspan="6" style="text-align:center;">جاري الجلب...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -250,7 +233,7 @@
     <!-- تبويب السجل -->
     <div id="logTab" class="tab-content">
       <div class="card">
-        <h2>سجل المبيعات والأرباح المحققة سحابياً</h2>
+        <h2>سجل المبيعات والأرباح المحققة</h2>
         <table>
           <thead><tr><th>التاريخ</th><th>المنتج</th><th>الزبون</th><th>سعر البيع</th><th>الربح</th></tr></thead>
           <tbody id="salesLogTable"><tr><td colspan="5" style="text-align:center;">لا توجد مبيعات بعد</td></tr></tbody>
@@ -260,7 +243,12 @@
   </div>
 
 <script>
-  const API_URL = "https://sheetdb.io/api/v1/sxofjkjdy6bji";
+  const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6InBhbm9uIiwiaWF0IjoxNzkzMzg1MTkzLCJleHAiOjIxMDg5NjExOTN9.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA"; // مفتاح الـ anon الصحيح
+  // استبدال مفتاح الـ anon بالكامل بالمفتاح الطويل الخاص بك إن لزم:
+  const actualKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
+
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, actualKey);
 
   let inventory = [];
   let topupList = [];
@@ -268,13 +256,9 @@
   let currentAdminEmail = sessionStorage.getItem('logged_admin_email');
 
   window.onload = function() {
-    if (currentAdminEmail) {
-      showDashboard();
-    }
+    if (currentAdminEmail) showDashboard();
     const lastImage = localStorage.getItem('last_card_image');
-    if (lastImage) {
-      document.getElementById('cardImage').value = lastImage;
-    }
+    if (lastImage) document.getElementById('cardImage').value = lastImage;
   };
 
   async function adminLogin(e) {
@@ -282,19 +266,17 @@
     const emailInput = document.getElementById('adminEmail').value.trim().toLowerCase();
     const passInput = document.getElementById('adminPassword').value.trim();
     const btn = document.getElementById('adminLoginBtn');
-    btn.textContent = "جاري التحقق من الصلاحيات...";
+    btn.textContent = "جاري التحقق...";
     document.getElementById('adminErrorMsg').textContent = '';
 
     try {
-      const res = await fetch(`${API_URL}?sheet=customers`);
-      const custs = await res.json();
-      if (!Array.isArray(custs)) throw new Error();
+      const { data: custs, error } = await supabaseClient.from('customers').select('*');
+      if (error) throw error;
 
       const adminUser = custs.find(c => {
-        const cEmail = (c.email || c.Email || "").toString().trim().toLowerCase();
-        const cPass = (c.password || c.Password || "").toString().trim();
-        const cRole = (c.role || c.Role || "").toString().trim();
-        return cEmail === emailInput && cPass === passInput && cRole === 'galilohovig';
+        return c.email.trim().toLowerCase() === emailInput && 
+               c.password.trim() === passInput && 
+               c.role.trim() === 'galilohovig';
       });
 
       if (adminUser) {
@@ -302,11 +284,11 @@
         sessionStorage.setItem('logged_admin_email', emailInput);
         showDashboard();
       } else {
-        document.getElementById('adminErrorMsg').textContent = '⚠️ البريد أو كلمة المرور غير صحيحة، أو ليس لديك صلاحية galilohovig!';
+        document.getElementById('adminErrorMsg').textContent = '⚠️ بيانات الدخول غير صحيحة أو ليس لديك صلاحية galilohovig!';
         btn.textContent = "تسجيل دخول الآدمن";
       }
     } catch (err) {
-      document.getElementById('adminErrorMsg').textContent = '⚠️ خطأ في الاتصال بالخادم السحابي.';
+      document.getElementById('adminErrorMsg').textContent = '⚠️ خطأ في الاتصال بقاعدة البيانات.';
       btn.textContent = "تسجيل دخول الآدمن";
     }
   }
@@ -322,22 +304,19 @@
     currentAdminEmail = null;
     document.getElementById('adminDashboard').style.display = 'none';
     document.getElementById('adminLoginScreen').style.display = 'flex';
-    document.getElementById('adminEmail').value = '';
-    document.getElementById('adminPassword').value = '';
-    document.getElementById('adminLoginBtn').textContent = "تسجيل دخول الآدمن";
   }
 
   async function fetchAllData() {
     if (!currentAdminEmail) return;
     try {
-      const invRes = await fetch(`${API_URL}?sheet=inventory`);
-      inventory = await invRes.json();
+      const { data: inv } = await supabaseClient.from('inventory').select('*');
+      inventory = inv || [];
 
-      const topupRes = await fetch(`${API_URL}?sheet=topup`);
-      topupList = await topupRes.json();
+      const { data: top } = await supabaseClient.from('topup').select('*');
+      topupList = top || [];
 
-      const custRes = await fetch(`${API_URL}?sheet=customers`);
-      customers = await custRes.json();
+      const { data: cust } = await supabaseClient.from('customers').select('*');
+      customers = cust || [];
 
       renderAll();
     } catch (err) {
@@ -361,22 +340,17 @@
     return result;
   }
 
-  // حفظ أكواد الشحن في شيت topup المستقل
   async function generateTopupCodes(e) {
     e.preventDefault();
     const value = parseFloat(document.getElementById('topupValue').value);
     const count = parseInt(document.getElementById('topupCount').value);
-
-    if (isNaN(value) || value <= 0 || isNaN(count) || count <= 0) {
-      return alert('الرجاء إدخال قيم صحيحة.');
-    }
+    if (isNaN(value) || value <= 0 || isNaN(count) || count <= 0) return alert('أدخل قيم صحيحة.');
 
     const now = Date.now();
     const dateStr = new Date().toLocaleString('ar-EG');
     const newTopups = [];
 
     for (let i = 0; i < count; i++) {
-      const secureCode = generateSecureCode();
       newTopups.push({
         id: 'TOPUP_' + (now + i),
         type: 'Balance Topup',
@@ -384,7 +358,7 @@
         costPrice: 0,
         sellPrice: value,
         image: 'https://cdn-icons-png.flaticon.com/512/2489/2489756.png',
-        code: secureCode,
+        code: generateSecureCode(),
         status: 'available',
         addedTimestamp: now + i,
         addedDate: dateStr,
@@ -394,23 +368,14 @@
       });
     }
 
-    try {
-      const response = await fetch(`${API_URL}?sheet=topup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: newTopups })
-      });
-
-      if (response.ok) {
-        alert(`✅ تم توليد وحفظ ${count} أكواد شحن بقيمة $${value} في شيت topup بنجاح!`);
-        document.getElementById('topupValue').value = '';
-        document.getElementById('topupCount').value = '';
-        await fetchAllData();
-      } else {
-        alert('⚠️ فشل حفظ الأكواد في السيرفر.');
-      }
-    } catch (err) {
-      alert('خطأ في الاتصال بالشبكة.');
+    const { error } = await supabaseClient.from('topup').insert(newTopups);
+    if (!error) {
+      alert(`✅ تم توليد وحفظ ${count} أكواد شحن في جدول topup بنجاح!`);
+      document.getElementById('topupValue').value = '';
+      document.getElementById('topupCount').value = '';
+      fetchAllData();
+    } else {
+      alert('⚠️ فشل حفظ الأكواد.');
     }
   }
 
@@ -424,49 +389,29 @@
     const rawCodes = document.getElementById('cardCodesBatch').value;
 
     localStorage.setItem('last_card_image', image);
-
     const codeLines = rawCodes.split('\n').map(c => c.trim()).filter(c => c.length > 0);
     if (!codeLines.length) return alert('أدخل كود واحد على الأقل.');
 
     const now = Date.now();
     const dateStr = new Date().toLocaleString('ar-EG');
-    const newCards = [];
+    const newCards = codeLines.map((code, i) => ({
+      id: 'CARD_' + (now + i),
+      type, value, costPrice, sellPrice, image, code,
+      status: 'available',
+      addedTimestamp: now + i,
+      addedDate: dateStr,
+      soldTo: "",
+      soldPrice: 0,
+      soldDate: ""
+    }));
 
-    codeLines.forEach((code, i) => {
-      newCards.push({
-        id: 'CARD_' + (now + i),
-        type: type,
-        value: value,
-        costPrice: costPrice,
-        sellPrice: sellPrice,
-        image: image,
-        code: code,
-        status: 'available',
-        addedTimestamp: now + i,
-        addedDate: dateStr,
-        soldTo: "",
-        soldPrice: 0,
-        soldDate: ""
-      });
-    });
-
-    try {
-      const response = await fetch(`${API_URL}?sheet=inventory`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: newCards })
-      });
-
-      if (response.ok) {
-        document.getElementById('cardCodesBatch').value = '';
-        document.getElementById('cardImage').value = localStorage.getItem('last_card_image') || '';
-        alert(`تمت إضافة ${codeLines.length} كود مع الصورة بنجاح!`);
-        await fetchAllData();
-      } else {
-        alert('⚠️ رفض السيرفر استقبال البيانات.');
-      }
-    } catch (err) {
-      alert('خطأ في الاتصال بالإنترنت.');
+    const { error } = await supabaseClient.from('inventory').insert(newCards);
+    if (!error) {
+      document.getElementById('cardCodesBatch').value = '';
+      alert(`تمت إضافة ${codeLines.length} كود بنجاح!`);
+      fetchAllData();
+    } else {
+      alert('⚠️ فشل الحفظ.');
     }
   }
 
@@ -482,22 +427,13 @@
       role: document.getElementById('custRole').value
     };
 
-    try {
-      const response = await fetch(`${API_URL}?sheet=customers`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: [newCust] })
-      });
-
-      if (response.ok) {
-        document.getElementById('customerForm').reset();
-        alert('تم حفظ الحساب وصلاحياته بنجاح!');
-        await fetchAllData();
-      } else {
-        alert('فشل الحفظ.');
-      }
-    } catch (err) {
-      alert('فشل الاتصال بالخادم.');
+    const { error } = await supabaseClient.from('customers').insert([newCust]);
+    if (!error) {
+      document.getElementById('customerForm').reset();
+      alert('تم حفظ الحساب بنجاح!');
+      fetchAllData();
+    } else {
+      alert('فشل الحفظ.');
     }
   }
 
@@ -508,118 +444,104 @@
     
     const cust = customers.find(c => c.id === custId);
     if (!cust) return;
-    
     const newBalance = parseFloat(cust.balance || 0) + amount;
 
-    try {
-      await fetch(`${API_URL}/id/${custId}?sheet=customers`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: { balance: newBalance } })
-      });
+    const { error } = await supabaseClient.from('customers').update({ balance: newBalance }).eq('id', custId);
+    if (!error) {
       inputField.value = '';
-      alert(`✅ تم تحديث رصيد (${cust.name}) سحابياً!`);
-      await fetchAllData();
-    } catch (err) {
-      alert('فشل تحديث الرصيد.');
+      alert('✅ تم تحديث الرصيد بنجاح!');
+      fetchAllData();
+    } else {
+      alert('فشل التحديث.');
     }
   }
 
   async function deleteCustomer(custId) {
-    if (!confirm('حذف هذا الحساب من الجدول السحابي؟')) return;
-    try {
-      await fetch(`${API_URL}/id/${custId}?sheet=customers`, { method: 'DELETE' });
-      alert('تم الحذف بنجاح.');
-      await fetchAllData();
-    } catch (err) {
+    if (!confirm('حذف هذا الحساب؟')) return;
+    const { error } = await supabaseClient.from('customers').delete().eq('id', custId);
+    if (!error) {
+      alert('تم الحذف.');
+      fetchAllData();
+    } else {
       alert('فشل الحذف.');
     }
   }
 
   function renderAll() {
-    const available = Array.isArray(inventory) ? inventory.filter(c => (c.status || c.Status) === 'available') : [];
-    const sold = Array.isArray(inventory) ? inventory.filter(c => (c.status || c.Status) === 'sold') : [];
-    const invValue = available.reduce((sum, c) => sum + parseFloat(c.sellPrice || c.SellPrice || 0), 0);
+    const available = inventory.filter(c => (c.status || "").toLowerCase() === 'available');
+    const sold = inventory.filter(c => (c.status || "").toLowerCase() === 'sold');
+    const invValue = available.reduce((sum, c) => sum + parseFloat(c.sellPrice || 0), 0);
     
-    // أرباح البطاقات العادية + أرباح أكواد التوب أب (إن وجدت مبيعات لها)
-    const topupSold = Array.isArray(topupList) ? topupList.filter(t => (t.status || t.Status) === 'sold') : [];
+    const topupSold = topupList.filter(t => (t.status || "").toLowerCase() === 'sold');
     const totalSoldItems = [...sold, ...topupSold];
-    const totalProfit = totalSoldItems.reduce((sum, c) => sum + (parseFloat(c.soldPrice || c.SoldPrice || 0) - parseFloat(c.costPrice || c.CostPrice || 0)), 0);
+    const totalProfit = totalSoldItems.reduce((sum, c) => sum + (parseFloat(c.soldPrice || 0) - parseFloat(c.costPrice || 0)), 0);
 
-    document.getElementById('statAvailable').textContent = available.length + (Array.isArray(topupList) ? topupList.filter(t => (t.status || t.Status) === 'available').length : 0);
+    document.getElementById('statAvailable').textContent = available.length + topupList.filter(t => (t.status || "").toLowerCase() === 'available').length;
     document.getElementById('statInventoryValue').textContent = '$' + invValue.toFixed(2);
     document.getElementById('statProfit').textContent = '$' + totalProfit.toFixed(2);
-    document.getElementById('statCustomers').textContent = Array.isArray(customers) ? customers.length : 0;
+    document.getElementById('statCustomers').textContent = customers.length;
 
     const groups = {};
     available.forEach(c => {
-      const type = c.type || c.Type;
-      const value = c.value || c.Value;
-      const sellPrice = c.sellPrice || c.SellPrice;
-      const image = c.image || c.Image;
+      const type = c.type;
+      const value = c.value;
       const key = `${type}___${value}`;
-      if (!groups[key]) groups[key] = { type, value, qty: 0, sellPrice, image };
+      if (!groups[key]) groups[key] = { type, value, qty: 0, sellPrice: c.sellPrice };
       groups[key].qty++;
     });
     
-    const groupKeys = Object.keys(groups);
-    document.getElementById('inventorySummaryTable').innerHTML = groupKeys.length ? groupKeys.map(k => `
+    document.getElementById('inventorySummaryTable').innerHTML = Object.keys(groups).length ? Object.keys(groups).map(k => `
       <tr>
         <td><strong>${groups[k].type}</strong></td>
         <td>${groups[k].value}</td>
-        <td><span class="badge badge-available" style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:12px; font-weight:bold;">${groups[k].qty} متوفر</span></td>
+        <td><span style="background:#d1fae5; color:#065f46; padding:4px 8px; border-radius:12px; font-weight:bold;">${groups[k].qty} متوفر</span></td>
         <td>$${parseFloat(groups[k].sellPrice).toFixed(2)}</td>
       </tr>
     `).join('') : `<tr><td colspan="4" style="text-align:center; color:#9b9b9b;">المخزون فارغ</td></tr>`;
 
-    // عرض جدول شيت topup في لوحة الآدمن لمتابعة من استخدامه
-    document.getElementById('topupTableSummary').innerHTML = Array.isArray(topupList) && topupList.length ? topupList.map(t => {
-      const status = t.status || t.Status || 'available';
-      const isSold = status.toLowerCase() === 'sold';
+    document.getElementById('topupTableSummary').innerHTML = topupList.length ? topupList.map(t => {
+      const isSold = (t.status || '').toLowerCase() === 'sold';
       const statusBadge = isSold ? '<span style="background:#fee2e2; color:#991b1b; padding:3px 8px; border-radius:12px; font-weight:bold;">مستخدم</span>' : '<span style="background:#d1fae5; color:#065f46; padding:3px 8px; border-radius:12px; font-weight:bold;">متوفر</span>';
       return `
         <tr>
-          <td><small>${t.addedDate || t.AddedDate || ''}</small></td>
-          <td><strong>$${parseFloat(t.sellPrice || t.SellPrice || 0).toFixed(2)}</strong></td>
-          <td><span style="font-family:monospace; background:#f3f4f6; padding:3px 6px; border-radius:4px; font-weight:bold;">${t.code || t.Code || ''}</span></td>
+          <td><small>${t.addedDate || ''}</small></td>
+          <td><strong>$${parseFloat(t.sellPrice || 0).toFixed(2)}</strong></td>
+          <td><span style="font-family:monospace; background:#f3f4f6; padding:3px 6px; border-radius:4px; font-weight:bold;">${t.code || ''}</span></td>
           <td>${statusBadge}</td>
-          <td style="color:var(--primary); font-weight:bold;">${t.soldTo || t.SoldTo || '-'}</td>
-          <td><small>${t.soldDate || t.SoldDate || '-'}</small></td>
+          <td style="color:var(--primary); font-weight:bold;">${t.soldTo || '-'}</td>
+          <td><small>${t.soldDate || '-'}</small></td>
         </tr>
       `;
-    }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد أكواد شحن مولدة</td></tr>`;
+    }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد أكواد شحن</td></tr>`;
 
-    document.getElementById('customerTable').innerHTML = Array.isArray(customers) && customers.length ? customers.map(c => {
-      const cRole = c.role || c.Role || 'client';
-      const roleBadge = cRole === 'galilohovig' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">galilohovig</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
+    document.getElementById('customerTable').innerHTML = customers.length ? customers.map(c => {
+      const roleBadge = c.role === 'galilohovig' ? '<span style="background:#ede9fe; color:#6d28d9; padding:3px 8px; border-radius:12px; font-weight:bold;">galilohovig</span>' : '<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:12px;">Client</span>';
       return `
         <tr>
           <td><strong>${c.name}</strong></td>
-          <td><span style="color:var(--primary); font-family:monospace;">${c.email || ''}</span></td>
-          <td><span style="font-family:monospace; background:#f3f4f6; padding:2px 6px; border-radius:4px;">${c.password || ''}</span></td>
+          <td><span style="color:var(--primary); font-family:monospace;">${c.email}</span></td>
+          <td><span style="font-family:monospace; background:#f3f4f6; padding:2px 6px; border-radius:4px;">${c.password}</span></td>
           <td>${roleBadge}</td>
           <td style="color:var(--success); font-weight:bold;">$${parseFloat(c.balance || 0).toFixed(2)}</td>
           <td>
             <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap;">
-              <input type="number" step="0.01" id="balance_input_${c.id}" placeholder="مبلغ (+ أو -)" style="width: 100px; padding: 5px; font-size: 0.85rem;">
+              <input type="number" step="0.01" id="balance_input_${c.id}" placeholder="مبلغ" style="width: 90px; padding: 5px;">
               <button class="btn-success" style="padding: 5px 10px; font-size: 0.8rem;" onclick="addBalanceToCustomer('${c.id}')">تحديث</button>
               <button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="deleteCustomer('${c.id}')">حذف</button>
             </div>
           </td>
         </tr>
       `;
-    }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد حسابات مسجلة</td></tr>`;
+    }).join('') : `<tr><td colspan="6" style="text-align:center; color:#9b9b9b;">لا توجد حسابات</td></tr>`;
 
     document.getElementById('salesLogTable').innerHTML = totalSoldItems.length ? totalSoldItems.map(s => {
-      const profit = parseFloat(s.soldPrice || s.SoldPrice || 0) - parseFloat(s.costPrice || s.CostPrice || 0);
-      const sType = s.type || s.Type || 'منتج';
-      const sVal = s.value || s.Value || '';
+      const profit = parseFloat(s.soldPrice || 0) - parseFloat(s.costPrice || 0);
       return `
         <tr>
-          <td><small>${s.soldDate || s.SoldDate || ''}</small></td>
-          <td>${sType} (${sVal})</td>
-          <td><strong>${s.soldTo || s.SoldTo || ''}</strong></td>
-          <td>$${parseFloat(s.soldPrice || s.SoldPrice || 0).toFixed(2)}</td>
+          <td><small>${s.soldDate || ''}</small></td>
+          <td>${s.type} (${s.value})</td>
+          <td><strong>${s.soldTo || ''}</strong></td>
+          <td>$${parseFloat(s.soldPrice || 0).toFixed(2)}</td>
           <td style="color:var(--success)">+$${profit.toFixed(2)}</td>
         </tr>
       `;
