@@ -38,7 +38,6 @@
     .btn-refresh { background: #475569; color: white; }
     .btn-copy { background: var(--primary); color: white; padding: 8px 14px; font-size: 0.9rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; }
 
-    /* شبكة الأقسام الرئيسية */
     .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
     .category-card { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .category-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 6px 15px rgba(37,99,235,0.1); }
@@ -46,7 +45,6 @@
     .category-card h3 { margin: 10px 0 5px; color: var(--text); font-size: 1.2rem; }
     .category-card p { color: #64748b; font-size: 0.85rem; margin: 0; }
 
-    /* تصميم سجل المشتريات المصنف والمنظم كبطاقات رسائل للأكواد */
     .purchase-section { margin-bottom: 25px; background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 15px; }
     .purchase-section h3 { margin: 0 0 15px; color: var(--primary); font-size: 1.15rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
     
@@ -59,7 +57,6 @@
     .code-box-wrapper { display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; border: 1px dashed #cbd5e1; }
     .code-text { font-family: monospace; font-size: 1.15rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
 
-    /* النافذة المنبثقة (Modal) لاختيار الفئات */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
     .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 500px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
     .modal-close { position: absolute; top: 15px; left: 15px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
@@ -127,13 +124,23 @@
       </div>
     </div>
 
+    <!-- صندوق شحن المحفظة برمز سري -->
+    <div class="card" style="background: #f8fafc; border: 2px dashed var(--primary);">
+      <h2 style="color: var(--primary);">💳 شحن المحفظة برمز سري</h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">هل لديك كود شحن رصيد؟ أدخله هنا ليتم إضافته إلى رصيدك فوراً.</p>
+      <form onsubmit="topupWalletWithCode(event)" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن (مثال: A1B2C3...)" style="flex: 1; min-width: 250px; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase;" required>
+        <button type="submit" class="btn-success" style="padding: 10px 20px;">شحن الرصيد الآن</button>
+      </form>
+    </div>
+
     <!-- قسم الأقسام الرئيسية -->
     <div class="card">
       <h2>🎮 اختر القسم لعرض الفئات المتوفرة</h2>
       <div id="categoriesContainer" class="categories-grid">جاري تحميل الأقسام...</div>
     </div>
 
-    <!-- قسم سجل المشتريات المصنف والمنظم برسائل الأكواد وأزرار النسخ -->
+    <!-- قسم سجل المشتريات -->
     <div class="card">
       <h2>📦 سجل مشترياتي (الأكواد الرقمية المصنفة)</h2>
       <div id="clientPurchasesContainer">
@@ -280,7 +287,8 @@
   function renderCategories(inventory) {
     const available = Array.isArray(inventory) ? inventory.filter(c => {
       const status = c.status || c.Status || "";
-      return status.toString().trim().toLowerCase() === 'available';
+      const type = c.type || c.Type || "";
+      return status.toString().trim().toLowerCase() === 'available' && type !== 'Wallet Top-up';
     }) : [];
 
     const categoriesMap = {};
@@ -373,13 +381,72 @@
     });
   }
 
-  // عرض سجل المشتريات مصنفاً حسب الأقسام وبشكل رسائل أكواد مع زر النسخ
+  // دالة شحن المحفظة باستخدام كود الشحن الفوري
+  async function topupWalletWithCode(e) {
+    e.preventDefault();
+    const inputCode = document.getElementById('topupCodeInput').value.trim().toUpperCase();
+    if (!inputCode) return;
+
+    try {
+      const invRes = await fetch(`${SHEET_DB_URL}?sheet=inventory`);
+      const inventory = await invRes.json();
+
+      // البحث عن الكود في المخزون ضمن أكواد الشحن المتاحة
+      const topupCard = inventory.find(c => {
+        const type = c.type || c.Type || "";
+        const code = c.code || c.Code || "";
+        const status = c.status || c.Status || "";
+        return type === 'Wallet Top-up' && code.toString().trim().toUpperCase() === inputCode && status.toLowerCase() === 'available';
+      });
+
+      if (!topupCard) {
+        return alert('⚠️ كود الشحن غير صحيح، أو أنه مستخدم مسبقاً!');
+      }
+
+      const cardId = topupCard.id || topupCard.Id;
+      const topupAmount = parseFloat(topupCard.sellPrice || topupCard.SellPrice || 0);
+      const clientId = globalClient.id || globalClient.Id;
+      const clientName = globalClient.name || globalClient.Name;
+      const currentBalance = parseFloat(globalClient.balance || globalClient.Balance || 0);
+      const newBalance = currentBalance + topupAmount;
+      const dateStr = new Date().toLocaleString('ar-EG');
+
+      // 1. تحديث رصيد الزبون
+      await fetch(`${SHEET_DB_URL}/id/${clientId}?sheet=customers`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { balance: newBalance } })
+      });
+
+      // 2. تحديث حالة كود الشحن إلى مستخدم (sold)
+      await fetch(`${SHEET_DB_URL}/id/${cardId}?sheet=inventory`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          data: { 
+            status: 'sold', 
+            soldTo: clientName, 
+            soldPrice: topupAmount, 
+            soldDate: dateStr 
+          } 
+        })
+      });
+
+      document.getElementById('topupCodeInput').value = '';
+      alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
+      initStoreData();
+    } catch (err) {
+      alert('حدث خطأ أثناء عملية الشحنة.');
+    }
+  }
+
   function renderPurchases(inventory, clientName) {
     const container = document.getElementById('clientPurchasesContainer');
     const myPurchases = Array.isArray(inventory) ? inventory.filter(c => {
       const status = c.status || c.Status || "";
       const soldTo = c.soldTo || c.SoldTo || "";
-      return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientName.trim();
+      const type = c.type || c.Type || "";
+      return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientName.trim() && type !== 'Wallet Top-up';
     }) : [];
     
     if (!myPurchases.length) {
