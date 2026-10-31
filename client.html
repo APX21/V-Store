@@ -1,620 +1,128 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>متجر بطاقات الهدايا - واجهة الزبون</title>
-  <style>
-    :root {
-      --primary: #2563eb;
-      --success: #16a34a;
-      --danger: #dc2626;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --border: #e2e8f0;
-      --text: #1e293b;
-    }
-    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-    .container { max-width: 1200px; margin: auto; }
-    
-    #loginScreen { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
-    .login-card { background: white; padding: 30px; border-radius: 12px; border: 1px solid var(--border); width: 100%; max-width: 420px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); text-align: center; }
-    .login-card input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; }
-    .login-card button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-    
-    .switch-auth { margin-top: 15px; font-size: 0.9rem; color: #64748b; }
-    .switch-auth a { color: var(--primary); text-decoration: none; font-weight: bold; cursor: pointer; }
-
-    #storeScreen { display: none; }
-    
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: white; padding: 15px 20px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap; gap: 15px; }
-    h1 { margin: 0; font-size: 1.5rem; color: #0f172a; }
-
-    .header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .topup-btn { background: var(--success); color: white; display: flex; align-items: center; gap: 6px; padding: 10px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
-    .cart-btn { background: #0f172a; color: white; position: relative; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
-    .cart-badge { background: var(--danger); color: white; border-radius: 50%; padding: 2px 6px; font-size: 0.75rem; position: absolute; top: -5px; right: -5px; }
-    .purchases-history-btn { background: var(--primary); color: white; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; }
-
-    .card { background: var(--card-bg); border-radius: 10px; border: 1px solid var(--border); padding: 20px; margin-bottom: 25px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    h2 { font-size: 1.2rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-
-    button { cursor: pointer; border-radius: 6px; border: none; padding: 10px 18px; font-weight: 600; font-size: 0.95rem; transition: opacity 0.2s; }
-    button:hover { opacity: 0.9; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-refresh { background: #475569; color: white; }
-    .btn-copy { background: var(--primary); color: white; padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; }
-
-    .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
-    .category-card { background: white; border: 2px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .category-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 6px 15px rgba(37,99,235,0.1); }
-    .category-img { width: 90px; height: 90px; object-fit: contain; margin-bottom: 12px; border-radius: 12px; background: #f8fafc; padding: 8px; }
-    .category-card h3 { margin: 10px 0 5px; color: var(--text); font-size: 1.2rem; }
-    .category-card p { color: #64748b; font-size: 0.85rem; margin: 0; }
-
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
-    .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 550px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
-    .modal-close { position: absolute; top: 15px; left: 15px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
-    
-    .sub-products-list { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-    .sub-product-row { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; gap: 10px; }
-    .sub-product-info h4 { margin: 0 0 4px; color: var(--primary); font-size: 1.05rem; }
-    .sub-product-info span { color: var(--success); font-weight: bold; font-size: 1.1rem; }
-    .sub-product-info small { display: block; color: #64748b; font-size: 0.75rem; margin-top: 2px; }
-
-    .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
-    .cart-total-box { margin-top: 20px; padding-top: 15px; border-top: 2px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 1.2rem; font-weight: bold; }
-
-    .purchase-ticket { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 12px; }
-    .code-box-wrapper { display: flex; align-items: center; gap: 8px; background: white; padding: 6px 12px; border-radius: 6px; border: 1px dashed #cbd5e1; }
-    .code-text { font-family: monospace; font-size: 1.1rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
-
-    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
-  </style>
+    <meta charset="UTF-8">
+    <title>متجر الرقميات - العميل</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; direction: rtl; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
+        .product-card { border: 1px solid #ddd; padding: 15px; border-radius: 6px; text-align: center; background: #fafafa; }
+        .product-card button { background: #28a745; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; margin-top: 10px; }
+        .product-card button:hover { background: #218838; }
+        .cart-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        input { width: 100%; padding: 8px; margin: 5px 0 15px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .checkout-btn { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; width: 100%; font-size: 16px; }
+        .checkout-btn:hover { background: #0056b3; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- شاشة المصادقة -->
-  <div id="loginScreen">
-    <div class="login-card">
-      <div id="loginView">
-        <h2 style="color: var(--primary);">🔐 تسجيل دخول الزبون</h2>
-        <p style="color: #64748b; font-size: 0.9rem;">أدخل بريدك الإلكتروني وكلمة المرور</p>
-        <form onsubmit="handleLoginStep1(event)">
-          <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" required>
-          <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
-          <button type="submit" id="loginBtn">التالي (إرسال كود التحقق)</button>
-        </form>
-        <div class="switch-auth">ليس لديك حساب؟ <a onclick="switchAuthView('register')">إنشاء حساب جديد</a></div>
-      </div>
+    <h1>متجر الألعاب وبطاقات الشحن</h1>
+    <p>اختر منتجاتك وأتمم طلبك مباشرة (بدون الحاجة لرمز تحقق OTP).</p>
 
-      <div id="otpView" style="display: none;">
-        <h2 style="color: var(--success);">🛡️ التحقق الأمني</h2>
-        <p style="color: #64748b; font-size: 0.9rem;">أدخل كود التحقق (6 أرقام) المرسل لإيميلك</p>
-        <form onsubmit="handleLoginStep2(event)">
-          <input type="text" id="otpInput" placeholder="أدخل الكود" maxlength="6" required style="text-align: center; letter-spacing: 4px; font-weight: bold; font-size: 1.2rem;">
-          <button type="submit" style="background: var(--success);">تأكيد والدخول</button>
-        </form>
-      </div>
-
-      <div id="registerView" style="display: none;">
-        <h2 style="color: var(--primary);">📝 إنشاء حساب جديد</h2>
-        <form onsubmit="handleRegister(event)">
-          <input type="text" id="regName" placeholder="الاسم الكامل" required>
-          <input type="text" id="regPhone" placeholder="رقم الهاتف" required>
-          <input type="email" id="regEmail" placeholder="البريد الإلكتروني" required>
-          <input type="password" id="regPassword" placeholder="كلمة المرور" required>
-          <button type="submit" id="regBtn" class="btn-success">إنشاء الحساب الان</button>
-        </form>
-        <div class="switch-auth">لديك حساب بالفعل؟ <a onclick="switchAuthView('login')">تسجيل الدخول</a></div>
-      </div>
-
-      <div id="errorMsg" class="error"></div>
-    </div>
-  </div>
-
-  <!-- واجهة المتجر -->
-  <div id="storeScreen">
-    <header>
-      <div>
-        <h1>🛍️ متجر بطاقات الهدايا الرقمية</h1>
-        <small id="clientEmailHeader" style="color: #64748b;"></small>
-      </div>
-      <div class="header-actions">
-        <button class="topup-btn" onclick="openTopupModal()">💳 شحن الرصيد</button>
-        <button class="purchases-history-btn" onclick="openPurchasesHistoryModal()">📦 مشترياتي</button>
-        <button class="cart-btn" onclick="openCartModal()">🛒 السلة <span id="cartCountBadge" class="cart-badge">0</span></button>
-        <button class="btn-refresh" onclick="initStoreData()">🔄</button>
-        <button class="btn-danger" onclick="logoutClient()">🚪</button>
-      </div>
-    </header>
-
-    <div class="card" style="border: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-      <div>
-        <h2 id="clientWelcomeName" style="border:none; margin:0; padding:0; color:var(--primary);">مرحباً بك</h2>
-        <p style="margin: 5px 0 0; color: #64748b;">نظام Google Sheets الآمن.</p>
-      </div>
-      <div style="background: #dcfce7; padding: 10px 20px; border-radius: 8px; border: 1px solid #16a34a33; text-align: center;">
-        <span style="font-size: 0.85rem; color: #166534; display: block;">رصيدك الحالي</span>
-        <div id="clientBalanceDisplay" style="font-weight: bold; color: var(--success); font-size: 1.4rem;">$0.00</div>
-      </div>
+    <!-- قائمة المنتجات -->
+    <div class="products-grid">
+        <div class="product-card">
+            <h3>بطاقة شحن PUBG Mobile</h3>
+            <p>السعر: 10 دولار</p>
+            <button onclick="addToCart('PUBG Mobile', 10)">إضافة إلى السلة</button>
+        </div>
+        <div class="product-card">
+            <h3>رصيد Steam Wallet</h3>
+            <p>السعر: 20 دولار</p>
+            <button onclick="addToCart('Steam Wallet', 20)">إضافة إلى السلة</button>
+        </div>
+        <div class="product-card">
+            <h3>بطاقة iTunes</h3>
+            <p>السعر: 15 دولار</p>
+            <button onclick="addToCart('iTunes Card', 15)">إضافة إلى السلة</button>
+        </div>
+        <div class="product-card">
+            <h3>PlayStation Network</h3>
+            <p>السعر: 25 دولار</p>
+            <button onclick="addToCart('PlayStation Network', 25)">إضافة إلى السلة</button>
+        </div>
+        <div class="product-card">
+            <h3>Free Fire Diamonds</h3>
+            <p>السعر: 10 دولار</p>
+            <button onclick="addToCart('Free Fire Diamonds', 10)">إضافة إلى السلة</button>
+        </div>
     </div>
 
-    <div class="card">
-      <h2>🎮 اختر القسم لعرض الفئات المتوفرة</h2>
-      <div id="categoriesContainer" class="categories-grid">جاري تحميل الأقسام...</div>
-    </div>
-  </div>
-</div>
+    <!-- قسم سلة المشتريات وإتمام الطلب -->
+    <div class="cart-section">
+        <h2>سلة المشتريات والطلب</h2>
+        <p>المنتج المختار: <span id="selected-product">لا يوجد</span></p>
+        <p>السعر الإجمالي: <span id="total-price">0</span> $</p>
 
-<!-- النوافذ المنبثقة -->
-<div id="categoryModal" class="modal-overlay">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <h3 id="modalTitle" style="margin-top:0; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:10px;">فئات البطاقات</h3>
-    <div id="modalSubProducts" class="sub-products-list"></div>
-  </div>
-</div>
+        <label for="client-name">الاسم:</label>
+        <input type="text" id="client-name" placeholder="أدخل اسمك الكريم">
 
-<div id="topupModal" class="modal-overlay">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeTopupModal()">✕</button>
-    <h3 style="margin-top:0; color:var(--success); border-bottom:1px solid var(--border); padding-bottom:10px;">💳 شحن المحفظة برمز سري</h3>
-    <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">أدخل كود شحن الرصيد المكون من 15 خانة ليضاف إلى محفظتك فوراً.</p>
-    <form onsubmit="topupWalletWithCode(event)">
-      <input type="text" id="topupCodeInput" placeholder="أدخل كود الشحن..." style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px; font-family: monospace; font-size: 1.1rem; text-transform: uppercase; margin-bottom: 15px;" required>
-      <button type="submit" class="btn-success" style="width: 100%; padding: 12px; font-size: 1.1rem;">شحن الرصيد الآن</button>
-    </form>
-  </div>
-</div>
+        <label for="client-email">البريد الإلكتروني:</label>
+        <input type="email" id="client-email" placeholder="example@domain.com">
 
-<div id="cartModal" class="modal-overlay">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closeCartModal()">✕</button>
-    <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:10px;">🛒 سلة المشتريات</h3>
-    <div id="cartItemsList" style="max-height: 50vh; overflow-y: auto;">
-      <p style="text-align:center; color:#94a3b8;">السلة فارغة حالياً</p>
+        <button class="checkout-btn" onclick="submitOrder()">إتمام الطلب الآن</button>
     </div>
-    <div class="cart-total-box">
-      <span>الإجمالي:</span>
-      <span id="cartTotalPrice" style="color: var(--success);">$0.00</span>
-    </div>
-    <button class="btn-success" style="width: 100%; margin-top: 20px; padding: 12px; font-size: 1.1rem;" onclick="checkoutCart()">💳 إتمام الشراء ودفع المبلغ</button>
-  </div>
-</div>
-
-<div id="purchasesHistoryModal" class="modal-overlay">
-  <div class="modal-content">
-    <button class="modal-close" onclick="closePurchasesHistoryModal()">✕</button>
-    <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid var(--border); padding-bottom:10px;">📦 سجل مشترياتي</h3>
-    <div id="purchasesHistoryContent" style="max-height: 65vh; overflow-y: auto; margin-top: 15px;">
-      <p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>
-    </div>
-  </div>
 </div>
 
 <script>
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR3Fg2JXRup4Xir-OjUuL08QP7vpHGd6rmVE7sb7z-QCXGl-arOrAN8mfb20Ivbd5y/exec";
+    let currentOrder = { product: '', price: 0 };
 
-  let currentClientEmail = sessionStorage.getItem('logged_client_email');
-  let globalInventory = [];
-  let globalClient = null;
-  let generatedOtp = "";
-  let tempEmail = "";
-  let shoppingCart = [];
-  let myPurchasedCards = [];
-
-  window.onload = function() {
-    if (currentClientEmail) {
-      showStoreScreen();
-    }
-  };
-
-  function switchAuthView(viewName) {
-    document.getElementById('loginView').style.display = viewName === 'login' ? 'block' : 'none';
-    document.getElementById('otpView').style.display = 'none';
-    document.getElementById('registerView').style.display = viewName === 'register' ? 'block' : 'none';
-    document.getElementById('errorMsg').textContent = '';
-  }
-
-  async function handleRegister(e) {
-    e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
-    const phone = document.getElementById('regPhone').value.trim();
-    const email = document.getElementById('regEmail').value.trim().toLowerCase();
-    const password = document.getElementById('regPassword').value.trim();
-    const btn = document.getElementById('regBtn');
-    btn.textContent = "جاري إنشاء الحساب...";
-    document.getElementById('errorMsg').textContent = '';
-
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "register_customer", name, phone, email, password })
-      });
-      const data = await res.json();
-
-      if (data.status === "success") {
-        alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
-        switchAuthView('login');
-      } else {
-        document.getElementById('errorMsg').textContent = '⚠️ ' + (data.message || 'فشل إنشاء الحساب');
-      }
-    } catch (err) {
-      console.error(err);
-      document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
-    } finally {
-      btn.textContent = "إنشاء الحساب الان";
-    }
-  }
-
-  async function handleLoginStep1(e) {
-    e.preventDefault();
-    tempEmail = document.getElementById('loginEmail').value.trim().toLowerCase();
-    const password = document.getElementById('loginPassword').value.trim();
-    const btn = document.getElementById('loginBtn');
-    btn.textContent = "جاري التحقق وإرسال الكود...";
-    document.getElementById('errorMsg').textContent = '';
-
-    try {
-      const verifyRes = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "verify_login", email: tempEmail, password: password })
-      });
-      const verifyData = await verifyRes.json();
-
-      if (verifyData.status !== "success") {
-        document.getElementById('errorMsg').textContent = '⚠️ البريد أو كلمة المرور غير صحيحة!';
-        btn.textContent = "التالي (إرسال كود التحقق)";
-        return;
-      }
-
-      const otpRes = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "send_otp", email: tempEmail })
-      });
-      const otpData = await otpRes.json();
-
-      if (otpData.status === "success") {
-        generatedOtp = otpData.otp;
-        document.getElementById('loginView').style.display = 'none';
-        document.getElementById('otpView').style.display = 'block';
-      } else {
-        document.getElementById('errorMsg').textContent = '⚠️ فشل إرسال كود التحقق.';
-        btn.textContent = "التالي (إرسال كود التحقق)";
-      }
-    } catch (err) {
-      document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
-      btn.textContent = "التالي (إرسال كود التحقق)";
-    }
-  }
-
-  function handleLoginStep2(e) {
-    e.preventDefault();
-    const enteredOtp = document.getElementById('otpInput').value.trim();
-    if (enteredOtp === generatedOtp) {
-      currentClientEmail = tempEmail;
-      sessionStorage.setItem('logged_client_email', currentClientEmail);
-      showStoreScreen();
-    } else {
-      document.getElementById('errorMsg').textContent = '⚠️ كود التحقق غير صحيح!';
-    }
-  }
-
-  function showStoreScreen() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('storeScreen').style.display = 'block';
-    initStoreData();
-  }
-
-  function logoutClient() {
-    sessionStorage.removeItem('logged_client_email');
-    currentClientEmail = null;
-    shoppingCart = [];
-    updateCartUI();
-    document.getElementById('storeScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    switchAuthView('login');
-  }
-
-  async function initStoreData() {
-    if (!currentClientEmail) return;
-
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({ action: "get_store_data" })
-      });
-      const data = await res.json();
-      if (data.status !== "success") throw new Error("Failed to load store data");
-
-      const customers = data.customers || [];
-      globalInventory = data.inventory || [];
-
-      globalClient = customers.find(c => String(c.email).trim().toLowerCase() === currentClientEmail);
-      if (!globalClient) {
-        logoutClient();
-        return;
-      }
-
-      const clientName = globalClient.name || "زبون";
-      const clientBalance = parseFloat(globalClient.balance || 0);
-
-      document.getElementById('clientWelcomeName').textContent = `أهلاً بك، ${clientName}`;
-      document.getElementById('clientEmailHeader').textContent = `البريد: ${currentClientEmail}`;
-      document.getElementById('clientBalanceDisplay').textContent = `$${clientBalance.toFixed(2)}`;
-
-      renderCategories(globalInventory);
-      
-      const clientNameTrim = clientName.trim();
-      myPurchasedCards = globalInventory.filter(c => {
-        const status = c.status || "";
-        const soldTo = c.soldTo || "";
-        return status.toString().trim().toLowerCase() === 'sold' && soldTo.toString().trim() === clientNameTrim;
-      });
-
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function renderCategories(inventory) {
-    const available = inventory.filter(c => (c.status || "").toString().trim().toLowerCase() === 'available');
-
-    const categoriesMap = {};
-    available.forEach(c => {
-      const type = c.type || "بطاقة";
-      const image = c.image || "https://via.placeholder.com/150?text=Card";
-      if (!categoriesMap[type]) {
-        categoriesMap[type] = { type, image, count: 0 };
-      }
-      categoriesMap[type].count++;
-    });
-
-    const container = document.getElementById('categoriesContainer');
-    const keys = Object.keys(categoriesMap);
-
-    if (!keys.length) {
-      container.innerHTML = `<p style="color:#94a3b8; grid-column:1/-1; text-align:center;">عذراً، لا توجد أقسام متاحة حالياً.</p>`;
-      return;
+    function addToCart(productName, price) {
+        currentOrder.product = productName;
+        currentOrder.price = price;
+        document.getElementById('selected-product').innerText = productName;
+        document.getElementById('total-price').innerText = price;
+        alert('تمت إضافة ' + productName + ' إلى السلة!');
     }
 
-    container.innerHTML = keys.map(type => {
-      const cat = categoriesMap[type];
-      return `
-        <div class="category-card" onclick="openCategoryModal('${type}')">
-          <img src="${cat.image}" alt="${type}" class="category-img" onerror="this.src='https://via.placeholder.com/150?text=Logo'">
-          <h3>${type}</h3>
-          <p>${cat.count} بطاقة متوفرة</p>
-        </div>
-      `;
-    }).join('');
-  }
+    async function submitOrder() {
+        const name = document.getElementById('client-name').value;
+        const email = document.getElementById('client-email').value;
 
-  function openCategoryModal(categoryType) {
-    document.getElementById('modalTitle').textContent = `فئات بطاقات: ${categoryType}`;
-    
-    const available = globalInventory.filter(c => {
-      const status = (c.status || "").toString().trim().toLowerCase();
-      const type = c.type || "";
-      return status === 'available' && type === categoryType;
-    });
+        if (!currentOrder.product) {
+            alert('الرجاء اختيار منتج أولاً!');
+            return;
+        }
+        if (!name || !email) {
+            alert('الرجاء إدخال الاسم والبريد الإلكتروني.');
+            return;
+        }
 
-    const subGroups = {};
-    available.forEach(c => {
-      const value = c.value || "";
-      const sellPrice = parseFloat(c.sellPrice || 0);
-      const key = `${categoryType}___${value}`;
-      if (!subGroups[key]) {
-        subGroups[key] = { type: categoryType, value, qty: 0, sellPrice };
-      }
-      subGroups[key].qty++;
-    });
+        const orderData = {
+            action: 'createOrder',
+            customerName: name,
+            customerEmail: email,
+            productItem: currentOrder.product,
+            amount: currentOrder.price,
+            paymentMethod: 'USDT / رصيد'
+        };
 
-    const subContainer = document.getElementById('modalSubProducts');
-    const subKeys = Object.keys(subGroups);
+        try {
+            // استبدل الرابط أدناه برابط الـ Web App الخاص بـ Google Apps Script
+            const response = await fetch('YOUR_APPS_SCRIPT_WEB_APP_URL', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
 
-    if (!subKeys.length) {
-      subContainer.innerHTML = `<p style="color:#94a3b8; text-align:center;">نفدت فئات هذا القسم مؤقتاً.</p>`;
-    } else {
-      subContainer.innerHTML = subKeys.map(k => {
-        const g = subGroups[k];
-        return `
-          <div class="sub-product-row">
-            <div class="sub-product-info">
-              <h4>فئة: ${g.value}</h4>
-              <span>$${g.sellPrice.toFixed(2)}</span>
-              <small>المتوفر: ${g.qty} بطاقة</small>
-            </div>
-            <button class="btn-success" style="padding: 8px 14px;" onclick="addToCart('${g.type}', '${g.value}', ${g.sellPrice})">🛒 إضافة للسلة</button>
-          </div>
-        `;
-      }).join('');
+            alert('تم إرسال طلبك وتسجيله في غوغل شيت بنجاح!');
+            // إعادة ضبط الحقول
+            currentOrder = { product: '', price: 0 };
+            document.getElementById('selected-product').innerText = 'لا يوجد';
+            document.getElementById('total-price').innerText = '0';
+            document.getElementById('client-name').value = '';
+            document.getElementById('client-email').value = '';
+        } catch (error) {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء إرسال الطلب.');
+        }
     }
-
-    document.getElementById('categoryModal').style.display = 'flex';
-  }
-
-  function closeModal() {
-    document.getElementById('categoryModal').style.display = 'none';
-  }
-
-  function openTopupModal() { document.getElementById('topupModal').style.display = 'flex'; }
-  function closeTopupModal() { document.getElementById('topupModal').style.display = 'none'; }
-
-  function addToCart(type, value, price) {
-    shoppingCart.push({ type, value, price });
-    updateCartUI();
-    closeModal();
-    alert(`✅ تمت إضافة (${type} - ${value}) إلى سلة المشتريات بنجاح!`);
-  }
-
-  function updateCartUI() {
-    document.getElementById('cartCountBadge').textContent = shoppingCart.length;
-    const listContainer = document.getElementById('cartItemsList');
-    
-    if (!shoppingCart.length) {
-      listContainer.innerHTML = `<p style="text-align:center; color:#94a3b8;">السلة فارغة حالياً</p>`;
-      document.getElementById('cartTotalPrice').textContent = '$0.00';
-      return;
-    }
-
-    let total = 0;
-    listContainer.innerHTML = shoppingCart.map((item, index) => {
-      total += item.price;
-      return `
-        <div class="cart-item-row">
-          <div>
-            <strong>${item.type} (${item.value})</strong>
-            <div style="color: var(--success); font-weight: bold;">$${item.price.toFixed(2)}</div>
-          </div>
-          <button class="btn-danger" style="padding: 5px 10px; font-size: 0.8rem;" onclick="removeFromCart(${index})">حذف</button>
-        </div>
-      `;
-    }).join('');
-
-    document.getElementById('cartTotalPrice').textContent = `$${total.toFixed(2)}`;
-  }
-
-  function removeFromCart(index) {
-    shoppingCart.splice(index, 1);
-    updateCartUI();
-  }
-
-  function openCartModal() {
-    updateCartUI();
-    document.getElementById('cartModal').style.display = 'flex';
-  }
-
-  function closeCartModal() {
-    document.getElementById('cartModal').style.display = 'none';
-  }
-
-  async function checkoutCart() {
-    if (!shoppingCart.length) return alert('السلة فارغة!');
-
-    const clientBalance = parseFloat(globalClient.balance || 0);
-    const totalPrice = shoppingCart.reduce((sum, item) => sum + item.price, 0);
-
-    if (clientBalance < totalPrice) {
-      return alert(`⚠️ رصيدك الحالي ($${clientBalance.toFixed(2)}) لا يكفي لإتمام المشتريات (الإجمالي: $${totalPrice.toFixed(2)})!`);
-    }
-
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "checkout",
-          clientId: globalClient.id,
-          clientName: globalClient.name,
-          cart: shoppingCart
-        })
-      });
-      const data = await res.json();
-
-      if (data.status === "success") {
-        shoppingCart = [];
-        updateCartUI();
-        closeCartModal();
-        alert(`🎉 تم إتمام الشراء بنجاح!\n\nالأكواد التي حصلت عليها:\n` + (data.codes || []).join('\n'));
-        initStoreData();
-      } else {
-        alert('⚠️ ' + (data.message || 'حدث خطأ أثناء الشراء'));
-      }
-    } catch (err) {
-      console.error(err);
-      alert('حدث خطأ في الاتصال بالسيرفر.');
-    }
-  }
-
-  function openPurchasesHistoryModal() {
-    renderPurchasesHistoryList();
-    document.getElementById('purchasesHistoryModal').style.display = 'flex';
-  }
-
-  function closePurchasesHistoryModal() {
-    document.getElementById('purchasesHistoryModal').style.display = 'none';
-  }
-
-  function renderPurchasesHistoryList() {
-    const container = document.getElementById('purchasesHistoryContent');
-
-    if (!myPurchasedCards.length) {
-      container.innerHTML = `<p style="text-align:center; color:#94a3b8;">لم تقم بشراء أي بطاقات بعد</p>`;
-      return;
-    }
-
-    const sortedPurchases = myPurchasedCards.sort((a, b) => {
-      const timeA = parseFloat(a.addedTimestamp || 0);
-      const timeB = parseFloat(b.addedTimestamp || 0);
-      return timeB - timeA;
-    });
-
-    container.innerHTML = `
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        ${sortedPurchases.map(p => {
-          const pType = p.type || "بطاقة";
-          const pValue = p.value || "";
-          const pDate = p.soldDate || "";
-          const pCode = p.code || "";
-          const pPrice = parseFloat(p.soldPrice || 0);
-
-          return `
-            <div class="purchase-ticket">
-              <div>
-                <strong style="color: var(--primary); font-size: 1.05rem;">${pType} (${pValue})</strong>
-                <small style="display:block; color:#64748b; margin-top:2px;">التاريخ: ${pDate} | السعر: $${pPrice.toFixed(2)}</small>
-              </div>
-              <div class="code-box-wrapper">
-                <span class="code-text">${pCode}</span>
-                <button class="btn-copy" onclick="copyCodeToClipboard('${pCode}')">📋 نسخ</button>
-              </div>
-            </div>
-          `;
-        }).join('')}
-      </div>
-    `;
-  }
-
-  function copyCodeToClipboard(codeText) {
-    navigator.clipboard.writeText(codeText).then(() => {
-      alert(`✅ تم نسخ الكود بنجاح: ${codeText}`);
-    }).catch(err => alert('فشل النسخ.'));
-  }
-
-  async function topupWalletWithCode(e) {
-    e.preventDefault();
-    const inputCode = document.getElementById('topupCodeInput').value.trim().toUpperCase();
-    if (!inputCode) return;
-
-    try {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify({
-          action: "topup_wallet",
-          clientId: globalClient.id,
-          clientName: globalClient.name,
-          code: inputCode
-        })
-      });
-      const data = await res.json();
-
-      if (data.status === "success") {
-        document.getElementById('topupCodeInput').value = '';
-        closeTopupModal();
-        alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${parseFloat(data.amount || 0).toFixed(2)}!`);
-        initStoreData();
-      } else {
-        alert('⚠️ ' + (data.message || 'كود الشحن غير صحيح أو مستخدم مسبقاً!'));
-      }
-    } catch (err) {
-      console.error(err);
-      alert('حدث خطأ أثناء عملية الشحن.');
-    }
-  }
 </script>
+
 </body>
 </html>
