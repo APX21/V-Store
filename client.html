@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>متجر بطاقات الهدايا - واجهة الزبون</title>
-  <!-- استدعاء مكتبة Supabase الرسمية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -56,7 +55,6 @@
     .category-card h3 { margin: 10px 0 5px; color: var(--text); font-size: 1.2rem; }
     .category-card p { color: #64748b; font-size: 0.85rem; margin: 0; }
 
-    /* نوافذ منبثقة */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 1000; padding: 20px; }
     .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 550px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; max-height: 85vh; overflow-y: auto; }
     .modal-close { position: absolute; top: 15px; left: 15px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; }
@@ -80,7 +78,6 @@
 <body>
 
 <div class="container">
-
   <!-- شاشة المصادقة -->
   <div id="loginScreen">
     <div class="login-card">
@@ -152,10 +149,9 @@
       <div id="categoriesContainer" class="categories-grid">جاري تحميل الأقسام...</div>
     </div>
   </div>
-
 </div>
 
-<!-- نافذة فئات البطاقات -->
+<!-- النوافذ المنبثقة -->
 <div id="categoryModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeModal()">✕</button>
@@ -164,7 +160,6 @@
   </div>
 </div>
 
-<!-- نافذة شحن الرصيد -->
 <div id="topupModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeTopupModal()">✕</button>
@@ -177,7 +172,6 @@
   </div>
 </div>
 
-<!-- نافذة سلة المشتريات -->
 <div id="cartModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closeCartModal()">✕</button>
@@ -193,7 +187,6 @@
   </div>
 </div>
 
-<!-- نافذة سجل المشتريات -->
 <div id="purchasesHistoryModal" class="modal-overlay">
   <div class="modal-content">
     <button class="modal-close" onclick="closePurchasesHistoryModal()">✕</button>
@@ -205,7 +198,6 @@
 </div>
 
 <script>
-  // تهيئة اتصال Supabase
   const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
   
@@ -267,7 +259,8 @@
       alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
       switchAuthView('login');
     } catch (err) {
-      document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
+      console.error(err);
+      document.getElementById('errorMsg').textContent = '⚠️ فشل إنشاء الحساب، تأكد من تعطيل RLS في Supabase.';
     } finally {
       btn.textContent = "إنشاء الحساب الان";
     }
@@ -554,7 +547,6 @@
         card.status = 'sold';
         const exactSoldTimestamp = nowTimestamp + i;
 
-        // تحديث الكود في Supabase
         const { error: updateErr } = await supabaseClient.from('inventory').update({
           status: 'sold',
           soldTo: clientName,
@@ -568,7 +560,6 @@
         purchasedCodes.push(`${cartItem.type} (${cartItem.value}): ${cardCode}`);
       }
 
-      // تحديث رصيد الزبون
       const { error: custErr } = await supabaseClient.from('customers').update({ balance: currentBalance }).eq('id', clientId);
       if (custErr) throw custErr;
 
@@ -666,10 +657,8 @@
       const newBalance = currentBalance + topupAmount;
       const dateStr = new Date().toLocaleString('ar-EG');
 
-      // تحديث رصيد الزبون
       await supabaseClient.from('customers').update({ balance: newBalance }).eq('id', clientId);
       
-      // تحديث حالة كود الشحن
       await supabaseClient.from('topup').update({
         status: 'sold',
         soldTo: clientName,
@@ -677,7 +666,7 @@
         soldDate: dateStr
       }).eq('id', cardId);
 
-      document.getElementById('topupCodeInput').value = '';
+      document.getElementById('topupCodeInput'].value = '';
       closeTopupModal();
       alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
       initStoreData();
