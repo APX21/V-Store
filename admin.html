@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة تحكم الآدمن - Supabase</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>لوحة تحكم الآدمن - Google Sheets</title>
   <style>
     :root {
       --primary: #4f46e5;
@@ -85,8 +84,8 @@
   <div id="adminDashboard" class="container">
     <header>
       <div>
-        <h1>⚙️ لوحة تحكم الآدمن المركزية (Supabase)</h1>
-        <small style="color: #6b7280;">نظام متجر بطاقات الهدايا الفائق السرعة</small>
+        <h1>⚙️ لوحة تحكم الآدمن المركزية (Google Sheets)</h1>
+        <small style="color: #6b7280;">نظام متجر بطاقات الهدايا الثابت والمستقر</small>
       </div>
       <div style="display: flex; gap: 12px; align-items: center;">
         <button class="btn-refresh" onclick="fetchAllData()">🔄 تحديث البيانات</button>
@@ -242,10 +241,7 @@
   </div>
 
 <script>
-  const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
-
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR3Fg2JXRup4Xir-OjUuL08QP7vpHGd6rmVE7sb7z-QCXGl-arOrAN8mfb20Ivbd5y/exec";
 
   let inventory = [];
   let topupList = [];
@@ -267,13 +263,18 @@
     document.getElementById('adminErrorMsg').textContent = '';
 
     try {
-      const { data: custs, error } = await supabaseClient.from('customers').select('*');
-      if (error) throw error;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "get_store_data" })
+      });
+      const data = await res.json();
+      if (data.status !== "success") throw new Error("Failed");
 
+      const custs = data.customers || [];
       const adminUser = custs.find(c => {
-        return c.email.trim().toLowerCase() === emailInput && 
-               c.password.trim() === passInput && 
-               c.role.trim() === 'galilohovig';
+        return String(c.email).trim().toLowerCase() === emailInput && 
+               String(c.password).trim() === passInput && 
+               String(c.role).trim() === 'galilohovig';
       });
 
       if (adminUser) {
@@ -285,7 +286,7 @@
         btn.textContent = "تسجيل دخول الآدمن";
       }
     } catch (err) {
-      document.getElementById('adminErrorMsg').textContent = '⚠️ خطأ في الاتصال بقاعدة البيانات.';
+      document.getElementById('adminErrorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
       btn.textContent = "تسجيل دخول الآدمن";
     }
   }
@@ -306,16 +307,17 @@
   async function fetchAllData() {
     if (!currentAdminEmail) return;
     try {
-      const { data: inv } = await supabaseClient.from('inventory').select('*');
-      inventory = inv || [];
-
-      const { data: top } = await supabaseClient.from('topup').select('*');
-      topupList = top || [];
-
-      const { data: cust } = await supabaseClient.from('customers').select('*');
-      customers = cust || [];
-
-      renderAll();
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "get_store_data" })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        inventory = data.inventory || [];
+        topupList = data.topup || [];
+        customers = data.customers || [];
+        renderAll();
+      }
     } catch (err) {
       console.error(err);
     }
@@ -365,14 +367,22 @@
       });
     }
 
-    const { error } = await supabaseClient.from('topup').insert(newTopups);
-    if (!error) {
-      alert(`✅ تم توليد وحفظ ${count} أكواد شحن في جدول topup بنجاح!`);
-      document.getElementById('topupValue').value = '';
-      document.getElementById('topupCount').value = '';
-      fetchAllData();
-    } else {
-      alert('⚠️ فشل حفظ الأكواد.');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin_add_topup", items: newTopups })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        alert(`✅ تم توليد وحفظ ${count} أكواد شحن بنجاح!`);
+        document.getElementById('topupValue').value = '';
+        document.getElementById('topupCount').value = '';
+        fetchAllData();
+      } else {
+        alert('⚠️ فشل حفظ الأكواد.');
+      }
+    } catch (err) {
+      alert('⚠️ خطأ في الاتصال.');
     }
   }
 
@@ -402,13 +412,21 @@
       soldDate: ""
     }));
 
-    const { error } = await supabaseClient.from('inventory').insert(newCards);
-    if (!error) {
-      document.getElementById('cardCodesBatch').value = '';
-      alert(`تمت إضافة ${codeLines.length} كود بنجاح!`);
-      fetchAllData();
-    } else {
-      alert('⚠️ فشل الحفظ.');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin_add_inventory", items: newCards })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        document.getElementById('cardCodesBatch').value = '';
+        alert(`تمت إضافة ${codeLines.length} كود بنجاح!`);
+        fetchAllData();
+      } else {
+        alert('⚠️ فشل الحفظ.');
+      }
+    } catch (err) {
+      alert('⚠️ خطأ في الاتصال.');
     }
   }
 
@@ -424,13 +442,21 @@
       role: document.getElementById('custRole').value
     };
 
-    const { error } = await supabaseClient.from('customers').insert([newCust]);
-    if (!error) {
-      document.getElementById('customerForm').reset();
-      alert('تم حفظ الحساب بنجاح!');
-      fetchAllData();
-    } else {
-      alert('فشل الحفظ.');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin_add_customer", customer: newCust })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        document.getElementById('customerForm').reset();
+        alert('تم حفظ الحساب بنجاح!');
+        fetchAllData();
+      } else {
+        alert('⚠️ ' + (data.message || 'فشل الحفظ'));
+      }
+    } catch (err) {
+      alert('فشل الاتصال.');
     }
   }
 
@@ -439,28 +465,40 @@
     const amount = parseFloat(inputField.value);
     if (isNaN(amount) || amount === 0) return alert('أدخل مبلغاً صحيحاً!');
     
-    const cust = customers.find(c => c.id === custId);
-    if (!cust) return;
-    const newBalance = parseFloat(cust.balance || 0) + amount;
-
-    const { error } = await supabaseClient.from('customers').update({ balance: newBalance }).eq('id', custId);
-    if (!error) {
-      inputField.value = '';
-      alert('✅ تم تحديث الرصيد بنجاح!');
-      fetchAllData();
-    } else {
-      alert('فشل التحديث.');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin_update_balance", custId, amount })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        inputField.value = '';
+        alert('✅ تم تحديث الرصيد بنجاح!');
+        fetchAllData();
+      } else {
+        alert('فشل التحديث.');
+      }
+    } catch (err) {
+      alert('خطأ في الاتصال.');
     }
   }
 
   async function deleteCustomer(custId) {
     if (!confirm('حذف هذا الحساب؟')) return;
-    const { error } = await supabaseClient.from('customers').delete().eq('id', custId);
-    if (!error) {
-      alert('تم الحذف.');
-      fetchAllData();
-    } else {
-      alert('فشل الحذف.');
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "admin_delete_customer", custId })
+      });
+      const data = await res.json();
+      if (data.status === "success") {
+        alert('تم الحذف.');
+        fetchAllData();
+      } else {
+        alert('فشل الحذف.');
+      }
+    } catch (err) {
+      alert('خطأ في الاتصال.');
     }
   }
 
