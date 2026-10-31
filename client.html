@@ -72,7 +72,7 @@
     .code-box-wrapper { display: flex; align-items: center; gap: 8px; background: white; padding: 6px 12px; border-radius: 6px; border: 1px dashed #cbd5e1; }
     .code-text { font-family: monospace; font-size: 1.1rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
 
-    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
+    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; word-break: break-all; }
   </style>
 </head>
 <body>
@@ -260,7 +260,7 @@
       switchAuthView('login');
     } catch (err) {
       console.error(err);
-      document.getElementById('errorMsg').textContent = '⚠️ فشل إنشاء الحساب، تأكد من تعطيل RLS في Supabase.';
+      document.getElementById('errorMsg').textContent = '⚠️ خطأ Supabase: ' + (err.message || JSON.stringify(err));
     } finally {
       btn.textContent = "إنشاء الحساب الان";
     }
