@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة تحكم الآدمن - Supabase</title>
-  <!-- استدعاء مكتبة Supabase الرسمية -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
@@ -244,11 +243,9 @@
 
 <script>
   const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6InBhbm9uIiwiaWF0IjoxNzkzMzg1MTkzLCJleHAiOjIxMDg5NjExOTN9.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA"; // مفتاح الـ anon الصحيح
-  // استبدال مفتاح الـ anon بالكامل بالمفتاح الطويل الخاص بك إن لزم:
-  const actualKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
 
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, actualKey);
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   let inventory = [];
   let topupList = [];
