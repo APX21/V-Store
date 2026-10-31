@@ -20,66 +20,123 @@
         .checkout-btn { background: #2980b9; color: white; border: none; padding: 14px; width: 100%; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .checkout-btn:hover { background: #2471a3; }
         #loading { display: none; color: #e67e22; font-weight: bold; text-align: center; margin-top: 10px; }
+        
+        /* تصميم صفحة تسجيل الدخول */
+        #auth-section { max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+        #store-section { display: none; }
+        .user-bar { background: #e8f4f8; padding: 10px 15px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logout-btn { background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>متجر البطاقات الرقمية</h1>
-    <p>اختر منتجك المفضل وأدخل بياناتك لإتمام الطلب فوراً وبكل سهولة.</p>
-
-    <!-- كتالوج المنتجات -->
-    <div class="grid">
-        <div class="card">
-            <h3>شدات PUBG Mobile</h3>
-            <p>10 دولار</p>
-            <button class="btn-buy" onclick="selectItem('PUBG Mobile', 10)">اختر المنتج</button>
-        </div>
-        <div class="card">
-            <h3>رصيد Steam Wallet</h3>
-            <p>20 دولار</p>
-            <button class="btn-buy" onclick="selectItem('Steam Wallet', 20)">اختر المنتج</button>
-        </div>
-        <div class="card">
-            <h3>بطاقة iTunes</h3>
-            <p>15 دولار</p>
-            <button class="btn-buy" onclick="selectItem('iTunes Card', 15)">اختر المنتج</button>
-        </div>
-        <div class="card">
-            <h3>PlayStation Network</h3>
-            <p>25 دولار</p>
-            <button class="btn-buy" onclick="selectItem('PlayStation Network', 25)">اختر المنتج</button>
-        </div>
-        <div class="card">
-            <h3>جواهر Free Fire</h3>
-            <p>10 دولار</p>
-            <button class="btn-buy" onclick="selectItem('Free Fire Diamonds', 10)">اختر المنتج</button>
-        </div>
+    <!-- قسم تسجيل الدخول / إنشاء الحساب -->
+    <div id="auth-section">
+        <h2>تسجيل الدخول للمتجر</h2>
+        <p style="color: #666; font-size: 14px;">أدخل بياناتك للمتابعة (بدون كلمات سر معقدة أو OTP)</p>
+        
+        <input type="text" id="auth-name" class="form-control" placeholder="الاسم الكامل">
+        <input type="email" id="auth-email" class="form-control" placeholder="البريد الإلكتروني">
+        
+        <button class="checkout-btn" onclick="loginUser()">دخول / إنشاء حساب</button>
     </div>
 
-    <!-- قسم إتمام الطلب -->
-    <div class="cart-box">
-        <h2>تفاصيل الطلب</h2>
-        <p>المنتج المحدد: <strong id="lbl-product" style="color: #e74c3c;">لم تقم باختيار منتج بعد</strong></p>
-        <p>السعر الإجمالي: <strong id="lbl-price">0</strong> $</p>
+    <!-- قسم المتجر الأساسي (يظهر بعد تسجيل الدخول) -->
+    <div id="store-section" class="container">
+        <div class="user-bar">
+            <span>مرحباً بك، <strong id="user-display-name"></strong> (<span id="user-display-email"></span>)</span>
+            <button class="logout-btn" onclick="logoutUser()">تسجيل خروج</button>
+        </div>
 
-        <label>الاسم الكريم:</label>
-        <input type="text" id="client-name" class="form-control" placeholder="أدخل اسمك الكامل">
+        <h1>متجر البطاقات الرقمية</h1>
+        <p>اختر منتجك المفضل لتأكيد الطلب مباشرة.</p>
 
-        <label>البريد الإلكتروني:</label>
-        <input type="email" id="client-email" class="form-control" placeholder="example@domain.com">
+        <!-- كتالوج المنتجات -->
+        <div class="grid">
+            <div class="card">
+                <h3>شدات PUBG Mobile</h3>
+                <p>10 دولار</p>
+                <button class="btn-buy" onclick="selectItem('PUBG Mobile', 10)">اختر المنتج</button>
+            </div>
+            <div class="card">
+                <h3>رصيد Steam Wallet</h3>
+                <p>20 دولار</p>
+                <button class="btn-buy" onclick="selectItem('Steam Wallet', 20)">اختر المنتج</button>
+            </div>
+            <div class="card">
+                <h3>بطاقة iTunes</h3>
+                <p>15 دولار</p>
+                <button class="btn-buy" onclick="selectItem('iTunes Card', 15)">اختر المنتج</button>
+            </div>
+            <div class="card">
+                <h3>PlayStation Network</h3>
+                <p>25 دولار</p>
+                <button class="btn-buy" onclick="selectItem('PlayStation Network', 25)">اختر المنتج</button>
+            </div>
+            <div class="card">
+                <h3>جواهر Free Fire</h3>
+                <p>10 دولار</p>
+                <button class="btn-buy" onclick="selectItem('Free Fire Diamonds', 10)">اختر المنتج</button>
+            </div>
+        </div>
 
-        <button class="checkout-btn" onclick="sendOrder()">تأكيد وإرسال الطلب</button>
-        <div id="loading">جاري إرسال الطلب وتخزينه... يرجى الانتظار</div>
+        <!-- قسم إتمام الطلب -->
+        <div class="cart-box">
+            <h2>تفاصيل الطلب</h2>
+            <p>المنتج المحدد: <strong id="lbl-product" style="color: #e74c3c;">لم تقم باختيار منتج بعد</strong></p>
+            <p>السعر الإجمالي: <strong id="lbl-price">0</strong> $</p>
+
+            <button class="checkout-btn" onclick="sendOrder()">تأكيد وإرسال الطلب</button>
+            <div id="loading">جاري إرسال الطلب وتخزينه... يرجى الانتظار</div>
+        </div>
     </div>
-</div>
 
 <script>
-    // رابط الـ Web App الخاص بك مدمج هنا مباشرة
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxec90WvLq3aEJoSetmZI-piRW98VPMzgnh1UkalMiRqoFSMiF_0WZYe6J0CCRvuBfgNQ/exec";
 
     let selectedProduct = "";
     let selectedPrice = 0;
+
+    // التحقق إذا كان المستخدم مسجل دخول مسبقاً في المتصفح
+    window.onload = function() {
+        const savedName = localStorage.getItem('store_user_name');
+        const savedEmail = localStorage.getItem('store_user_email');
+        if (savedName && savedEmail) {
+            showStore(savedName, savedEmail);
+        }
+    };
+
+    function loginUser() {
+        const name = document.getElementById('auth-name').value.trim();
+        const email = document.getElementById('auth-email').value.trim();
+
+        if (!name || !email) {
+            alert('الرجاء إدخال الاسم والبريد الإلكتروني.');
+            return;
+        }
+
+        // حفظ البيانات محلياً
+        localStorage.setItem('store_user_name', name);
+        localStorage.setItem('store_user_email', email);
+
+        showStore(name, email);
+    }
+
+    function showStore(name, email) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('store-section').style.display = 'block';
+        document.getElementById('user-display-name').innerText = name;
+        document.getElementById('user-display-email').innerText = email;
+    }
+
+    function logoutUser() {
+        localStorage.removeItem('store_user_name');
+        localStorage.removeItem('store_user_email');
+        document.getElementById('store-section').style.display = 'none';
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('auth-name').value = '';
+        document.getElementById('auth-email').value = '';
+    }
 
     function selectItem(name, price) {
         selectedProduct = name;
@@ -89,16 +146,12 @@
     }
 
     async function sendOrder() {
-        const name = document.getElementById('client-name').value.trim();
-        const email = document.getElementById('client-email').value.trim();
+        const name = localStorage.getItem('store_user_name');
+        const email = localStorage.getItem('store_user_email');
         const loadingDiv = document.getElementById('loading');
 
         if (!selectedProduct) {
             alert('الرجاء اختيار منتج من القائمة أولاً!');
-            return;
-        }
-        if (!name || !email) {
-            alert('الرجاء تعبئة الاسم والبريد الإلكتروني.');
             return;
         }
 
@@ -128,8 +181,6 @@
             selectedPrice = 0;
             document.getElementById('lbl-product').innerText = 'لم تقم باختيار منتج بعد';
             document.getElementById('lbl-price').innerText = '0';
-            document.getElementById('client-name').value = '';
-            document.getElementById('client-email').value = '';
             
         } catch (error) {
             loadingDiv.style.display = 'none';
