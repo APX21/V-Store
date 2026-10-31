@@ -666,7 +666,7 @@
         soldDate: dateStr
       }).eq('id', cardId);
 
-      document.getElementById('topupCodeInput'].value = '';
+      document.getElementById('topupCodeInput').value = '';
       closeTopupModal();
       alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
       initStoreData();
