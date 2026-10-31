@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>متجر بطاقات الهدايا - واجهة الزبون</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --primary: #2563eb;
@@ -72,7 +71,7 @@
     .code-box-wrapper { display: flex; align-items: center; gap: 8px; background: white; padding: 6px 12px; border-radius: 6px; border: 1px dashed #cbd5e1; }
     .code-text { font-family: monospace; font-size: 1.1rem; font-weight: bold; color: var(--primary); letter-spacing: 1px; }
 
-    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; word-break: break-all; }
+    .error { color: var(--danger); font-size: 0.9rem; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -136,7 +135,7 @@
     <div class="card" style="border: 2px solid var(--primary); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
       <div>
         <h2 id="clientWelcomeName" style="border:none; margin:0; padding:0; color:var(--primary);">مرحباً بك</h2>
-        <p style="margin: 5px 0 0; color: #64748b;">قاعدة بيانات Supabase الآمنة.</p>
+        <p style="margin: 5px 0 0; color: #64748b;">نظام Google Sheets الآمن.</p>
       </div>
       <div style="background: #dcfce7; padding: 10px 20px; border-radius: 8px; border: 1px solid #16a34a33; text-align: center;">
         <span style="font-size: 0.85rem; color: #166534; display: block;">رصيدك الحالي</span>
@@ -198,11 +197,7 @@
 </div>
 
 <script>
-  const SUPABASE_URL = "https://slddqmergegayuiufoimhu.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNsZGRxbWVyZ2F5aXVmaG9pbWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMzODUxOTMsImV4cCI6MjEwODk2MTE5M30.2wECr57VC3lVTMPsdKZLSvJpNVyhWhCs3Cv-lTsDKrA";
-  
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXWw0QkmtsrFETPrg4XCFvKLBCBvLTI8YRjxLZyLQORHl_u7psBB_yXTLonysaJ2ou/exec";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR3Fg2JXRup4Xir-OjUuL08QP7vpHGd6rmVE7sb7z-QCXGl-arOrAN8mfb20Ivbd5y/exec";
 
   let currentClientEmail = sessionStorage.getItem('logged_client_email');
   let globalInventory = [];
@@ -236,31 +231,21 @@
     document.getElementById('errorMsg').textContent = '';
 
     try {
-      const { data: customers, error } = await supabaseClient.from('customers').select('*');
-      if (error) throw error;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "register_customer", name, phone, email, password })
+      });
+      const data = await res.json();
 
-      const exists = customers.find(c => c.email.trim().toLowerCase() === email);
-      if (exists) {
-        document.getElementById('errorMsg').textContent = '⚠️ البريد مسجل مسبقاً!';
-        btn.textContent = "إنشاء الحساب الان";
-        return;
+      if (data.status === "success") {
+        alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
+        switchAuthView('login');
+      } else {
+        document.getElementById('errorMsg').textContent = '⚠️ ' + (data.message || 'فشل إنشاء الحساب');
       }
-
-      const newCust = {
-        id: 'CUST_' + Date.now(),
-        name, phone, email, password,
-        balance: 0,
-        role: 'client'
-      };
-
-      const { error: insError } = await supabaseClient.from('customers').insert([newCust]);
-      if (insError) throw insError;
-
-      alert('🎉 تم إنشاء حسابك بنجاح! يمكنك تسجيل الدخول الآن.');
-      switchAuthView('login');
     } catch (err) {
       console.error(err);
-      document.getElementById('errorMsg').textContent = '⚠️ خطأ Supabase: ' + (err.message || JSON.stringify(err));
+      document.getElementById('errorMsg').textContent = '⚠️ خطأ في الاتصال بالسيرفر.';
     } finally {
       btn.textContent = "إنشاء الحساب الان";
     }
@@ -339,10 +324,17 @@
     if (!currentClientEmail) return;
 
     try {
-      const { data: customers, error } = await supabaseClient.from('customers').select('*');
-      if (error) throw error;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({ action: "get_store_data" })
+      });
+      const data = await res.json();
+      if (data.status !== "success") throw new Error("Failed to load store data");
 
-      globalClient = customers.find(c => c.email.toString().trim().toLowerCase() === currentClientEmail);
+      const customers = data.customers || [];
+      globalInventory = data.inventory || [];
+
+      globalClient = customers.find(c => String(c.email).trim().toLowerCase() === currentClientEmail);
       if (!globalClient) {
         logoutClient();
         return;
@@ -354,10 +346,6 @@
       document.getElementById('clientWelcomeName').textContent = `أهلاً بك، ${clientName}`;
       document.getElementById('clientEmailHeader').textContent = `البريد: ${currentClientEmail}`;
       document.getElementById('clientBalanceDisplay').textContent = `$${clientBalance.toFixed(2)}`;
-
-      const { data: inventory, error: invError } = await supabaseClient.from('inventory').select('*');
-      if (invError) throw invError;
-      globalInventory = inventory;
 
       renderCategories(globalInventory);
       
@@ -516,62 +504,29 @@
     }
 
     try {
-      const { data: inventory, error: invError } = await supabaseClient.from('inventory').select('*');
-      if (invError) throw invError;
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "checkout",
+          clientId: globalClient.id,
+          clientName: globalClient.name,
+          cart: shoppingCart
+        })
+      });
+      const data = await res.json();
 
-      const clientId = globalClient.id;
-      const clientName = globalClient.name;
-      const saleDateStr = new Date().toLocaleString('ar-EG');
-      const nowTimestamp = Date.now();
-
-      let currentBalance = clientBalance;
-      const purchasedCodes = [];
-
-      for (let i = 0; i < shoppingCart.length; i++) {
-        const cartItem = shoppingCart[i];
-        const availableCards = inventory.filter(c => {
-          const status = (c.status || "").toString().trim().toLowerCase();
-          return status === 'available' && c.type === cartItem.type && c.value === cartItem.value;
-        }).sort((a, b) => (a.addedTimestamp || 0) - (b.addedTimestamp || 0));
-
-        if (!availableCards.length) {
-          alert(`⚠️ عذراً، نفدت كمية فئة (${cartItem.type} - ${cartItem.value}) أثناء المعالجة!`);
-          break;
-        }
-
-        const card = availableCards[0];
-        const cardId = card.id;
-        const cardCode = card.code;
-
-        currentBalance -= cartItem.price;
-        card.status = 'sold';
-        const exactSoldTimestamp = nowTimestamp + i;
-
-        const { error: updateErr } = await supabaseClient.from('inventory').update({
-          status: 'sold',
-          soldTo: clientName,
-          soldPrice: cartItem.price,
-          soldDate: saleDateStr,
-          addedTimestamp: exactSoldTimestamp
-        }).eq('id', cardId);
-
-        if (updateErr) throw updateErr;
-
-        purchasedCodes.push(`${cartItem.type} (${cartItem.value}): ${cardCode}`);
+      if (data.status === "success") {
+        shoppingCart = [];
+        updateCartUI();
+        closeCartModal();
+        alert(`🎉 تم إتمام الشراء بنجاح!\n\nالأكواد التي حصلت عليها:\n` + (data.codes || []).join('\n'));
+        initStoreData();
+      } else {
+        alert('⚠️ ' + (data.message || 'حدث خطأ أثناء الشراء'));
       }
-
-      const { error: custErr } = await supabaseClient.from('customers').update({ balance: currentBalance }).eq('id', clientId);
-      if (custErr) throw custErr;
-
-      shoppingCart = [];
-      updateCartUI();
-      closeCartModal();
-
-      alert(`🎉 تم إتمام الشراء بنجاح!\n\nالأكواد التي حصلت عليها:\n` + purchasedCodes.join('\n'));
-      initStoreData();
     } catch (err) {
       console.error(err);
-      alert('حدث خطأ أثناء إتمام عملية الشراء.');
+      alert('حدث خطأ في الاتصال بالسيرفر.');
     }
   }
 
@@ -636,40 +591,25 @@
     if (!inputCode) return;
 
     try {
-      const { data: topupList, error: tError } = await supabaseClient.from('topup').select('*');
-      if (tError) throw tError;
-
-      const topupCard = topupList.find(c => {
-        const code = c.code || "";
-        const status = (c.status || "").toString().trim().toLowerCase();
-        return code.toString().trim().toUpperCase() === inputCode && status === 'available';
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: "topup_wallet",
+          clientId: globalClient.id,
+          clientName: globalClient.name,
+          code: inputCode
+        })
       });
+      const data = await res.json();
 
-      if (!topupCard) {
-        return alert('⚠️ كود الشحن غير صحيح، أو أنه مستخدم مسبقاً!');
+      if (data.status === "success") {
+        document.getElementById('topupCodeInput').value = '';
+        closeTopupModal();
+        alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${parseFloat(data.amount || 0).toFixed(2)}!`);
+        initStoreData();
+      } else {
+        alert('⚠️ ' + (data.message || 'كود الشحن غير صحيح أو مستخدم مسبقاً!'));
       }
-
-      const cardId = topupCard.id;
-      const topupAmount = parseFloat(topupCard.sellPrice || 0);
-      const clientId = globalClient.id;
-      const clientName = globalClient.name;
-      const currentBalance = parseFloat(globalClient.balance || 0);
-      const newBalance = currentBalance + topupAmount;
-      const dateStr = new Date().toLocaleString('ar-EG');
-
-      await supabaseClient.from('customers').update({ balance: newBalance }).eq('id', clientId);
-      
-      await supabaseClient.from('topup').update({
-        status: 'sold',
-        soldTo: clientName,
-        soldPrice: topupAmount,
-        soldDate: dateStr
-      }).eq('id', cardId);
-
-      document.getElementById('topupCodeInput').value = '';
-      closeTopupModal();
-      alert(`🎉 مبروك! تم شحن محفظتك بنجاح بمبلغ $${topupAmount.toFixed(2)}!`);
-      initStoreData();
     } catch (err) {
       console.error(err);
       alert('حدث خطأ أثناء عملية الشحن.');
