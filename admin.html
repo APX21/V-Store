@@ -11,9 +11,9 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
     <div class="max-w-3xl mx-auto space-y-6">
-        <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl">
+        <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h1 class="text-xl font-bold text-amber-400">🛡️ لوحة تحكم الأدمن</h1>
-            <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300">عرض المتجر 🌐</a>
+            <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
         <!-- نموذج إضافة منتج جديد -->
@@ -21,16 +21,16 @@
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة بطاقة جديدة والمخزون</h2>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">اسم المنتج</label>
-                <input type="text" id="adm-title" placeholder="مثال: بطاقة أيتونز 10$" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                <input type="text" id="adm-title" placeholder="مثال: بطاقة أيتونز 10$" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
-                    <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                    <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">القسم</label>
-                    <select id="adm-cat" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                    <select id="adm-cat" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
                         <option value="itunes">آيتونز</option>
                         <option value="playstation">بلايستيشن</option>
                         <option value="steam">ستيم</option>
@@ -39,9 +39,9 @@
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">الأكواد (ضع كل كود في سطر منفصل)</label>
-                <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
+                <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-400"></textarea>
             </div>
-            <button onclick="addNewProduct()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">حفظ وإضافة المنتج للشيت</button>
+            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ وإضافة المنتج للشيت</button>
         </div>
 
         <!-- نموذج شحن رصيد لزبون -->
@@ -49,13 +49,13 @@
             <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن أو تعديل رصيد زبون</h2>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للزبون</label>
-                <input type="email" id="adm-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                <input type="email" id="adm-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-400">
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">المبلغ المراد إضافته ($)</label>
-                <input type="number" id="adm-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                <input type="number" id="adm-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-400">
             </div>
-            <button onclick="addBalanceToUser()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">إضافة الرصيد لحساب الزبون</button>
+            <button onclick="addBalanceToUser()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">إضافة الرصيد لحساب الزبون</button>
         </div>
     </div>
 
@@ -88,7 +88,9 @@
                 } else {
                     alert('خطأ: ' + data.message);
                 }
-            } catch(e) { alert('حدث خطأ في الاتصال.'); }
+            } catch(e) { 
+                alert('حدث خطأ في الاتصال.'); 
+            }
         }
 
         async function addBalanceToUser() {
@@ -113,7 +115,9 @@
                 } else {
                     alert('خطأ: ' + data.message);
                 }
-            } catch(e) { alert('حدث خطأ في الاتصال.'); }
+            } catch(e) { 
+                alert('حدث خطأ في الاتصال.'); 
+            }
         }
     </script>
 </body>
