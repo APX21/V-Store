@@ -25,11 +25,10 @@
             <button onclick="switchAdminTab('users-list')" id="btn-users-list" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">👥 قائمة الزبائن</button>
         </div>
 
-        <!-- 1. تبويب: إضافة فئة أو قسم جديد (بالقوائم المترابطة الذكية) -->
+        <!-- 1. تبويب: إضافة فئة أو قسم جديد -->
         <div id="tab-add-product" class="admin-tab bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة والأكواد</h2>
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة مع التكلفة وسعر البيع</h2>
             
-            <!-- اختيار القسم الرئيسي -->
             <div>
                 <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
                 <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
@@ -38,19 +37,25 @@
                 <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
 
-            <!-- اختيار الفئة (قائمة منسدلة تتحدث حسب القسم + خيار إضافة فئة جديدة) -->
             <div>
                 <label class="block text-xs text-slate-400 mb-1">فئة المنتج</label>
                 <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
                     <option value="">-- اختر القسم أولاً --</option>
                 </select>
-                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة هنا (مثال: بطاقة 15$)..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
 
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
-                <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">إجمالي سعر الشراء للدفعة ($)</label>
+                    <input type="number" id="adm-cost-price" placeholder="مثال: 80" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">سعر المبيع للزبون ($)</label>
+                    <input type="number" id="adm-price" placeholder="مثال: 10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
             </div>
+
             <div>
                 <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
                 <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
@@ -61,16 +66,16 @@
         <!-- 2. تبويب: إدارة المخزون -->
         <div id="tab-manage-stock" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (إضافة أكواد سريعة للفئات)</h2>
-                <button onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400">تحديث المخزون 🔄</button>
+                <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون وتكلفة الدفعات</h2>
+                <button onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400">تحديث 🔄</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400">
                         <tr>
-                            <th class="p-3">القسم / الفئة</th>
+                            <th class="p-3">الفئة والأسعار</th>
                             <th class="p-3">المتوفر</th>
-                            <th class="p-3 text-center">إضافة أكواد جديدة</th>
+                            <th class="p-3 text-center">إضافة دفعة أكواد وتكلفة</th>
                         </tr>
                     </thead>
                     <tbody id="admin-products-table" class="divide-y divide-slate-800">
@@ -94,7 +99,7 @@
             <button onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">إضافة الرصيد للحساب 💵</button>
         </div>
 
-        <!-- 4. تبويب: قائمة الزبائن وأرصدتهم -->
+        <!-- 4. تبويب: قائمة الزبائن -->
         <div id="tab-users-list" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن المسجلين</h2>
@@ -118,7 +123,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcJ8k5UXtpYt9239K30WzRhiZTqtMi3m3Fi35iqRWQz6GtUBB4ZpyrIc_GuhYpK9Fm/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwj0uH9eFvnKubx5bUEcLRvZ9hCCvvOgN6ET6MsxLfMogeZ-Zp_bNELo-8kr5EW-wQp/exec";
         let globalProducts = [];
 
         window.onload = function() {
@@ -167,12 +172,9 @@
             });
             html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
             select.innerHTML = html;
-            
-            // إعادة ضبط قائمة الفئات
             document.getElementById('adm-title-select').innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
         }
 
-        // عند تغيير القسم الرئيسي، يتم تحديث قائمة الفئات التابعة له تلقائياً
         function onCategoryChange() {
             let selectVal = document.getElementById('adm-category-select').value;
             let newCatInput = document.getElementById('adm-new-category');
@@ -183,7 +185,6 @@
                 newCatInput.classList.remove('hidden');
                 newCatInput.value = '';
                 newCatInput.focus();
-                // إذا كان قسم جديد، فهذا يعني حتماً فئة جديدة
                 titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
                 titleSelect.value = 'NEW_TITLE';
                 newTitleInput.classList.remove('hidden');
@@ -192,18 +193,16 @@
                 newCatInput.classList.add('hidden');
                 newTitleInput.classList.add('hidden');
 
-                // تصفية الفئات التابعة لهذا القسم فقط
                 let filtered = globalProducts.filter(p => p.category === selectVal);
                 let html = '<option value="">-- اختر الفئة --</option>';
                 filtered.forEach(p => {
-                    html += `<option value="${p.title}" data-price="${p.price}" data-id="${p.id}">${p.title} (${p.price}$)</option>`;
+                    html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
                 });
                 html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
             }
         }
 
-        // عند اختيار الفئة (سواء قديمة أو جديدة)
         function onTitleChange() {
             let titleSelectVal = document.getElementById('adm-title-select').value;
             let newTitleInput = document.getElementById('adm-new-title');
@@ -216,7 +215,6 @@
                 priceInput.value = '';
             } else {
                 newTitleInput.classList.add('hidden');
-                // جلب السعر التلقائي للفئة المختارة لتسهيل العمل
                 let selectedOption = document.getElementById('adm-title-select').selectedOptions[0];
                 if (selectedOption && selectedOption.dataset.price) {
                     priceInput.value = selectedOption.dataset.price;
@@ -237,13 +235,15 @@
                 row.innerHTML = `
                     <td class="p-3">
                         <span class="text-xs text-amber-400 block">${p.category}</span>
-                        <strong class="text-slate-100">${p.title}</strong> (${p.price}$)
+                        <strong class="text-slate-100">${p.title}</strong>
+                        <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة وسطية: <span class="text-emerald-400 font-bold">${p.costPrice.toFixed(2)}$</span></div>
                     </td>
-                    <td class="p-3 text-emerald-400 font-bold">${p.codesCount} كود</td>
+                    <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
                     <td class="p-3 text-center">
-                        <div class="flex flex-col gap-2 items-center">
-                            <textarea id="codes-${p.id}" placeholder="ضع الأكواد هنا (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
-                            <button onclick="addCodes('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition w-full">إضافة للمخزون ➕</button>
+                        <div class="flex flex-col gap-2">
+                            <input type="number" id="batch-cost-${p.id}" placeholder="إجمالي سعر شراء الدفعة ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
+                            <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
+                            <button onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1.5 rounded text-xs transition w-full">إضافة دفعة للمخزون ➕</button>
                         </div>
                     </td>
                 `;
@@ -251,23 +251,27 @@
             });
         }
 
-        async function addCodes(productId) {
+        async function addCodesWithCost(productId) {
+            let batchCostInput = document.getElementById('batch-cost-' + productId);
             let textarea = document.getElementById('codes-' + productId);
+            
+            let batchTotalCost = parseFloat(batchCostInput.value);
             let newCodes = textarea.value.trim();
 
-            if(!newCodes) {
-                alert('الرجاء كتابة الأكواد الجديدة أولاً.');
+            if(isNaN(batchTotalCost) || batchTotalCost < 0 || !newCodes) {
+                alert('الرجاء إدخال إجمالي سعر شراء الدفعة والأكواد الجديدة بشكل صحيح.');
                 return;
             }
 
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes })
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes, batchTotalCost })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة الأكواد بنجاح للمخزون!');
+                    alert('تم إضافة الدفعة وتحديث التكلفة الوسطية بنجاح!');
+                    batchCostInput.value = '';
                     textarea.value = '';
                     loadAdminProducts();
                 } else {
@@ -346,30 +350,29 @@
             }
 
             let price = parseFloat(document.getElementById('adm-price').value);
+            let costPrice = parseFloat(document.getElementById('adm-cost-price').value);
             let codes = document.getElementById('adm-codes').value.trim();
 
-            if(!category || !title || isNaN(price) || !codes) {
-                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة السعر والأكواد.');
+            if(!category || !title || isNaN(price) || isNaN(costPrice) || !codes) {
+                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة تكلفة الدفعة، السعر، والأكواد.');
                 return;
             }
 
-            // إذا كانت الفئة موجودة مسبقاً وتختار إضافات أكواد لها
             if (productIdToUpdate) {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes })
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes, batchTotalCost: costPrice })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('الفئة موجودة مسبقاً، وتم إضافة الأكواد الجديدة إلى مخزونها بنجاح!');
+                    alert('الفئة موجودة، وتم إضافة الأكواد وتحديث التكلفة الوسطية بنجاح!');
                     clearForm();
                     loadAdminProducts();
                 }
             } else {
-                // إذا كانت فئة جديدة تماماً
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
+                    body: JSON.stringify({ action: 'addProduct', title, price, costPrice, category, codes })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
@@ -387,6 +390,7 @@
             document.getElementById('adm-title-select').innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
             document.getElementById('adm-new-title').value = '';
             document.getElementById('adm-new-title').classList.add('hidden');
+            document.getElementById('adm-cost-price').value = '';
             document.getElementById('adm-price').value = '';
             document.getElementById('adm-codes').value = '';
         }
