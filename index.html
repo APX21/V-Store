@@ -4,34 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر البطاقات الرقمية</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-    </style>
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
     <!-- شريط التنقل العلوي -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-3 space-x-reverse">
-                <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
-            </div>
+            <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
+            
             <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold">
                 <button onclick="switchTab('store')" id="nav-store" class="text-amber-400 transition hover:text-amber-300">المتجر</button>
-                <button onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300">مشترياتي</button>
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300">الشحن والرصيد</button>
-                <button onclick="switchTab('admin')" id="nav-admin" class="text-slate-400 transition hover:text-amber-300">لوحة التحكم</button>
+                <button onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300">مشترياتي وأكوادى</button>
+                <button onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300">شحن الرصيد</button>
             </nav>
+
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div id="auth-box" class="flex items-center gap-2">
-                    <input type="email" id="user-email-input" placeholder="أدخل بريدك للدخول..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-200">
-                    <button onclick="loginUser()" class="bg-amber-500 text-slate-950 px-3 py-1 rounded-lg text-xs font-bold">دخول</button>
+                    <input type="email" id="user-email-input" placeholder="أدخل بريدك الإلكتروني..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200">
+                    <button onclick="loginUser()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">دخول</button>
                 </div>
-                <div id="user-info" class="hidden text-sm bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                    مرحباً: <span id="current-user-email" class="text-amber-400 font-bold"></span>
+                <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
+                    <span>الحساب: <strong id="current-user-email" class="text-amber-400"></strong></span>
+                    <span>الرصيد: <strong id="user-balance" class="text-emerald-400">0.00</strong> $</span>
+                    <button onclick="logoutUser()" class="text-red-400 hover:underline">خروج</button>
                 </div>
             </div>
         </div>
@@ -44,61 +42,42 @@
         <section id="tab-store" class="space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">المنتجات المتوفرة</h2>
-                <button onclick="loadStoreData()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg">تحديث المنتجات 🔄</button>
+                <button onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">تحديث 🔄</button>
             </div>
-
             <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <p class="text-slate-500 col-span-full text-center py-6">جاري جلب المنتجات من شيت غوغل...</p>
+                <p class="text-slate-500 col-span-full text-center py-6">جاري جلب المنتجات...</p>
             </div>
         </section>
 
-        <!-- قسم مشترياتي والأكواد -->
+        <!-- قسم مشترياتي -->
         <section id="tab-purchases" class="hidden space-y-6">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">سجل المشتريات والأكواد</h2>
-            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-slate-400 text-sm">
-                سيتم حفظ الأكواد التي تشتريها وتظهر هنا مباشرة مرتبطة بحسابك.
+            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">سجل المشتريات والأكواد الخاصة بك</h2>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">المنتج</th>
+                            <th class="p-3">السعر</th>
+                            <th class="p-3">كود البطاقة</th>
+                            <th class="p-3">التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchases-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="4" class="p-6 text-center text-slate-500">يرجى تسجيل الدخول لعرض مشترياتك.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </section>
 
         <!-- قسم شحن الرصيد -->
         <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">شحن رصيد الحساب</h2>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-                <p class="text-sm text-slate-400">قم بتحويل المبلغ عبر USDT (شبكة BEP20) وأدخل رقم العملية:</p>
+            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">تعليمات شحن الرصيد</h2>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
+                <p class="text-slate-300">لشحن رصيدك في المتجر، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه، ثم تواصل مع الإدارة لتتم إضافة الرصيد إلى حسابك:</p>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة (USDT BEP20)</label>
-                    <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-amber-400 font-mono">
+                    <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة:</label>
+                    <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-amber-400 font-mono select-all">
                 </div>
-            </div>
-        </section>
-
-        <!-- لوحة التحكم (Admin Panel) -->
-        <section id="tab-admin" class="hidden space-y-6">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">لوحة تحكم الأدمن (إضافة منتج وأكواد لشيت غوغل)</h2>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 max-w-xl">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">اسم المنتج</label>
-                    <input type="text" id="adm-title" placeholder="مثال: بطاقة أيتونز 10$" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
-                        <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">القسم</label>
-                        <select id="adm-cat" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-                            <option value="itunes">آيتونز</option>
-                            <option value="playstation">بلايستيشن</option>
-                            <option value="steam">ستيم</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
-                    <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
-                </div>
-                <button onclick="addNewProduct()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">إضافة المنتج إلى Google Sheets</button>
             </div>
         </section>
 
@@ -106,22 +85,19 @@
 
     <!-- شريط التنقل السفلي للهواتف -->
     <div class="md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
-        <button onclick="switchTab('store')" id="mob-store" class="text-amber-400">المتجر</button>
+        <button onclick="switchTab('store')" id="mob-store" class="text-amber-400 font-bold">المتجر</button>
         <button onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400">مشترياتي</button>
         <button onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400">الرصيد</button>
-        <button onclick="switchTab('admin')" id="mob-admin" class="text-slate-400">التحكم</button>
     </div>
 
-    <!-- جافاسكريبت والربط الفعلي -->
+    <!-- السكريبت -->
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBfY413FMWlq5x0WfoxKZ3OOeBmqTiQbtceUbHMZT_BmF2WIbDu35S0QXEEKjPij_p/exec";
-        
         let currentUser = localStorage.getItem('store_user') || "";
         let productsList = [];
 
         window.onload = function() {
             if(currentUser) {
-                document.getElementById('user-email-input').value = currentUser;
                 activateUserSession(currentUser);
             }
             loadStoreData();
@@ -129,14 +105,20 @@
 
         function loginUser() {
             let email = document.getElementById('user-email-input').value.trim();
-            if(!email) {
-                alert('الرجاء إدخال البريد الإلكتروني.');
-                return;
-            }
+            if(!email) { alert('الرجاء إدخال البريد الإلكتروني.'); return; }
             currentUser = email;
             localStorage.setItem('store_user', email);
             activateUserSession(email);
-            alert('تم تسجيل الدخول بنجاح!');
+            loadStoreData();
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('store_user');
+            currentUser = "";
+            document.getElementById('user-info').classList.add('hidden');
+            document.getElementById('auth-box').classList.remove('hidden');
+            document.getElementById('user-email-input').value = "";
+            renderPurchases([]);
         }
 
         function activateUserSession(email) {
@@ -147,49 +129,46 @@
         }
 
         function switchTab(tabId) {
-            ['store', 'purchases', 'wallet', 'admin'].forEach(t => {
+            ['store', 'purchases', 'wallet'].forEach(t => {
                 document.getElementById('tab-' + t).classList.add('hidden');
                 let navBtn = document.getElementById('nav-' + t);
                 let mobBtn = document.getElementById('mob-' + t);
                 if(navBtn) navBtn.className = "text-slate-400 transition hover:text-amber-300";
                 if(mobBtn) mobBtn.className = "text-slate-400";
             });
-
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             let activeNav = document.getElementById('nav-' + tabId);
             let activeMob = document.getElementById('mob-' + tabId);
             if(activeNav) activeNav.className = "text-amber-400 font-bold transition hover:text-amber-300";
             if(activeMob) activeMob.className = "text-amber-400 font-bold";
             
-            if(tabId === 'store') loadStoreData();
+            if(tabId === 'purchases') fetchUserPurchases();
         }
 
-        // جلب المنتجات من شيت غوغل
         async function loadStoreData() {
             try {
-                let response = await fetch(SCRIPT_URL, {
+                let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getStoreData' })
+                    body: JSON.stringify({ action: 'getStoreData', email: currentUser })
                 });
-                let result = await response.json();
+                let result = await res.json();
                 if(result.status === 'success') {
                     productsList = result.products;
+                    if(result.userBalance !== undefined) {
+                        document.getElementById('user-balance').innerText = result.userBalance.toFixed(2);
+                    }
                     renderProducts();
                 }
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function renderProducts() {
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
-            
             if(productsList.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد منتجات مضافة في الشيت حالياً.</p>';
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد منتجات متوفرة حالياً.</p>';
                 return;
             }
-
             productsList.forEach(p => {
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between shadow-md";
@@ -208,13 +187,8 @@
             });
         }
 
-        // شراء منتج وسحب كود من الشيت
         async function buyProduct(productId) {
-            if(!currentUser) {
-                alert('الرجاء تسجيل الدخول ببريدك الإلكتروني أولاً أعلى الصفحة.');
-                return;
-            }
-
+            if(!currentUser) { alert('الرجاء تسجيل الدخول بريدك الإلكتروني أولاً أعلى الصفحة.'); return; }
             if(!confirm('هل أنت متأكد من رغبتك في شراء هذا المنتج؟')) return;
 
             try {
@@ -224,46 +198,46 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم الشراء بنجاح! كود البطاقة الخاص بك هو:\n\n' + data.code);
+                    alert('تم الشراء بنجاح! كود البطاقة الخاص بك:\n\n' + data.code);
                     loadStoreData();
                 } else {
                     alert('خطأ: ' + data.message);
                 }
-            } catch(e) {
-                alert('حدث خطأ أثناء الاتصال بالخادم.');
-            }
+            } catch(e) { alert('حدث خطأ أثناء الاتصال.'); }
         }
 
-        // إضافة منتج جديد من لوحة التحكم لشيت غوغل
-        async function addNewProduct() {
-            let title = document.getElementById('adm-title').value;
-            let price = parseFloat(document.getElementById('adm-price').value);
-            let category = document.getElementById('adm-cat').value;
-            let codes = document.getElementById('adm-codes').value;
-
-            if(!title || isNaN(price) || !codes) {
-                alert('الرجاء تعبئة كافة الحقول.');
-                return;
-            }
-
+        async function fetchUserPurchases() {
+            if(!currentUser) return;
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
+                    body: JSON.stringify({ action: 'getUserPurchases', email: currentUser })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة المنتج وتخزين الأكواد في شيت غوغل بنجاح!');
-                    document.getElementById('adm-title').value = '';
-                    document.getElementById('adm-price').value = '';
-                    document.getElementById('adm-codes').value = '';
-                    loadStoreData();
-                } else {
-                    alert('خطأ: ' + data.message);
+                    renderPurchases(data.purchases);
                 }
-            } catch(e) {
-                alert('حدث خطأ في الاتصال.');
+            } catch(e) {}
+        }
+
+        function renderPurchases(list) {
+            const tbody = document.getElementById('purchases-table');
+            if(!list || list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات سابقة.</td></tr>';
+                return;
             }
+            tbody.innerHTML = '';
+            list.forEach(item => {
+                let row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/40 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-semibold">${item.productTitle}</td>
+                    <td class="p-3 text-amber-400">${item.price} $</td>
+                    <td class="p-3 font-mono text-emerald-400 select-all bg-slate-950/50 rounded">${item.assignedCode}</td>
+                    <td class="p-3 text-xs text-slate-400">${item.timestamp}</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
     </script>
 </body>
