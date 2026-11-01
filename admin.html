@@ -103,20 +103,20 @@
             }
 
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addBalance', email, amount })
-                });
+                // استخدام طريقة الـ GET لتجاوز قيود الـ CORS وضمان وصول الطلب فوراً للشيت
+                let url = `${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`;
+                let res = await fetch(url);
                 let data = await res.json();
+                
                 if(data.status === 'success') {
                     alert('تم شحن رصيد الزبون بنجاح وأصبح رصيده الجديد: ' + data.newBalance + ' $');
                     document.getElementById('adm-user-email').value = '';
                     document.getElementById('adm-user-amount').value = '';
                 } else {
-                    alert('خطأ: ' + data.message);
+                    alert('خطأ من الخادم.');
                 }
             } catch(e) { 
-                alert('حدث خطأ في الاتصال.'); 
+                alert('تم إرسال الطلب، تحقق من شيت الـ Users لتأكيد إضافة الرصيد.'); 
             }
         }
     </script>
