@@ -26,8 +26,12 @@
                 <button onclick="switchTab('admin')" id="nav-admin" class="text-slate-400 transition hover:text-amber-300">لوحة التحكم</button>
             </nav>
             <div class="flex items-center space-x-3 space-x-reverse">
-                <div id="user-info" class="text-sm bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
-                    الرصيد: <span id="user-balance" class="text-amber-400 font-bold">0.00</span> $
+                <div id="auth-box" class="flex items-center gap-2">
+                    <input type="email" id="user-email-input" placeholder="أدخل بريدك للدخول..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1 text-xs text-slate-200">
+                    <button onclick="loginUser()" class="bg-amber-500 text-slate-950 px-3 py-1 rounded-lg text-xs font-bold">دخول</button>
+                </div>
+                <div id="user-info" class="hidden text-sm bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                    مرحباً: <span id="current-user-email" class="text-amber-400 font-bold"></span>
                 </div>
             </div>
         </div>
@@ -40,38 +44,19 @@
         <section id="tab-store" class="space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">المنتجات المتوفرة</h2>
-                <div class="flex gap-2">
-                    <button onclick="filterProducts('all')" class="px-4 py-1.5 bg-amber-500 text-slate-950 rounded-lg text-sm font-bold">الكل</button>
-                    <button onclick="filterProducts('itunes')" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm">آيتونز</button>
-                    <button onclick="filterProducts('playstation')" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm">بلايستيشن</button>
-                    <button onclick="filterProducts('steam')" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm">ستيم</button>
-                </div>
+                <button onclick="loadStoreData()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg">تحديث المنتجات 🔄</button>
             </div>
 
             <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- المنتجات يتم تعبئتها ديناميكياً -->
+                <p class="text-slate-500 col-span-full text-center py-6">جاري جلب المنتجات من شيت غوغل...</p>
             </div>
         </section>
 
         <!-- قسم مشترياتي والأكواد -->
         <section id="tab-purchases" class="hidden space-y-6">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">سجل المشتريات والأكواد</h2>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">المنتج</th>
-                            <th class="p-3">السعر</th>
-                            <th class="p-3">كود البطاقة</th>
-                            <th class="p-3">التاريخ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="purchases-table" class="divide-y divide-slate-800">
-                        <tr>
-                            <td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات حتى الآن.</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-slate-400 text-sm">
+                سيتم حفظ الأكواد التي تشتريها وتظهر هنا مباشرة مرتبطة بحسابك.
             </div>
         </section>
 
@@ -79,22 +64,17 @@
         <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">شحن رصيد الحساب</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-                <p class="text-sm text-slate-400">قم بتحويل المبلغ عبر USDT (شبكة BEP20) وأدخل رقم العملية لتأكيد الشحن فوراً:</p>
+                <p class="text-sm text-slate-400">قم بتحويل المبلغ عبر USDT (شبكة BEP20) وأدخل رقم العملية:</p>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة (USDT BEP20)</label>
                     <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-amber-400 font-mono">
                 </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">رقم المعاملة (TxID)</label>
-                    <input type="text" id="tx-input" placeholder="أدخل رقم المعاملة هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
-                </div>
-                <button onclick="requestDeposit()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg transition">إرسال طلب الشحن</button>
             </div>
         </section>
 
         <!-- لوحة التحكم (Admin Panel) -->
         <section id="tab-admin" class="hidden space-y-6">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">لوحة تحكم الأدمن (إضافة منتج وتعبئة الأكواد)</h2>
+            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">لوحة تحكم الأدمن (إضافة منتج وأكواد لشيت غوغل)</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 max-w-xl">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">اسم المنتج</label>
@@ -115,10 +95,10 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">الأكواد (ضع كل كود في سطر منفصل)</label>
+                    <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
                     <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
                 </div>
-                <button onclick="addNewProduct()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">إضافة المنتج والمخزون</button>
+                <button onclick="addNewProduct()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-6 py-2.5 rounded-lg text-sm transition">إضافة المنتج إلى Google Sheets</button>
             </div>
         </section>
 
@@ -132,18 +112,39 @@
         <button onclick="switchTab('admin')" id="mob-admin" class="text-slate-400">التحكم</button>
     </div>
 
-    <!-- جافاسكريبت التشغيل -->
+    <!-- جافاسكريبت والربط الفعلي -->
     <script>
-        // بيانات أولية تجريبية
-        let state = {
-            balance: 50.00,
-            products: [
-                { id: 1, title: 'بطاقة أيتونز 10$', price: 10, category: 'itunes', codes: ['ITUNES-1111-2222', 'ITUNES-3333-4444'] },
-                { id: 2, title: 'بطاقة بلايستيشن 20$', price: 20, category: 'playstation', codes: ['PSN-5555-6666'] },
-                { id: 3, title: 'بطاقة ستيم 50$', price: 49.99, category: 'steam', codes: ['STEAM-7777-8888'] }
-            ],
-            purchases: []
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyBfY413FMWlq5x0WfoxKZ3OOeBmqTiQbtceUbHMZT_BmF2WIbDu35S0QXEEKjPij_p/exec";
+        
+        let currentUser = localStorage.getItem('store_user') || "";
+        let productsList = [];
+
+        window.onload = function() {
+            if(currentUser) {
+                document.getElementById('user-email-input').value = currentUser;
+                activateUserSession(currentUser);
+            }
+            loadStoreData();
         };
+
+        function loginUser() {
+            let email = document.getElementById('user-email-input').value.trim();
+            if(!email) {
+                alert('الرجاء إدخال البريد الإلكتروني.');
+                return;
+            }
+            currentUser = email;
+            localStorage.setItem('store_user', email);
+            activateUserSession(email);
+            alert('تم تسجيل الدخول بنجاح!');
+        }
+
+        function activateUserSession(email) {
+            document.getElementById('auth-box').classList.add('hidden');
+            let userInfo = document.getElementById('user-info');
+            userInfo.classList.remove('hidden');
+            document.getElementById('current-user-email').innerText = email;
+        }
 
         function switchTab(tabId) {
             ['store', 'purchases', 'wallet', 'admin'].forEach(t => {
@@ -160,136 +161,110 @@
             if(activeNav) activeNav.className = "text-amber-400 font-bold transition hover:text-amber-300";
             if(activeMob) activeMob.className = "text-amber-400 font-bold";
             
-            if(tabId === 'store') renderProducts('all');
-            if(tabId === 'purchases') renderPurchases();
+            if(tabId === 'store') loadStoreData();
         }
 
-        function renderProducts(filter) {
+        // جلب المنتجات من شيت غوغل
+        async function loadStoreData() {
+            try {
+                let response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getStoreData' })
+                });
+                let result = await response.json();
+                if(result.status === 'success') {
+                    productsList = result.products;
+                    renderProducts();
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderProducts() {
             const grid = document.getElementById('products-grid');
             grid.innerHTML = '';
             
-            let filtered = filter === 'all' ? state.products : state.products.filter(p => p.category === filter);
-
-            if(filtered.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد منتجات في هذا القسم حالياً.</p>';
+            if(productsList.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد منتجات مضافة في الشيت حالياً.</p>';
                 return;
             }
 
-            filtered.forEach(p => {
+            productsList.forEach(p => {
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between shadow-md";
                 card.innerHTML = `
                     <div>
                         <span class="text-xs bg-slate-800 text-amber-400 px-2 py-0.5 rounded">${p.category.toUpperCase()}</span>
                         <h3 class="font-bold mt-2 text-base">${p.title}</h3>
-                        <p class="text-sm text-slate-400 mt-1">المتوفر: <span class="text-slate-200 font-bold">${p.codes.length}</span> كود</p>
+                        <p class="text-sm text-slate-400 mt-1">المتوفر: <span class="text-slate-200 font-bold">${p.codesCount}</span> كود</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center pt-3 border-t border-slate-800">
                         <span class="text-amber-400 font-bold">${p.price} $</span>
-                        <button onclick="buyProduct(${p.id})" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">شراء فوري</button>
+                        <button onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">شراء فوري</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        function filterProducts(cat) {
-            renderProducts(cat);
-        }
-
-        function buyProduct(id) {
-            let product = state.products.find(p => p.id === id);
-            if(!product) return;
-
-            if(product.codes.length === 0) {
-                alert('عذراً، نفدت الكمية من هذا المنتج حالياً!');
+        // شراء منتج وسحب كود من الشيت
+        async function buyProduct(productId) {
+            if(!currentUser) {
+                alert('الرجاء تسجيل الدخول ببريدك الإلكتروني أولاً أعلى الصفحة.');
                 return;
             }
 
-            if(state.balance < product.price) {
-                alert('رصيدك غير كافي! يرجى شحن رصيد حسابك أولاً.');
-                switchTab('wallet');
-                return;
+            if(!confirm('هل أنت متأكد من رغبتك في شراء هذا المنتج؟')) return;
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'buyProduct', email: currentUser, productId: productId })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم الشراء بنجاح! كود البطاقة الخاص بك هو:\n\n' + data.code);
+                    loadStoreData();
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch(e) {
+                alert('حدث خطأ أثناء الاتصال بالخادم.');
             }
-
-            // خصم الرصيد وسحب كود
-            state.balance -= product.price;
-            let assignedCode = product.codes.shift(); // سحب أول كود من المخزون
-            
-            state.purchases.unshift({
-                title: product.title,
-                price: product.price,
-                code: assignedCode,
-                date: new Date().toLocaleString()
-            });
-
-            document.getElementById('user-balance').innerText = state.balance.toFixed(2);
-            alert('تمت العملية بنجاح! تم إظهار الكود في صفحة "مشترياتي".');
-            renderProducts('all');
         }
 
-        function renderPurchases() {
-            const tbody = document.getElementById('purchases-table');
-            if(state.purchases.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات حتى الآن.</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = '';
-            state.purchases.forEach(item => {
-                let row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/40 transition";
-                row.innerHTML = `
-                    <td class="p-3 font-semibold">${item.title}</td>
-                    <td class="p-3 text-amber-400">${item.price} $</td>
-                    <td class="p-3 font-mono text-emerald-400 select-all bg-slate-950/50 rounded">${item.code}</td>
-                    <td class="p-3 text-xs text-slate-400">${item.date}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function requestDeposit() {
-            let tx = document.getElementById('tx-input').value;
-            if(!tx) {
-                alert('الرجاء إدخال رقم المعاملة.');
-                return;
-            }
-            alert('تم استلام طلب الشحن بنجاح وسيتم إضافته للرصيد بعد التحقق من شبكة USDT.');
-            document.getElementById('tx-input').value = '';
-        }
-
-        function addNewProduct() {
+        // إضافة منتج جديد من لوحة التحكم لشيت غوغل
+        async function addNewProduct() {
             let title = document.getElementById('adm-title').value;
             let price = parseFloat(document.getElementById('adm-price').value);
             let category = document.getElementById('adm-cat').value;
-            let codesRaw = document.getElementById('adm-codes').value;
+            let codes = document.getElementById('adm-codes').value;
 
-            if(!title || isNaN(price) || !codesRaw) {
-                alert('الرجاء تعبئة كافة الحقول المطلوبة بشكل صحيح.');
+            if(!title || isNaN(price) || !codes) {
+                alert('الرجاء تعبئة كافة الحقول.');
                 return;
             }
 
-            let codesArray = codesRaw.split('\n').map(c => c.trim()).filter(c => c.length > 0);
-
-            state.products.push({
-                id: Date.now(),
-                title,
-                price,
-                category,
-                codes: codesArray
-            });
-
-            document.getElementById('adm-title').value = '';
-            document.getElementById('adm-price').value = '';
-            document.getElementById('adm-codes').value = '';
-
-            alert('تم إضافة المنتج وتعبئة الأكواد بنجاح في المخزون!');
-            switchTab('store');
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم إضافة المنتج وتخزين الأكواد في شيت غوغل بنجاح!');
+                    document.getElementById('adm-title').value = '';
+                    document.getElementById('adm-price').value = '';
+                    document.getElementById('adm-codes').value = '';
+                    loadStoreData();
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
+            }
         }
-
-        // تشغيل المتجر عند التحميل
-        renderProducts('all');
     </script>
 </body>
 </html>
