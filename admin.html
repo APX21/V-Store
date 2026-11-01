@@ -25,20 +25,28 @@
             <button onclick="switchAdminTab('users-list')" id="btn-users-list" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">👥 قائمة الزبائن</button>
         </div>
 
-        <!-- 1. تبويب: إضافة فئة أو قسم جديد -->
+        <!-- 1. تبويب: إضافة فئة أو قسم جديد (بالقوائم المترابطة الذكية) -->
         <div id="tab-add-product" class="admin-tab bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة فئة جديدة أو قسم جديد</h2>
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة والأكواد</h2>
+            
+            <!-- اختيار القسم الرئيسي -->
             <div>
                 <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
-                <select id="adm-category-select" onchange="checkCategorySelect()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
+                <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
                     <option value="">جاري تحميل الأقسام...</option>
                 </select>
                 <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
+
+            <!-- اختيار الفئة (قائمة منسدلة تتحدث حسب القسم + خيار إضافة فئة جديدة) -->
             <div>
-                <label class="block text-xs text-slate-400 mb-1">اسم الفئة (مثال: بطاقة أيتونز 10$)</label>
-                <input type="text" id="adm-title" placeholder="اسم الفئة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                <label class="block text-xs text-slate-400 mb-1">فئة المنتج</label>
+                <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
+                    <option value="">-- اختر القسم أولاً --</option>
+                </select>
+                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة هنا (مثال: بطاقة 15$)..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
+
             <div>
                 <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
                 <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
@@ -47,7 +55,7 @@
                 <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
                 <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
             </div>
-            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ الفئة الجديدة</button>
+            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ الأكواد / الفئة الجديدة</button>
         </div>
 
         <!-- 2. تبويب: إدارة المخزون -->
@@ -72,7 +80,7 @@
             </div>
         </div>
 
-        <!-- 3. تبويب: شحن رصيد (خانة الإيميل والمبلغ فقط كما طلبت) -->
+        <!-- 3. تبويب: شحن رصيد -->
         <div id="tab-add-balance" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد لزبون مباشرة</h2>
             <div>
@@ -111,14 +119,13 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcJ8k5UXtpYt9239K30WzRhiZTqtMi3m3Fi35iqRWQz6GtUBB4ZpyrIc_GuhYpK9Fm/exec";
-        let availableCategories = [];
+        let globalProducts = [];
 
         window.onload = function() {
             loadAdminProducts();
             loadUsersList();
         };
 
-        // نظام التنقل بين الأزرار (Tabs)
         function switchAdminTab(tabId) {
             document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
             document.getElementById('tab-' + tabId).classList.remove('hidden');
@@ -141,8 +148,9 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    renderAdminProducts(data.products);
-                    updateCategoriesDropdown(data.products);
+                    globalProducts = data.products;
+                    renderAdminProducts(globalProducts);
+                    updateCategoriesDropdown(globalProducts);
                 }
             } catch(e) {
                 document.getElementById('admin-products-table').innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل التحميل.</td></tr>';
@@ -150,26 +158,69 @@
         }
 
         function updateCategoriesDropdown(products) {
-            availableCategories = [...new Set(products.map(p => p.category))];
+            let categories = [...new Set(products.map(p => p.category))];
             const select = document.getElementById('adm-category-select');
             
             let html = '<option value="">-- اختر القسم الرئيسي --</option>';
-            availableCategories.forEach(cat => {
+            categories.forEach(cat => {
                 html += `<option value="${cat}">${cat}</option>`;
             });
             html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
             select.innerHTML = html;
+            
+            // إعادة ضبط قائمة الفئات
+            document.getElementById('adm-title-select').innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
         }
 
-        function checkCategorySelect() {
-            let select = document.getElementById('adm-category-select');
+        // عند تغيير القسم الرئيسي، يتم تحديث قائمة الفئات التابعة له تلقائياً
+        function onCategoryChange() {
+            let selectVal = document.getElementById('adm-category-select').value;
             let newCatInput = document.getElementById('adm-new-category');
-            if (select.value === 'NEW_CAT') {
+            let titleSelect = document.getElementById('adm-title-select');
+            let newTitleInput = document.getElementById('adm-new-title');
+
+            if (selectVal === 'NEW_CAT') {
                 newCatInput.classList.remove('hidden');
                 newCatInput.value = '';
                 newCatInput.focus();
+                // إذا كان قسم جديد، فهذا يعني حتماً فئة جديدة
+                titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
+                titleSelect.value = 'NEW_TITLE';
+                newTitleInput.classList.remove('hidden');
+                newTitleInput.value = '';
             } else {
                 newCatInput.classList.add('hidden');
+                newTitleInput.classList.add('hidden');
+
+                // تصفية الفئات التابعة لهذا القسم فقط
+                let filtered = globalProducts.filter(p => p.category === selectVal);
+                let html = '<option value="">-- اختر الفئة --</option>';
+                filtered.forEach(p => {
+                    html += `<option value="${p.title}" data-price="${p.price}" data-id="${p.id}">${p.title} (${p.price}$)</option>`;
+                });
+                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
+                titleSelect.innerHTML = html;
+            }
+        }
+
+        // عند اختيار الفئة (سواء قديمة أو جديدة)
+        function onTitleChange() {
+            let titleSelectVal = document.getElementById('adm-title-select').value;
+            let newTitleInput = document.getElementById('adm-new-title');
+            let priceInput = document.getElementById('adm-price');
+
+            if (titleSelectVal === 'NEW_TITLE') {
+                newTitleInput.classList.remove('hidden');
+                newTitleInput.value = '';
+                newTitleInput.focus();
+                priceInput.value = '';
+            } else {
+                newTitleInput.classList.add('hidden');
+                // جلب السعر التلقائي للفئة المختارة لتسهيل العمل
+                let selectedOption = document.getElementById('adm-title-select').selectedOptions[0];
+                if (selectedOption && selectedOption.dataset.price) {
+                    priceInput.value = selectedOption.dataset.price;
+                }
             }
         }
 
@@ -227,7 +278,6 @@
             }
         }
 
-        // دالة الشحن السريع (عبر الخانتين فقط)
         async function quickAddBalance() {
             let email = document.getElementById('quick-user-email').value.trim();
             let amount = parseFloat(document.getElementById('quick-user-amount').value);
@@ -245,8 +295,6 @@
                     document.getElementById('quick-user-email').value = '';
                     document.getElementById('quick-user-amount').value = '';
                     loadUsersList();
-                } else {
-                    alert('حدث خطأ أثناء الشحن.');
                 }
             } catch(e) {
                 alert('تم إرسال الطلب بنجاح.');
@@ -280,39 +328,67 @@
         }
 
         async function addNewProduct() {
-            let selectVal = document.getElementById('adm-category-select').value;
-            let category = '';
+            let catSelect = document.getElementById('adm-category-select').value;
+            let category = (catSelect === 'NEW_CAT') ? document.getElementById('adm-new-category').value.trim() : catSelect;
 
-            if (selectVal === 'NEW_CAT') {
-                category = document.getElementById('adm-new-category').value.trim();
+            let titleSelect = document.getElementById('adm-title-select').value;
+            let title = '';
+            let productIdToUpdate = '';
+
+            if (titleSelect === 'NEW_TITLE') {
+                title = document.getElementById('adm-new-title').value.trim();
             } else {
-                category = selectVal;
+                let selectedOption = document.getElementById('adm-title-select').selectedOptions[0];
+                title = titleSelect;
+                if (selectedOption) {
+                    productIdToUpdate = selectedOption.dataset.id;
+                }
             }
 
-            let title = document.getElementById('adm-title').value.trim();
             let price = parseFloat(document.getElementById('adm-price').value);
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || !codes) {
-                alert('الرجاء اختيار القسم أو كتابته، وتعبئة كافة الحقول.');
+                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة السعر والأكواد.');
                 return;
             }
 
-            let res = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
-            });
-            let data = await res.json();
-            if(data.status === 'success') {
-                alert('تم إضافة الفئة بنجاح!');
-                document.getElementById('adm-category-select').value = '';
-                document.getElementById('adm-new-category').value = '';
-                document.getElementById('adm-new-category').classList.add('hidden');
-                document.getElementById('adm-title').value = '';
-                document.getElementById('adm-price').value = '';
-                document.getElementById('adm-codes').value = '';
-                loadAdminProducts();
+            // إذا كانت الفئة موجودة مسبقاً وتختار إضافات أكواد لها
+            if (productIdToUpdate) {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('الفئة موجودة مسبقاً، وتم إضافة الأكواد الجديدة إلى مخزونها بنجاح!');
+                    clearForm();
+                    loadAdminProducts();
+                }
+            } else {
+                // إذا كانت فئة جديدة تماماً
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم إضافة الفئة الجديدة بنجاح!');
+                    clearForm();
+                    loadAdminProducts();
+                }
             }
+        }
+
+        function clearForm() {
+            document.getElementById('adm-category-select').value = '';
+            document.getElementById('adm-new-category').value = '';
+            document.getElementById('adm-new-category').classList.add('hidden');
+            document.getElementById('adm-title-select').innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
+            document.getElementById('adm-new-title').value = '';
+            document.getElementById('adm-new-title').classList.add('hidden');
+            document.getElementById('adm-price').value = '';
+            document.getElementById('adm-codes').value = '';
         }
     </script>
 </body>
