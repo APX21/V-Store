@@ -16,51 +16,68 @@
             <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
-        <!-- قسم إضافة قسم وفئة جديدة والأكواد -->
+        <!-- قسم إضافة فئة جديدة -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم جديد والفئات والأكواد</h2>
-            
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم جديد والفئة والأكواد</h2>
             <div>
-                <label class="block text-xs text-slate-400 mb-1">اسم القسم الرئيسي (مثال: iTunes أو PlayStation أو PUBG)</label>
-                <input type="text" id="adm-category" placeholder="اكتب اسم القسم هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                <label class="block text-xs text-slate-400 mb-1">اسم القسم الرئيسي (مثال: iTunes)</label>
+                <input type="text" id="adm-category" placeholder="اسم القسم..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
             </div>
-
             <div>
-                <label class="block text-xs text-slate-400 mb-1">اسم الفئة / المنتج (مثال: بطاقة أيتونز 10$)</label>
-                <input type="text" id="adm-title" placeholder="اسم الفئة والكمية..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                <label class="block text-xs text-slate-400 mb-1">اسم الفئة (مثال: بطاقة أيتونز 10$)</label>
+                <input type="text" id="adm-title" placeholder="اسم الفئة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
             </div>
-
             <div>
-                <label class="block text-xs text-slate-400 mb-1">السعر للزبون ($)</label>
-                <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
+                <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
             </div>
-
             <div>
-                <label class="block text-xs text-slate-400 mb-1">الأكواد (ضع كل كود في سطر منفصل)</label>
-                <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-400"></textarea>
+                <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
+                <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
             </div>
-            
-            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ وإضافة الفئة والأكواد للشيت</button>
+            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ الفئة الجديدة</button>
         </div>
 
-        <!-- قسم قائمة الزبائن والشحن السريع -->
+        <!-- قسم إدارة المخزون وإضافة أكواد للفئات الموجودة -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">قائمة الزبائن وأرصدتهم</h2>
-                <button onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-emerald-400">تحديث القائمة 🔄</button>
+                <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (إضافة أكواد سريعة للفئات)</h2>
+                <button onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400">تحديث المخزون 🔄</button>
             </div>
             
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400">
                         <tr>
-                            <th class="p-3">البريد الإلكتروني للزبون</th>
-                            <th class="p-3">الرصيد الحالي</th>
-                            <th class="p-3 text-center">شحن رصيد سريع</th>
+                            <th class="p-3">القسم / الفئة</th>
+                            <th class="p-3">المتوفر</th>
+                            <th class="p-3 text-center">إضافة أكواد جديدة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-products-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري تحميل الفئات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- قسم قائمة الزبائن والشحن -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">قائمة الزبائن وأرصدتهم</h2>
+                <button onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-emerald-400">تحديث 🔄</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">البريد الإلكتروني</th>
+                            <th class="p-3">الرصيد</th>
+                            <th class="p-3 text-center">شحن رصيد</th>
                         </tr>
                     </thead>
                     <tbody id="users-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري تحميل قائمة الزبائن...</td></tr>
+                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -72,7 +89,77 @@
 
         window.onload = function() {
             loadUsersList();
+            loadAdminProducts();
         };
+
+        async function loadAdminProducts() {
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getStoreData' })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    renderAdminProducts(data.products);
+                }
+            } catch(e) {
+                document.getElementById('admin-products-table').innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل التحميل.</td></tr>';
+            }
+        }
+
+        function renderAdminProducts(products) {
+            const tbody = document.getElementById('admin-products-table');
+            if(!products || products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا توجد منتجات مضافة.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            products.forEach(p => {
+                let row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/40 transition";
+                row.innerHTML = `
+                    <td class="p-3">
+                        <span class="text-xs text-amber-400 block">${p.category}</span>
+                        <strong class="text-slate-100">${p.title}</strong> (${p.price}$)
+                    </td>
+                    <td class="p-3 text-emerald-400 font-bold">${p.codesCount} كود</td>
+                    <td class="p-3 text-center">
+                        <div class="flex flex-col gap-2 items-center">
+                            <textarea id="codes-${p.id}" placeholder="ضع الأكواد هنا (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
+                            <button onclick="addCodes('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition w-full">إضافة للمخزون ➕</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function addCodes(productId) {
+            let textarea = document.getElementById('codes-' + productId);
+            let newCodes = textarea.value.trim();
+
+            if(!newCodes) {
+                alert('الرجاء كتابة الأكواد الجديدة أولاً.');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم إضافة الأكواد بنجاح للمخزون!');
+                    textarea.value = '';
+                    loadAdminProducts();
+                } else {
+                    alert('خطأ: ' + data.message);
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
+            }
+        }
 
         async function loadUsersList() {
             try {
@@ -81,20 +168,13 @@
                     body: JSON.stringify({ action: 'getUsersList' })
                 });
                 let data = await res.json();
-                if(data.status === 'success') {
-                    renderUsersTable(data.users);
-                }
-            } catch(e) {
-                document.getElementById('users-table').innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل تحميل القائمة.</td></tr>';
-            }
+                if(data.status === 'success') { renderUsersTable(data.users); }
+            } catch(e) {}
         }
 
         function renderUsersTable(users) {
             const tbody = document.getElementById('users-table');
-            if(!users || users.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد زبائن مسجلين.</td></tr>';
-                return;
-            }
+            if(!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
             tbody.innerHTML = '';
             users.forEach(u => {
                 let row = document.createElement('tr');
@@ -114,28 +194,12 @@
         }
 
         async function addBalanceDirect(email) {
-            let inputId = 'amt-' + CSS.escape(email);
-            let amountInput = document.getElementById(inputId);
+            let amountInput = document.getElementById('amt-' + CSS.escape(email));
             let amount = parseFloat(amountInput.value);
-
-            if(isNaN(amount) || amount <= 0) {
-                alert('الرجاء إدخال مبلغ صحيح.');
-                return;
-            }
-
-            try {
-                let url = `${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`;
-                let res = await fetch(url);
-                let data = await res.json();
-                if(data.status === 'success') {
-                    alert('تم شحن الرصيد بنجاح! الرصيد الجديد: ' + data.newBalance + ' $');
-                    amountInput.value = '';
-                    loadUsersList();
-                }
-            } catch(e) {
-                alert('تم إرسال الطلب.');
-                loadUsersList();
-            }
+            if(isNaN(amount) || amount <= 0) { alert('مبلغ غير صحيح'); return; }
+            let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
+            let data = await res.json();
+            if(data.status === 'success') { alert('تم الشحن بنجاح!'); amountInput.value = ''; loadUsersList(); }
         }
 
         async function addNewProduct() {
@@ -145,24 +209,23 @@
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || !codes) {
-                alert('الرجاء تعبئة كافة الحقول (القسم، اسم الفئة، السعر، والأكواد).');
+                alert('الرجاء تعبئة كافة الحقول.');
                 return;
             }
 
-            try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
-                });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    alert('تم إضافة القسم والفئة والأكواد بنجاح!');
-                    document.getElementById('adm-category').value = '';
-                    document.getElementById('adm-title').value = '';
-                    document.getElementById('adm-price').value = '';
-                    document.getElementById('adm-codes').value = '';
-                }
-            } catch(e) { alert('خطأ في الاتصال.'); }
+            let res = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'addProduct', title, price, category, codes })
+            });
+            let data = await res.json();
+            if(data.status === 'success') {
+                alert('تم إضافة الفئة بنجاح!');
+                document.getElementById('adm-category').value = '';
+                document.getElementById('adm-title').value = '';
+                document.getElementById('adm-price').value = '';
+                document.getElementById('adm-codes').value = '';
+                loadAdminProducts();
+            }
         }
     </script>
 </body>
