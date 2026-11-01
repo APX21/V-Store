@@ -16,13 +16,19 @@
             <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
-        <!-- قسم إضافة فئة جديدة -->
+        <!-- قسم إضافة فئة جديدة أو قسم جديد -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم جديد والفئة والأكواد</h2>
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة فئة جديدة أو قسم جديد</h2>
+            
             <div>
-                <label class="block text-xs text-slate-400 mb-1">اسم القسم الرئيسي (مثال: iTunes)</label>
-                <input type="text" id="adm-category" placeholder="اسم القسم..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
+                <select id="adm-category-select" onchange="checkCategorySelect()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400 mb-2">
+                    <option value="">جاري تحميل الأقسام...</option>
+                </select>
+                <!-- حقل يظهر فقط إذا أراد إضافة قسم جديد -->
+                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400 hidden">
             </div>
+
             <div>
                 <label class="block text-xs text-slate-400 mb-1">اسم الفئة (مثال: بطاقة أيتونز 10$)</label>
                 <input type="text" id="adm-title" placeholder="اسم الفئة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
@@ -86,6 +92,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcJ8k5UXtpYt9239K30WzRhiZTqtMi3m3Fi35iqRWQz6GtUBB4ZpyrIc_GuhYpK9Fm/exec";
+        let availableCategories = [];
 
         window.onload = function() {
             loadUsersList();
@@ -101,9 +108,34 @@
                 let data = await res.json();
                 if(data.status === 'success') {
                     renderAdminProducts(data.products);
+                    updateCategoriesDropdown(data.products);
                 }
             } catch(e) {
                 document.getElementById('admin-products-table').innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل التحميل.</td></tr>';
+            }
+        }
+
+        function updateCategoriesDropdown(products) {
+            availableCategories = [...new Set(products.map(p => p.category))];
+            const select = document.getElementById('adm-category-select');
+            
+            let html = '<option value="">-- اختر القسم الرئيسي --</option>';
+            availableCategories.forEach(cat => {
+                html += `<option value="${cat}">${cat}</option>`;
+            });
+            html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
+            select.innerHTML = html;
+        }
+
+        function checkCategorySelect() {
+            let select = document.getElementById('adm-category-select');
+            let newCatInput = document.getElementById('adm-new-category');
+            if (select.value === 'NEW_CAT') {
+                newCatInput.classList.remove('hidden');
+                newCatInput.value = '';
+                newCatInput.focus();
+            } else {
+                newCatInput.classList.add('hidden');
             }
         }
 
@@ -181,7 +213,7 @@
                 row.className = "hover:bg-slate-800/40 transition";
                 row.innerHTML = `
                     <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
-                    <td class="p-3 text-emerald-400 font-bold">${u.balance.toFixed(2)} $</td>
+                    <td class="p-3 text-emerald-400 font-bold">${u.balance.digest ? '' : u.balance.toFixed(2)} $</td>
                     <td class="p-3 text-center">
                         <div class="flex items-center justify-center gap-2">
                             <input type="number" id="amt-${CSS.escape(u.email)}" placeholder="المبلغ" class="w-20 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-center text-slate-200">
@@ -203,13 +235,21 @@
         }
 
         async function addNewProduct() {
-            let category = document.getElementById('adm-category').value.trim();
+            let selectVal = document.getElementById('adm-category-select').value;
+            let category = '';
+
+            if (selectVal === 'NEW_CAT') {
+                category = document.getElementById('adm-new-category').value.trim();
+            } else {
+                category = selectVal;
+            }
+
             let title = document.getElementById('adm-title').value.trim();
             let price = parseFloat(document.getElementById('adm-price').value);
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || !codes) {
-                alert('الرجاء تعبئة كافة الحقول.');
+                alert('الرجاء اختيار القسم أو كتابته، وتعبئة كافة الحقول.');
                 return;
             }
 
@@ -220,7 +260,9 @@
             let data = await res.json();
             if(data.status === 'success') {
                 alert('تم إضافة الفئة بنجاح!');
-                document.getElementById('adm-category').value = '';
+                document.getElementById('adm-category-select').value = '';
+                document.getElementById('adm-new-category').value = '';
+                document.getElementById('adm-new-category').classList.add('hidden');
                 document.getElementById('adm-title').value = '';
                 document.getElementById('adm-price').value = '';
                 document.getElementById('adm-codes').value = '';
