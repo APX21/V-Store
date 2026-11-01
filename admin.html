@@ -16,21 +16,21 @@
             <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
-        <!-- نموذج إضافة منتج جديد -->
+        <!-- قسم إضافة منتج جديد -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة بطاقة جديدة والمخزون</h2>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">اسم المنتج</label>
-                <input type="text" id="adm-title" placeholder="مثال: بطاقة أيتونز 10$" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                <input type="text" id="adm-title" placeholder="مثال: بطاقة أيتونز 10$" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">السعر ($)</label>
-                    <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                    <input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">القسم</label>
-                    <select id="adm-cat" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400">
+                    <select id="adm-cat" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
                         <option value="itunes">آيتونز</option>
                         <option value="playstation">بلايستيشن</option>
                         <option value="steam">ستيم</option>
@@ -39,29 +39,108 @@
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">الأكواد (ضع كل كود في سطر منفصل)</label>
-                <textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX-XXXX&#10;YYYY-YYYY-YYYY" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono focus:outline-none focus:border-amber-400"></textarea>
+                <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
             </div>
-            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ وإضافة المنتج للشيت</button>
+            <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ وإضافة المنتج</button>
         </div>
 
-        <!-- نموذج شحن رصيد لزبون -->
+        <!-- قسم إدارة وزبائن المتجر -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن أو تعديل رصيد زبون</h2>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للزبون</label>
-                <input type="email" id="adm-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-400">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">قائمة الزبائن وأرصدتهم</h2>
+                <button onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-emerald-400">تحديث القائمة 🔄</button>
             </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">المبلغ المراد إضافته ($)</label>
-                <input type="number" id="adm-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-400">
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">البريد الإلكتروني للزبون</th>
+                            <th class="p-3">الرصيد الحالي</th>
+                            <th class="p-3 text-center">إضافة رصيد سريع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري تحميل قائمة الزبائن...</td></tr>
+                    </tbody>
+                </table>
             </div>
-            <button onclick="addBalanceToUser()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">إضافة الرصيد لحساب الزبون</button>
         </div>
     </div>
 
-    <!-- السكريبت الخاص بالأدمن -->
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEDtXKlWavW_OSiSgg2Mgo_MkUBQrlmFFMkKpBoXI4tIiGcs2EZhm8d7kBY84TdEWW/exec";
+
+        window.onload = function() {
+            loadUsersList();
+        };
+
+        async function loadUsersList() {
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getUsersList' })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    renderUsersTable(data.users);
+                }
+            } catch(e) {
+                document.getElementById('users-table').innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل تحميل قائمة الزبائن.</td></tr>';
+            }
+        }
+
+        function renderUsersTable(users) {
+            const tbody = document.getElementById('users-table');
+            if(!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد زبائن مسجلين حتى الآن.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                let row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/40 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
+                    <td class="p-3 text-emerald-400 font-bold">${u.balance.toFixed(2)} $</td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <input type="number" id="amt-${CSS.escape(u.email)}" placeholder="المبلغ" class="w-20 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-center text-slate-200">
+                            <button onclick="addBalanceDirect('${u.email}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition">شحن</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function addBalanceDirect(email) {
+            let inputId = 'amt-' + CSS.escape(email);
+            let amountInput = document.getElementById(inputId);
+            let amount = parseFloat(amountInput.value);
+
+            if(isNaN(amount) || amount <= 0) {
+                alert('الرجاء إدخال مبلغ صحيح للشحن.');
+                return;
+            }
+
+            try {
+                let url = `${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`;
+                let res = await fetch(url);
+                let data = await res.json();
+                
+                if(data.status === 'success') {
+                    alert('تم إضافة ' + amount + '$ بنجاح للزبون! الرصيد الجديد: ' + data.newBalance + ' $');
+                    amountInput.value = '';
+                    loadUsersList(); // تحديث القائمة فوراً
+                } else {
+                    alert('حدث خطأ أثناء الشحن.');
+                }
+            } catch(e) {
+                alert('تم إرسال الطلب بنجاح، جاري تحديث القائمة...');
+                loadUsersList();
+            }
+        }
 
         async function addNewProduct() {
             let title = document.getElementById('adm-title').value;
@@ -70,7 +149,7 @@
             let codes = document.getElementById('adm-codes').value;
 
             if(!title || isNaN(price) || !codes) {
-                alert('الرجاء تعبئة كافة الحقول بشكل صحيح.');
+                alert('الرجاء تعبئة كافة الحقول.');
                 return;
             }
 
@@ -81,43 +160,12 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة المنتج والأكواد بنجاح!');
+                    alert('تم إضافة المنتج بنجاح!');
                     document.getElementById('adm-title').value = '';
                     document.getElementById('adm-price').value = '';
                     document.getElementById('adm-codes').value = '';
-                } else {
-                    alert('خطأ: ' + data.message);
                 }
-            } catch(e) { 
-                alert('حدث خطأ في الاتصال.'); 
-            }
-        }
-
-        async function addBalanceToUser() {
-            let email = document.getElementById('adm-user-email').value.trim();
-            let amount = parseFloat(document.getElementById('adm-user-amount').value);
-
-            if(!email || isNaN(amount)) {
-                alert('الرجاء إدخال البريد والمبلغ بشكل صحيح.');
-                return;
-            }
-
-            try {
-                // استخدام طريقة الـ GET لتجاوز قيود الـ CORS وضمان وصول الطلب فوراً للشيت
-                let url = `${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`;
-                let res = await fetch(url);
-                let data = await res.json();
-                
-                if(data.status === 'success') {
-                    alert('تم شحن رصيد الزبون بنجاح وأصبح رصيده الجديد: ' + data.newBalance + ' $');
-                    document.getElementById('adm-user-email').value = '';
-                    document.getElementById('adm-user-amount').value = '';
-                } else {
-                    alert('خطأ من الخادم.');
-                }
-            } catch(e) { 
-                alert('تم إرسال الطلب، تحقق من شيت الـ Users لتأكيد إضافة الرصيد.'); 
-            }
+            } catch(e) { alert('خطأ في الاتصال.'); }
         }
     </script>
 </body>
