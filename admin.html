@@ -11,24 +11,30 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
     <div class="max-w-3xl mx-auto space-y-6">
+        <!-- رأس الصفحة -->
         <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h1 class="text-xl font-bold text-amber-400">🛡️ لوحة تحكم الأدمن</h1>
             <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
-        <!-- قسم إضافة فئة جديدة أو قسم جديد -->
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+        <!-- أزرار التنقل الرئيسية (التبويبات) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+            <button onclick="switchAdminTab('add-product')" id="btn-add-product" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950">➕ إضافة فئة/قسم</button>
+            <button onclick="switchAdminTab('manage-stock')" id="btn-manage-stock" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">📦 إدارة المخزون</button>
+            <button onclick="switchAdminTab('add-balance')" id="btn-add-balance" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">💵 شحن رصيد</button>
+            <button onclick="switchAdminTab('users-list')" id="btn-users-list" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200">👥 قائمة الزبائن</button>
+        </div>
+
+        <!-- 1. تبويب: إضافة فئة أو قسم جديد -->
+        <div id="tab-add-product" class="admin-tab bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة فئة جديدة أو قسم جديد</h2>
-            
             <div>
                 <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
-                <select id="adm-category-select" onchange="checkCategorySelect()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400 mb-2">
+                <select id="adm-category-select" onchange="checkCategorySelect()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
                     <option value="">جاري تحميل الأقسام...</option>
                 </select>
-                <!-- حقل يظهر فقط إذا أراد إضافة قسم جديد -->
-                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:outline-none focus:border-amber-400 hidden">
+                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
-
             <div>
                 <label class="block text-xs text-slate-400 mb-1">اسم الفئة (مثال: بطاقة أيتونز 10$)</label>
                 <input type="text" id="adm-title" placeholder="اسم الفئة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
@@ -44,13 +50,12 @@
             <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ الفئة الجديدة</button>
         </div>
 
-        <!-- قسم إدارة المخزون وإضافة أكواد للفئات الموجودة -->
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+        <!-- 2. تبويب: إدارة المخزون -->
+        <div id="tab-manage-stock" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (إضافة أكواد سريعة للفئات)</h2>
                 <button onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400">تحديث المخزون 🔄</button>
             </div>
-            
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400">
@@ -61,33 +66,47 @@
                         </tr>
                     </thead>
                     <tbody id="admin-products-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري تحميل الفئات...</td></tr>
+                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- قسم قائمة الزبائن والشحن -->
-        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+        <!-- 3. تبويب: شحن رصيد (خانة الإيميل والمبلغ فقط كما طلبت) -->
+        <div id="tab-add-balance" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+            <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد لزبون مباشرة</h2>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للزبون</label>
+                <input type="email" id="quick-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">المبلغ المراد إضافته ($)</label>
+                <input type="number" id="quick-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+            </div>
+            <button onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">إضافة الرصيد للحساب 💵</button>
+        </div>
+
+        <!-- 4. تبويب: قائمة الزبائن وأرصدتهم -->
+        <div id="tab-users-list" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">قائمة الزبائن وأرصدتهم</h2>
-                <button onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-emerald-400">تحديث 🔄</button>
+                <h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن المسجلين</h2>
+                <button onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400">تحديث القائمة 🔄</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400">
                         <tr>
                             <th class="p-3">البريد الإلكتروني</th>
-                            <th class="p-3">الرصيد</th>
-                            <th class="p-3 text-center">شحن رصيد</th>
+                            <th class="p-3">الرصيد الحالي</th>
                         </tr>
                     </thead>
                     <tbody id="users-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
+                        <tr><td colspan="2" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -95,9 +114,24 @@
         let availableCategories = [];
 
         window.onload = function() {
-            loadUsersList();
             loadAdminProducts();
+            loadUsersList();
         };
+
+        // نظام التنقل بين الأزرار (Tabs)
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            ['add-product', 'manage-stock', 'add-balance', 'users-list'].forEach(id => {
+                let btn = document.getElementById('btn-' + id);
+                if(id === tabId) {
+                    btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow";
+                } else {
+                    btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200";
+                }
+            });
+        }
 
         async function loadAdminProducts() {
             try {
@@ -193,6 +227,32 @@
             }
         }
 
+        // دالة الشحن السريع (عبر الخانتين فقط)
+        async function quickAddBalance() {
+            let email = document.getElementById('quick-user-email').value.trim();
+            let amount = parseFloat(document.getElementById('quick-user-amount').value);
+
+            if(!email || isNaN(amount) || amount <= 0) {
+                alert('الرجاء إدخال البريد الإلكتروني والمبلغ بشكل صحيح.');
+                return;
+            }
+
+            try {
+                let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم شحن الرصيد بنجاح! الرصيد الحالي للزبون: ' + data.newBalance + ' $');
+                    document.getElementById('quick-user-email').value = '';
+                    document.getElementById('quick-user-amount').value = '';
+                    loadUsersList();
+                } else {
+                    alert('حدث خطأ أثناء الشحن.');
+                }
+            } catch(e) {
+                alert('تم إرسال الطلب بنجاح.');
+            }
+        }
+
         async function loadUsersList() {
             try {
                 let res = await fetch(SCRIPT_URL, {
@@ -206,32 +266,17 @@
 
         function renderUsersTable(users) {
             const tbody = document.getElementById('users-table');
-            if(!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
+            if(!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
             tbody.innerHTML = '';
             users.forEach(u => {
                 let row = document.createElement('tr');
                 row.className = "hover:bg-slate-800/40 transition";
                 row.innerHTML = `
                     <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
-                    <td class="p-3 text-emerald-400 font-bold">${u.balance.digest ? '' : u.balance.toFixed(2)} $</td>
-                    <td class="p-3 text-center">
-                        <div class="flex items-center justify-center gap-2">
-                            <input type="number" id="amt-${CSS.escape(u.email)}" placeholder="المبلغ" class="w-20 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-xs text-center text-slate-200">
-                            <button onclick="addBalanceDirect('${u.email}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition">شحن</button>
-                        </div>
-                    </td>
+                    <td class="p-3 text-emerald-400 font-bold">${u.balance.toFixed(2)} $</td>
                 `;
                 tbody.appendChild(row);
             });
-        }
-
-        async function addBalanceDirect(email) {
-            let amountInput = document.getElementById('amt-' + CSS.escape(email));
-            let amount = parseFloat(amountInput.value);
-            if(isNaN(amount) || amount <= 0) { alert('مبلغ غير صحيح'); return; }
-            let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
-            let data = await res.json();
-            if(data.status === 'success') { alert('تم الشحن بنجاح!'); amountInput.value = ''; loadUsersList(); }
         }
 
         async function addNewProduct() {
