@@ -38,20 +38,19 @@
     <!-- المحتوى الرئيسي -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
 
-        <!-- القسم الرئيسي: عرض الأقسام (أيتونز، بلايستيشن، ستيم) -->
+        <!-- الأقسام الرئيسية (تتولد تلقائياً حسب ما يضيفه الأدمن) -->
         <section id="tab-store" class="space-y-6">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام البطاقات الرقمية</h2>
+                <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام المتجر الرقمي</h2>
                 <button onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">تحديث 🔄</button>
             </div>
 
-            <!-- أايقونات الأقسام الكبرى -->
-            <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <!-- يتم تعبئتها ديناميكياً -->
+            <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <p class="text-slate-500 col-span-full text-center py-6">جاري تحميل الأقسام...</p>
             </div>
         </section>
 
-        <!-- قسم عرض الفئات التابعة للقسم المختار -->
+        <!-- الفئات التابعة للقسم المختار -->
         <section id="tab-category-products" class="hidden space-y-6">
             <div class="flex items-center justify-between">
                 <button onclick="goHome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2">
@@ -61,11 +60,11 @@
             </div>
 
             <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- المنتجات التابعة للقسم -->
+                <!-- فئات المنتجات -->
             </div>
         </section>
 
-        <!-- قسم مشترياتي -->
+        <!-- سجل المشتريات -->
         <section id="tab-purchases" class="hidden space-y-6">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">سجل المشتريات والأكواد الخاصة بك</h2>
             <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg">
@@ -85,11 +84,11 @@
             </div>
         </section>
 
-        <!-- قسم شحن الرصيد -->
+        <!-- شحن الرصيد -->
         <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">تعليمات شحن الرصيد</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
-                <p class="text-slate-300">لشحن رصيدك في المتجر، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه، ثم تواصل مع الإدارة:</p>
+                <p class="text-slate-300">لشحن رصيدك، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه وتواصل مع الإدارة:</p>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة:</label>
                     <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-amber-400 font-mono select-all">
@@ -99,16 +98,15 @@
 
     </main>
 
-    <!-- شريط التنقل السفلي للهواتف -->
+    <!-- شريط التنقل السفلي -->
     <div class="md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
         <button onclick="goHome()" id="mob-store" class="text-amber-400 font-bold">المتجر</button>
         <button onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400">مشترياتي</button>
         <button onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400">الرصيد</button>
     </div>
 
-    <!-- السكريبت -->
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcKGFyACuLdXEvzEuR7NaXJXM8VKHrvdtinH1jJEFqut-p7QKvQqzlSvXkDc0-u6Mf/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRIX3VMipH14oe1qq3rnHYtfWfLfFGfQQZPB1XR-ivpx27UGVc80AOS6oiW60IsoS-/exec";
         let currentUser = localStorage.getItem('store_user') || "";
         let productsList = [];
 
@@ -176,38 +174,28 @@
             } catch (e) { console.error(e); }
         }
 
-        // عرض الأقسام الرئيسية (أيتونز، بلايستيشن، ستيم)
         function renderCategories() {
             const grid = document.getElementById('categories-grid');
             grid.innerHTML = '';
 
-            // استخراج الأقسام الفريدة الموجودة في المنتجات
-            let categoriesMap = {
-                'itunes': { title: 'بطاقات أيتونز (Apple)', icon: '🍏', desc: 'شحن رصيد متجر أبل وأب ستور' },
-                'playstation': { title: 'بطاقات بلايستيشن (PlayStation)', icon: '🎮', desc: 'بطاقات ستور سعودي، أمريكي، وغيرها' },
-                'steam': { title: 'بطاقات ستيم (Steam)', icon: '💻', desc: 'شحن محفظة ألعاب الكمبيوتر' }
-            };
-
-            // تجميع الأقسام المتوفرة فعلياً
             let activeCategories = [...new Set(productsList.map(p => p.category))];
 
             if(activeCategories.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام أو منتجات مضافة حالياً من لوحة التحكم.</p>';
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام مضافة حالياً من لوحة التحكم.</p>';
                 return;
             }
 
-            activeCategories.forEach(catKey => {
-                let catInfo = categoriesMap[catKey] || { title: catKey.toUpperCase(), icon: '🏷️', desc: 'بطاقات رقمية متنوعة' };
-                let count = productsList.filter(p => p.category === catKey).length;
+            activeCategories.forEach(catName => {
+                let count = productsList.filter(p => p.category === catName).length;
 
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-6 rounded-2xl flex flex-col justify-between shadow-lg cursor-pointer transition transform hover:-translate-y-1";
-                card.onclick = () => openCategory(catKey, catInfo.title);
+                card.onclick = () => openCategory(catName);
                 card.innerHTML = `
                     <div>
-                        <div class="text-4xl mb-3">${catInfo.icon}</div>
-                        <h3 class="font-bold text-lg text-slate-100">${catInfo.title}</h3>
-                        <p class="text-xs text-slate-400 mt-1">${catInfo.desc}</p>
+                        <div class="text-3xl mb-3">🏷️</div>
+                        <h3 class="font-bold text-lg text-slate-100">${catName}</h3>
+                        <p class="text-xs text-slate-400 mt-1">اضغط لاستعراض الفئات والأكواد</p>
                     </div>
                     <div class="mt-6 flex justify-between items-center pt-3 border-t border-slate-800">
                         <span class="text-xs bg-slate-800 text-amber-400 px-2.5 py-1 rounded-full font-bold">${count} فئات متاحة</span>
@@ -218,19 +206,18 @@
             });
         }
 
-        // عند النقر على قسم، فتح الفئات التابعة له
-        function openCategory(catKey, catTitle) {
+        function openCategory(catName) {
             hideAllTabs();
             document.getElementById('tab-category-products').classList.remove('hidden');
-            document.getElementById('category-title').innerText = catTitle;
+            document.getElementById('category-title').innerText = "قسم: " + catName;
 
             const grid = document.getElementById('category-products-grid');
             grid.innerHTML = '';
 
-            let filteredProducts = productsList.filter(p => p.category === catKey);
+            let filteredProducts = productsList.filter(p => p.category === catName);
 
             if(filteredProducts.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات منتجات متوفرة تحت هذا القسم حالياً.</p>';
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات تحت هذا القسم.</p>';
                 return;
             }
 
