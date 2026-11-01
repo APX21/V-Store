@@ -16,7 +16,7 @@
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
             
             <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold">
-                <button onclick="switchTab('store')" id="nav-store" class="text-amber-400 transition hover:text-amber-300">المتجر</button>
+                <button onclick="goHome()" id="nav-store" class="text-amber-400 transition hover:text-amber-300">المتجر الرئيسي</button>
                 <button onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300">مشترياتي وأكوادى</button>
                 <button onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300">شحن الرصيد</button>
             </nav>
@@ -38,14 +38,30 @@
     <!-- المحتوى الرئيسي -->
     <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
 
-        <!-- قسم المتجر -->
+        <!-- القسم الرئيسي: عرض الأقسام (أيتونز، بلايستيشن، ستيم) -->
         <section id="tab-store" class="space-y-6">
             <div class="flex justify-between items-center">
-                <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">المنتجات المتوفرة</h2>
+                <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام البطاقات الرقمية</h2>
                 <button onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">تحديث 🔄</button>
             </div>
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <p class="text-slate-500 col-span-full text-center py-6">جاري جلب المنتجات...</p>
+
+            <!-- أايقونات الأقسام الكبرى -->
+            <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <!-- يتم تعبئتها ديناميكياً -->
+            </div>
+        </section>
+
+        <!-- قسم عرض الفئات التابعة للقسم المختار -->
+        <section id="tab-category-products" class="hidden space-y-6">
+            <div class="flex items-center justify-between">
+                <button onclick="goHome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2">
+                    <span>← العودة للأقسام الرئيسية</span>
+                </button>
+                <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
+            </div>
+
+            <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- المنتجات التابعة للقسم -->
             </div>
         </section>
 
@@ -73,7 +89,7 @@
         <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">تعليمات شحن الرصيد</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
-                <p class="text-slate-300">لشحن رصيدك في المتجر، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه، ثم تواصل مع الإدارة لتتم إضافة الرصيد إلى حسابك:</p>
+                <p class="text-slate-300">لشحن رصيدك في المتجر، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه، ثم تواصل مع الإدارة:</p>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة:</label>
                     <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-amber-400 font-mono select-all">
@@ -85,7 +101,7 @@
 
     <!-- شريط التنقل السفلي للهواتف -->
     <div class="md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
-        <button onclick="switchTab('store')" id="mob-store" class="text-amber-400 font-bold">المتجر</button>
+        <button onclick="goHome()" id="mob-store" class="text-amber-400 font-bold">المتجر</button>
         <button onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400">مشترياتي</button>
         <button onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400">الرصيد</button>
     </div>
@@ -97,9 +113,7 @@
         let productsList = [];
 
         window.onload = function() {
-            if(currentUser) {
-                activateUserSession(currentUser);
-            }
+            if(currentUser) { activateUserSession(currentUser); }
             loadStoreData();
         };
 
@@ -118,7 +132,6 @@
             document.getElementById('user-info').classList.add('hidden');
             document.getElementById('auth-box').classList.remove('hidden');
             document.getElementById('user-email-input').value = "";
-            renderPurchases([]);
         }
 
         function activateUserSession(email) {
@@ -128,21 +141,22 @@
             document.getElementById('current-user-email').innerText = email;
         }
 
+        function goHome() {
+            hideAllTabs();
+            document.getElementById('tab-store').classList.remove('hidden');
+            loadStoreData();
+        }
+
         function switchTab(tabId) {
-            ['store', 'purchases', 'wallet'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                let navBtn = document.getElementById('nav-' + t);
-                let mobBtn = document.getElementById('mob-' + t);
-                if(navBtn) navBtn.className = "text-slate-400 transition hover:text-amber-300";
-                if(mobBtn) mobBtn.className = "text-slate-400";
-            });
+            hideAllTabs();
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            let activeNav = document.getElementById('nav-' + tabId);
-            let activeMob = document.getElementById('mob-' + tabId);
-            if(activeNav) activeNav.className = "text-amber-400 font-bold transition hover:text-amber-300";
-            if(activeMob) activeMob.className = "text-amber-400 font-bold";
-            
             if(tabId === 'purchases') fetchUserPurchases();
+        }
+
+        function hideAllTabs() {
+            ['tab-store', 'tab-category-products', 'tab-purchases', 'tab-wallet'].forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+            });
         }
 
         async function loadStoreData() {
@@ -157,30 +171,81 @@
                     if(result.userBalance !== undefined) {
                         document.getElementById('user-balance').innerText = result.userBalance.toFixed(2);
                     }
-                    renderProducts();
+                    renderCategories();
                 }
             } catch (e) { console.error(e); }
         }
 
-        function renderProducts() {
-            const grid = document.getElementById('products-grid');
+        // عرض الأقسام الرئيسية (أيتونز، بلايستيشن، ستيم)
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
             grid.innerHTML = '';
-            if(productsList.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد منتجات متوفرة حالياً.</p>';
+
+            // استخراج الأقسام الفريدة الموجودة في المنتجات
+            let categoriesMap = {
+                'itunes': { title: 'بطاقات أيتونز (Apple)', icon: '🍏', desc: 'شحن رصيد متجر أبل وأب ستور' },
+                'playstation': { title: 'بطاقات بلايستيشن (PlayStation)', icon: '🎮', desc: 'بطاقات ستور سعودي، أمريكي، وغيرها' },
+                'steam': { title: 'بطاقات ستيم (Steam)', icon: '💻', desc: 'شحن محفظة ألعاب الكمبيوتر' }
+            };
+
+            // تجميع الأقسام المتوفرة فعلياً
+            let activeCategories = [...new Set(productsList.map(p => p.category))];
+
+            if(activeCategories.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام أو منتجات مضافة حالياً من لوحة التحكم.</p>';
                 return;
             }
-            productsList.forEach(p => {
+
+            activeCategories.forEach(catKey => {
+                let catInfo = categoriesMap[catKey] || { title: catKey.toUpperCase(), icon: '🏷️', desc: 'بطاقات رقمية متنوعة' };
+                let count = productsList.filter(p => p.category === catKey).length;
+
+                let card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-6 rounded-2xl flex flex-col justify-between shadow-lg cursor-pointer transition transform hover:-translate-y-1";
+                card.onclick = () => openCategory(catKey, catInfo.title);
+                card.innerHTML = `
+                    <div>
+                        <div class="text-4xl mb-3">${catInfo.icon}</div>
+                        <h3 class="font-bold text-lg text-slate-100">${catInfo.title}</h3>
+                        <p class="text-xs text-slate-400 mt-1">${catInfo.desc}</p>
+                    </div>
+                    <div class="mt-6 flex justify-between items-center pt-3 border-t border-slate-800">
+                        <span class="text-xs bg-slate-800 text-amber-400 px-2.5 py-1 rounded-full font-bold">${count} فئات متاحة</span>
+                        <span class="text-amber-400 text-sm font-bold">تصفح الفئات ←</span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // عند النقر على قسم، فتح الفئات التابعة له
+        function openCategory(catKey, catTitle) {
+            hideAllTabs();
+            document.getElementById('tab-category-products').classList.remove('hidden');
+            document.getElementById('category-title').innerText = catTitle;
+
+            const grid = document.getElementById('category-products-grid');
+            grid.innerHTML = '';
+
+            let filteredProducts = productsList.filter(p => p.category === catKey);
+
+            if(filteredProducts.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات منتجات متوفرة تحت هذا القسم حالياً.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(p => {
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between shadow-md";
                 card.innerHTML = `
                     <div>
-                        <span class="text-xs bg-slate-800 text-amber-400 px-2 py-0.5 rounded">${p.category.toUpperCase()}</span>
-                        <h3 class="font-bold mt-2 text-base">${p.title}</h3>
-                        <p class="text-sm text-slate-400 mt-1">المتوفر: <span class="text-slate-200 font-bold">${p.codesCount}</span> كود</p>
+                        <span class="text-xs bg-slate-800 text-amber-400 px-2 py-0.5 rounded">فئة متاحة</span>
+                        <h3 class="font-bold mt-2 text-base text-slate-100">${p.title}</h3>
+                        <p class="text-sm text-slate-400 mt-1">المتوفر في المخزون: <span class="text-slate-200 font-bold">${p.codesCount}</span> كود</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center pt-3 border-t border-slate-800">
-                        <span class="text-amber-400 font-bold">${p.price} $</span>
-                        <button onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">شراء فوري</button>
+                        <span class="text-amber-400 font-bold text-lg">${p.price} $</span>
+                        <button onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold transition">شراء فوري</button>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -189,7 +254,7 @@
 
         async function buyProduct(productId) {
             if(!currentUser) { alert('الرجاء تسجيل الدخول بريدك الإلكتروني أولاً أعلى الصفحة.'); return; }
-            if(!confirm('هل أنت متأكد من رغبتك في شراء هذا المنتج؟')) return;
+            if(!confirm('هل أنت متأكد من رغبتك في شراء هذه البطاقة؟')) return;
 
             try {
                 let res = await fetch(SCRIPT_URL, {
