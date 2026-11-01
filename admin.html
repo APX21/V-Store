@@ -44,7 +44,7 @@
             <button onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition">حفظ وإضافة المنتج</button>
         </div>
 
-        <!-- قسم إدارة وزبائن المتجر -->
+        <!-- قسم قائمة الزبائن وأرصدتهم والشحن السريع -->
         <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">قائمة الزبائن وأرصدتهم</h2>
@@ -57,7 +57,7 @@
                         <tr>
                             <th class="p-3">البريد الإلكتروني للزبون</th>
                             <th class="p-3">الرصيد الحالي</th>
-                            <th class="p-3 text-center">إضافة رصيد سريع</th>
+                            <th class="p-3 text-center">شحن رصيد سريع</th>
                         </tr>
                     </thead>
                     <tbody id="users-table" class="divide-y divide-slate-800">
@@ -69,7 +69,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzEDtXKlWavW_OSiSgg2Mgo_MkUBQrlmFFMkKpBoXI4tIiGcs2EZhm8d7kBY84TdEWW/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcKGFyACuLdXEvzEuR7NaXJXM8VKHrvdtinH1jJEFqut-p7QKvQqzlSvXkDc0-u6Mf/exec";
 
         window.onload = function() {
             loadUsersList();
@@ -132,7 +132,7 @@
                 if(data.status === 'success') {
                     alert('تم إضافة ' + amount + '$ بنجاح للزبون! الرصيد الجديد: ' + data.newBalance + ' $');
                     amountInput.value = '';
-                    loadUsersList(); // تحديث القائمة فوراً
+                    loadUsersList();
                 } else {
                     alert('حدث خطأ أثناء الشحن.');
                 }
