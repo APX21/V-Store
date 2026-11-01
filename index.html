@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر البطاقات الرقمية والشحن</title>
+    <!-- استدعاء Tailwind CSS لتصميم سريع واحترافي -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans min-h-screen">
+
+    <!-- الهيدر -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400">⚡ متجر البطاقات السريع</h1>
+            <span class="text-sm bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">متصل بقاعدة البيانات</span>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-semibold mb-6 text-slate-200">المنتجات المتوفرة</h2>
+        
+        <!-- حالة التحميل -->
+        <div id="loading" class="text-center py-12 text-slate-400">جاري تحميل المنتجات...</div>
+
+        <!-- شبكة المنتجات -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- سيتم تعبئة المنتجات تلقائياً هنا عبر الـ JavaScript -->
+        </div>
+    </main>
+
+    <!-- نافذة إتمام الشراء (Modal) -->
+    <div id="buy-modal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full shadow-2xl">
+            <h3 class="text-lg font-bold mb-4 text-emerald-400">تأكيد عملية الشراء</h3>
+            <p id="modal-product-name" class="text-slate-300 mb-4 font-medium"></p>
+            
+            <div class="mb-4">
+                <label class="block text-sm text-slate-400 mb-1">اسمك أو معرفك:</label>
+                <input type="text" id="customer-name" placeholder="أدخل اسمك الكريم" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div id="purchase-result" class="mb-4 text-sm"></div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-slate-300 transition">إلغاء</button>
+                <button id="confirm-buy-btn" onclick="executePurchase()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white font-medium transition">تأكيد الشراء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- سكربت جلب البيانات والربط مع الـ API -->
+    <script>
+        // ضع رابط الـ Web App الخاص بك هنا مباشرة
+        const API_URL = "https://script.google.com/macros/s/AKfycbwmREd92nl6kqYhGdaR95zXhLEswOUkoDQBAYPZkBxT9altEUZcCHNDDvJvlaQ_6pLcSg/exec";
+        
+        let selectedProductId = null;
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`${API_URL}?action=getProducts`);
+                const result = await response.json();
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                if (result.status === 'success') {
+                    renderProducts(result.data);
+                } else {
+                    document.getElementById('loading').innerText = 'فشل في تحميل المنتجات.';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerText = 'حدث خطأ أثناء الاتصال بالقاعدة.';
+            }
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = '';
+            
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-800 border border-slate-700/60 rounded-xl p-5 flex flex-col justify-between shadow-lg hover:border-emerald-500/50 transition";
+                card.innerHTML = `
+                    <div>
+                        <span class="text-xs bg-slate-700 text-slate-300 px-2.5 py-1 rounded-md">${p.category}</span>
+                        <h3 class="text-lg font-bold mt-3 text-white">${p.productName}</h3>
+                        <p class="text-emerald-400 font-semibold text-xl mt-2">$${p.price}</p>
+                    </div>
+                    <div class="mt-5">
+                        <button onclick="openModal('${p.productId}', '${p.productName}')" 
+                            class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition text-center block">
+                            شراء الآن
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openModal(productId, productName) {
+            selectedProductId = productId;
+            document.getElementById('modal-product-name').innerText = `المنتج: ${productName}`;
+            document.getElementById('purchase-result').innerHTML = '';
+            document.getElementById('customer-name').value = '';
+            document.getElementById('buy-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('buy-modal').classList.add('hidden');
+        }
+
+        async function executePurchase() {
+            const customerName = document.getElementById('customer-name').value.trim() || "Guest";
+            const resultDiv = document.getElementById('purchase-result');
+            const btn = document.getElementById('confirm-buy-btn');
+            
+            btn.disabled = true;
+            btn.innerText = "جاري المعالجة...";
+            resultDiv.innerHTML = '<span class="text-yellow-400">جاري سحب الكود وإتمام الطلب...</span>';
+
+            try {
+                const response = await fetch(`${API_URL}?action=buyProduct&productId=${selectedProductId}&customerName=${encodeURIComponent(customerName)}`);
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    resultDiv.innerHTML = `<div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-3 rounded-lg">
+                        <strong>${result.message}</strong><br>
+                        الكود الخاص بك: <code class="bg-slate-900 px-2 py-1 rounded text-white select-all">${result.code}</code>
+                    </div>`;
+                    btn.style.display = 'none';
+                } else {
+                    resultDiv.innerHTML = `<span class="text-red-400">${result.message}</span>`;
+                    btn.disabled = false;
+                    btn.innerText = "تأكيد الشراء";
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="text-red-400">حدث خطأ في الاتصال بالخادم.</span>`;
+                btn.disabled = false;
+                btn.innerText = "تأكيد الشراء";
+            }
+        }
+
+        // تشغيل الجلب عند فتح الصفحة
+        fetchProducts();
+    </script>
+</body>
+</html>
