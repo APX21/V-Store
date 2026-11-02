@@ -15,19 +15,15 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
             
-            <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold">
+            <nav id="main-nav" class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold hidden">
                 <button type="button" onclick="goHome()" id="nav-store" class="text-amber-400 transition hover:text-amber-300 cursor-pointer">المتجر الرئيسي</button>
                 <button type="button" onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">مشترياتي وأكوادى</button>
                 <button type="button" onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">شحن الرصيد</button>
             </nav>
 
             <div class="flex items-center space-x-3 space-x-reverse">
-                <div id="auth-box" class="flex items-center gap-2">
-                    <input type="email" id="user-email-input" placeholder="أدخل بريدك الإلكتروني..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200">
-                    <button type="button" onclick="loginUser()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">دخول</button>
-                </div>
                 <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
-                    <span>الحساب: <strong id="current-user-email" class="text-amber-400"></strong></span>
+                    <span>مرحباً: <strong id="current-user-name" class="text-amber-400"></strong></span>
                     <span>الرصيد: <strong id="user-balance" class="text-emerald-400">0.00</strong> $</span>
                     <button type="button" onclick="logoutUser()" class="text-red-400 hover:underline cursor-pointer">خروج</button>
                 </div>
@@ -36,15 +32,67 @@
     </header>
 
     <!-- المحتوى الرئيسي -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full">
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full flex flex-col justify-center">
 
-        <!-- الأقسام الرئيسية -->
-        <section id="tab-store" class="space-y-6">
+        <!-- صندوق المصادقة (تسجيل الدخول / إنشاء حساب) -->
+        <section id="auth-container" class="max-w-md mx-auto w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-6">
+            
+            <!-- نموذج تسجيل الدخول -->
+            <div id="login-form" class="space-y-4">
+                <h2 class="text-xl font-bold text-amber-400 text-center">تسجيل الدخول إلى حسابك</h2>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني</label>
+                    <input type="email" id="login-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">كلمة المرور</label>
+                    <input type="password" id="login-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <button type="button" onclick="submitLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول 🔐</button>
+                <p class="text-xs text-center text-slate-400">ليس لديك حساب؟ <button type="button" onclick="toggleAuthMode('register')" class="text-amber-400 font-bold underline cursor-pointer">انشئ حساباً جديداً</button></p>
+            </div>
+
+            <!-- نموذج إنشاء حساب جديد -->
+            <div id="register-form" class="space-y-4 hidden">
+                <h2 class="text-xl font-bold text-amber-400 text-center">إنشاء حساب جديد</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">الاسم</label>
+                        <input type="text" id="reg-firstname" placeholder="محمد" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">الكنية</label>
+                        <input type="text" id="reg-lastname" placeholder="العلي" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني</label>
+                    <input type="email" id="reg-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">رقم الموبايل</label>
+                    <input type="text" id="reg-phone" placeholder="0912345678" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">كلمة المرور</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">تأكيد كلمة المرور</label>
+                    <input type="password" id="reg-confirm-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <button type="button" onclick="submitRegister()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">تسجيل الحساب 📝</button>
+                <p class="text-xs text-center text-slate-400">لديك حساب بالفعل؟ <button type="button" onclick="toggleAuthMode('login')" class="text-amber-400 font-bold underline cursor-pointer">سجل دخولك</button></p>
+            </div>
+
+        </section>
+
+        <!-- الأقسام الرئيسية (مخفية لحين تسجيل الدخول) -->
+        <section id="tab-store" class="space-y-6 hidden">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام المتجر الرقمي</h2>
                 <button type="button" onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition cursor-pointer">تحديث 🔄</button>
             </div>
-
             <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 <p class="text-slate-500 col-span-full text-center py-6">جاري تحميل الأقسام...</p>
             </div>
@@ -58,10 +106,7 @@
                 </button>
                 <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
             </div>
-
-            <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- فئات المنتجات -->
-            </div>
+            <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
         </section>
 
         <!-- سجل المشتريات -->
@@ -78,14 +123,14 @@
                         </tr>
                     </thead>
                     <tbody id="purchases-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="4" class="p-6 text-center text-slate-500">يرجى تسجيل الدخول لعرض مشترياتك.</td></tr>
+                        <tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات.</td></tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
         <!-- طلب شحن الرصيد -->
-        <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
+        <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto w-full">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">طلب شحن رصيد للحساب</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
                 <p class="text-slate-300">أدخل القيمة المراد شحنها، وسيتم توليد رقم طلب خاص بك لتقوم الإدارة باعتماده:</p>
@@ -99,52 +144,112 @@
                     <p class="text-xs text-emerald-400 font-bold">تم تقديم طلب الشحن بنجاح!</p>
                     <p class="text-xs text-slate-300">رقم طلب الشحن الخاص بك:</p>
                     <span id="generated-request-id" class="text-lg font-mono font-bold text-amber-400 select-all block bg-slate-900 p-2 rounded"></span>
-                    <p class="text-[11px] text-slate-400">يرجى تزويد الإدارة برقم الطلب لتتم إضافة الرصيد لحسابك فوراً.</p>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- شريط التنقل السفلي -->
-    <div class="md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
-        <button type="button" onclick="goHome()" id="mob-store" class="text-amber-400 font-bold cursor-pointer">المتجر</button>
-        <button type="button" onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400 cursor-pointer">مشترياتي</button>
-        <button type="button" onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400 cursor-pointer">الرصيد</button>
-    </div>
-
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz94Sqp9rCFKfFIt_7sDSyduZXQuZM5ziuILMS8itVElIoH73TUfgswdw9nXuSl5HL_/exec";
-        let currentUser = localStorage.getItem('store_user') || "";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ5uMecsVqbNE7pNcXy0at98o8uLJ7kULlkpYtvYLkbATqMveQAruxVd5jJQouAJ1A/exec";
+        let currentUser = JSON.parse(localStorage.getItem('store_user_data')) || null;
         let productsList = [];
 
         window.onload = function() {
-            if(currentUser) { activateUserSession(currentUser); }
-            loadStoreData();
+            if(currentUser && currentUser.email) {
+                activateUserSession(currentUser);
+            }
         };
 
-        function loginUser() {
-            let email = document.getElementById('user-email-input').value.trim();
-            if(!email) { alert('الرجاء إدخال البريد الإلكتروني.'); return; }
-            currentUser = email;
-            localStorage.setItem('store_user', email);
-            activateUserSession(email);
-            loadStoreData();
+        function toggleAuthMode(mode) {
+            if(mode === 'register') {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('hidden');
+            } else {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('hidden');
+            }
+        }
+
+        async function submitLogin() {
+            let email = document.getElementById('login-email').value.trim();
+            let password = document.getElementById('login-password').value;
+
+            if(!email || !password) {
+                alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'loginUser', email: email, password: password })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    currentUser = data.user;
+                    localStorage.setItem('store_user_data', JSON.stringify(currentUser));
+                    activateUserSession(currentUser);
+                } else {
+                    alert('خطأ: ' + (data.message || 'فشل تسجيل الدخول'));
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
+            }
+        }
+
+        async function submitRegister() {
+            let firstName = document.getElementById('reg-firstname').value.trim();
+            let lastName = document.getElementById('reg-lastname').value.trim();
+            let email = document.getElementById('reg-email').value.trim();
+            let phone = document.getElementById('reg-phone').value.trim();
+            let password = document.getElementById('reg-password').value;
+            let confirmPassword = document.getElementById('reg-confirm-password').value;
+
+            if(!firstName || !lastName || !email || !phone || !password) {
+                alert('الرجاء تعبئة جميع الحقول المطلوبة.');
+                return;
+            }
+            if(password !== confirmPassword) {
+                alert('كلمتا المرور غير متطابقتين.');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'registerUser', firstName, lastName, email, phone, password })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن.');
+                    toggleAuthMode('login');
+                } else {
+                    alert('خطأ: ' + (data.message || 'فشل التسجيل'));
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
+            }
         }
 
         function logoutUser() {
-            localStorage.removeItem('store_user');
-            currentUser = "";
+            localStorage.removeItem('store_user_data');
+            currentUser = null;
             document.getElementById('user-info').classList.add('hidden');
-            document.getElementById('auth-box').classList.remove('hidden');
-            document.getElementById('user-email-input').value = "";
+            document.getElementById('main-nav').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            hideAllTabs();
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
         }
 
-        function activateUserSession(email) {
-            document.getElementById('auth-box').classList.add('hidden');
-            let userInfo = document.getElementById('user-info');
-            userInfo.classList.remove('hidden');
-            document.getElementById('current-user-email').innerText = email;
+        function activateUserSession(user) {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('main-nav').classList.remove('hidden');
+            document.getElementById('user-info').classList.remove('hidden');
+            document.getElementById('current-user-name').innerText = user.name || user.email;
+            document.getElementById('user-balance').innerText = (user.balance || 0).toFixed(2);
+            goHome();
         }
 
         function goHome() {
@@ -154,10 +259,6 @@
         }
 
         function switchTab(tabId) {
-            if(tabId === 'wallet' && !currentUser) {
-                alert('الرجاء تسجيل الدخول بريدك الإلكتروني أولاً لتتمكن من طلب شحن الرصيد.');
-                return;
-            }
             hideAllTabs();
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             if(tabId === 'purchases') fetchUserPurchases();
@@ -171,16 +272,19 @@
         }
 
         async function loadStoreData() {
+            if(!currentUser) return;
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getStoreData', email: currentUser })
+                    body: JSON.stringify({ action: 'getStoreData', email: currentUser.email })
                 });
                 let result = await res.json();
                 if(result.status === 'success') {
                     productsList = result.products || [];
                     if(result.userBalance !== undefined) {
+                        currentUser.balance = result.userBalance;
                         document.getElementById('user-balance').innerText = result.userBalance.toFixed(2);
+                        localStorage.setItem('store_user_data', JSON.stringify(currentUser));
                     }
                     renderCategories();
                 }
@@ -193,15 +297,13 @@
             grid.innerHTML = '';
 
             let activeCategories = [...new Set(productsList.map(p => p.category))];
-
             if(activeCategories.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام مضافة حالياً من لوحة التحكم.</p>';
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام مضافة حالياً.</p>';
                 return;
             }
 
             activeCategories.forEach(catName => {
                 let count = productsList.filter(p => p.category === catName).length;
-
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-6 rounded-2xl flex flex-col justify-between shadow-lg cursor-pointer transition transform hover:-translate-y-1";
                 card.onclick = () => openCategory(catName);
@@ -230,12 +332,6 @@
             grid.innerHTML = '';
 
             let filteredProducts = productsList.filter(p => p.category === catName);
-
-            if(filteredProducts.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات تحت هذا القسم.</p>';
-                return;
-            }
-
             filteredProducts.forEach(p => {
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between shadow-md";
@@ -243,7 +339,7 @@
                     <div>
                         <span class="text-xs bg-slate-800 text-amber-400 px-2 py-0.5 rounded">فئة متاحة</span>
                         <h3 class="font-bold mt-2 text-base text-slate-100">${p.title}</h3>
-                        <p class="text-sm text-slate-400 mt-1">المتوفر في المخزون: <span class="text-slate-200 font-bold">${p.codesCount}</span> كود</p>
+                        <p class="text-sm text-slate-400 mt-1">المتوفر: <span class="text-slate-200 font-bold">${p.codesCount}</span> كود</p>
                     </div>
                     <div class="mt-4 flex justify-between items-center pt-3 border-t border-slate-800">
                         <span class="text-amber-400 font-bold text-lg">${p.price} $</span>
@@ -257,45 +353,42 @@
         async function submitDepositRequest() {
             let amount = parseFloat(document.getElementById('deposit-amount').value);
             if(isNaN(amount) || amount <= 0) {
-                alert('الرجاء إدخال مبلغ صحيح للشحن.');
+                alert('الرجاء إدخال مبلغ صحيح.');
                 return;
             }
 
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'createDepositRequest', email: currentUser, amount: amount })
+                    body: JSON.stringify({ action: 'createDepositRequest', email: currentUser.email, amount: amount })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
                     document.getElementById('generated-request-id').innerText = data.requestId;
                     document.getElementById('deposit-result').classList.remove('hidden');
                     document.getElementById('deposit-amount').value = '';
-                } else {
-                    alert('حدث خطأ أثناء تقديم الطلب.');
                 }
-            } catch(e) {
-                alert('خطأ في الاتصال.');
-            }
+            } catch(e) {}
         }
 
         async function buyProduct(productId) {
-            if(!currentUser) { alert('الرجاء تسجيل الدخول بريدك الإلكتروني أولاً أعلى الصفحة.'); return; }
             if(!confirm('هل أنت متأكد من رغبتك في شراء هذه البطاقة؟')) return;
-
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'buyProduct', email: currentUser, productId: productId })
+                    body: JSON.stringify({ action: 'buyProduct', email: currentUser.email, productId: productId })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم الشراء بنجاح! كود البطاقة الخاص بك:\n\n' + data.code);
+                    alert('تم الشراء بنجاح! كود البطاقة:\n\n' + data.code);
+                    currentUser.balance = data.newBalance;
+                    document.getElementById('user-balance').innerText = data.newBalance.toFixed(2);
+                    localStorage.setItem('store_user_data', JSON.stringify(currentUser));
                     loadStoreData();
                 } else {
                     alert('خطأ: ' + (data.message || 'خطأ'));
                 }
-            } catch(e) { alert('حدث خطأ أثناء الاتصال.'); }
+            } catch(e) {}
         }
 
         async function fetchUserPurchases() {
@@ -303,7 +396,7 @@
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'getUserPurchases', email: currentUser })
+                    body: JSON.stringify({ action: 'getUserPurchases', email: currentUser.email })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
@@ -316,20 +409,19 @@
             const tbody = document.getElementById('purchases-table');
             if(!tbody) return;
             if(!list || list.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات سابقة.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات.</td></tr>';
                 return;
             }
             tbody.innerHTML = '';
             list.forEach(item => {
-                let row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/40 transition";
-                row.innerHTML = `
-                    <td class="p-3 font-semibold">${item.productTitle}</td>
-                    <td class="p-3 text-amber-400">${item.price} $</td>
-                    <td class="p-3 font-mono text-emerald-400 select-all bg-slate-950/50 rounded">${item.assignedCode}</td>
-                    <td class="p-3 text-xs text-slate-400">${item.timestamp}</td>
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-semibold">${item.productTitle}</td>
+                        <td class="p-3 text-amber-400">${item.price} $</td>
+                        <td class="p-3 font-mono text-emerald-400 select-all bg-slate-950/50 rounded">${item.assignedCode}</td>
+                        <td class="p-3 text-xs text-slate-400">${item.timestamp}</td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
             });
         }
     </script>
