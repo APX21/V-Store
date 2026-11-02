@@ -17,12 +17,13 @@
             <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
         </header>
 
-        <!-- أزرار التنقل الرئيسية (التبويبات) - تم إصلاحها بالكامل لتعمل بسلاسة -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-50 relative">
-            <button type="button" onclick="switchAdminTab('add-product')" id="btn-add-product" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer">➕ إضافة فئة/قسم</button>
-            <button type="button" onclick="switchAdminTab('manage-stock')" id="btn-manage-stock" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 إدارة المخزون</button>
+        <!-- أزرار التنقل الرئيسية (التبويبات) -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-50 relative">
+            <button type="button" onclick="switchAdminTab('add-product')" id="btn-add-product" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة فئة/قسم</button>
+            <button type="button" onclick="switchAdminTab('manage-stock')" id="btn-manage-stock" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
+            <button type="button" onclick="switchAdminTab('deposit-requests')" id="btn-deposit-requests" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💳 طلبات الشحن</button>
             <button type="button" onclick="switchAdminTab('add-balance')" id="btn-add-balance" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💵 شحن رصيد</button>
-            <button type="button" onclick="switchAdminTab('users-list')" id="btn-users-list" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 قائمة الزبائن</button>
+            <button type="button" onclick="switchAdminTab('users-list')" id="btn-users-list" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
         <!-- 1. تبويب: إضافة فئة أو قسم جديد -->
@@ -86,7 +87,31 @@
             </div>
         </div>
 
-        <!-- 3. تبويب: شحن رصيد -->
+        <!-- 3. تبويب: طلبات الشحن -->
+        <div id="tab-deposit-requests" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+            <div class="flex justify-between items-center">
+                <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات شحن الرصيد الواردة</h2>
+                <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث القائمة 🔄</button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">رقم الطلب</th>
+                            <th class="p-3">البريد الإلكتروني</th>
+                            <th class="p-3">المبلغ ($)</th>
+                            <th class="p-3">التاريخ</th>
+                            <th class="p-3 text-center">إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deposit-requests-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 4. تبويب: شحن رصيد -->
         <div id="tab-add-balance" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد لزبون مباشرة</h2>
             <div>
@@ -100,11 +125,11 @@
             <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">إضافة الرصيد للحساب 💵</button>
         </div>
 
-        <!-- 4. تبويب: قائمة الزبائن -->
+        <!-- 5. تبويب: قائمة الزبائن -->
         <div id="tab-users-list" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن المسجلين</h2>
-                <button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث القائمة 🔄</button>
+                <button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
@@ -124,37 +149,88 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4hytj1Tz_QSq55KLvTDQJx-wHkhmZQbD9AHoDxsZllLpVSVuHgPVDlOddJ-j7zWU/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGwWg148elSACN54v0kyMe6nNbJTImlbVudGwf4LhXPFRseaY469pDqhkKN-DZ_QbE/exec";
         let globalProducts = [];
 
         window.onload = function() {
             loadAdminProducts();
             loadUsersList();
+            loadDepositRequests();
         };
 
-        // نظام تبديل التبويبات الآمن والسريع
         function switchAdminTab(tabId) {
             try {
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
-                let targetTab = document.getElementById('tab- ' + tabId);
-                // تدارك أي خطأ بالاسم
-                document.getElementById('tab-add-product').classList.add('hidden');
-                document.getElementById('tab-manage-stock').classList.add('hidden');
-                document.getElementById('tab-add-balance').classList.add('hidden');
-                document.getElementById('tab-users-list').classList.add('hidden');
-
-                document.getElementById('tab-' + tabId).classList.remove('hidden');
-
-                ['add-product', 'manage-stock', 'add-balance', 'users-list'].forEach(id => {
+                ['add-product', 'manage-stock', 'deposit-requests', 'add-balance', 'users-list'].forEach(id => {
+                    let tab = document.getElementById('tab-' + id);
                     let btn = document.getElementById('btn-' + id);
-                    if(id === tabId) {
-                        btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
-                    } else {
-                        btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
-                    }
+                    if(tab) tab.classList.add('hidden');
+                    if(btn) btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
                 });
+
+                let activeTab = document.getElementById('tab-' + tabId);
+                let activeBtn = document.getElementById('btn-' + tabId);
+                if(activeTab) activeTab.classList.remove('hidden');
+                if(activeBtn) activeBtn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
+                
+                if(tabId === 'deposit-requests') loadDepositRequests();
+            } catch(e) { console.error(e); }
+        }
+
+        async function loadDepositRequests() {
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getDepositRequests' })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    renderDepositRequests(data.requests || []);
+                }
             } catch(e) {
-                console.error(e);
+                let tbody = document.getElementById('deposit-requests-table');
+                if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-400">فشل جلب الطلبات.</td></tr>';
+            }
+        }
+
+        function renderDepositRequests(requests) {
+            const tbody = document.getElementById('deposit-requests-table');
+            if(!tbody) return;
+            if(!requests || requests.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن معلقة.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = '';
+            requests.forEach(req => {
+                let row = document.createElement('tr');
+                row.className = "hover:bg-slate-800/40 transition";
+                row.innerHTML = `
+                    <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
+                    <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                    <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
+                    <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                    <td class="p-3 text-center">
+                        <button type="button" onclick="approveDeposit('${req.email}', ${req.amount})" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">اعتماد وشحن 💵</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function approveDeposit(email, amount) {
+            if(!confirm(`هل أنت متأكد من اعتماد شحن مبلغ ${amount}$ للزبون (${email})؟`)) return;
+
+            try {
+                let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
+                let data = await res.json();
+                if(data.status === 'success') {
+                    alert('تم اعتماد الطلب وشحن رصيد الزبون بنجاح!');
+                    loadDepositRequests();
+                    loadUsersList();
+                } else {
+                    alert('حدث خطأ أثناء اعتماد الشحن.');
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
             }
         }
 
@@ -170,10 +246,7 @@
                     renderAdminProducts(globalProducts);
                     updateCategoriesDropdown(globalProducts);
                 }
-            } catch(e) {
-                let tbody = document.getElementById('admin-products-table');
-                if(tbody) tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-red-400">فشل التحميل.</td></tr>';
-            }
+            } catch(e) {}
         }
 
         function updateCategoriesDropdown(products) {
@@ -187,9 +260,6 @@
             });
             html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
             select.innerHTML = html;
-            
-            let titleSelect = document.getElementById('adm-title-select');
-            if(titleSelect) titleSelect.innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
         }
 
         function onCategoryChange() {
