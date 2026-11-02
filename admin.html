@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
-    <div class="max-w-3xl mx-auto space-y-6">
+    <div class="max-w-4xl mx-auto space-y-6">
         <!-- رأس الصفحة -->
         <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h1 class="text-xl font-bold text-amber-400">🛡️ لوحة تحكم الأدمن</h1>
@@ -87,27 +87,74 @@
             </div>
         </div>
 
-        <!-- 3. تبويب: طلبات الشحن -->
-        <div id="tab-deposit-requests" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
+        <!-- 3. تبويب: طلبات الشحن (مقسماً لمعلقة، مقبولة، ومرفوضة) -->
+        <div id="tab-deposit-requests" class="admin-tab hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات شحن الرصيد الواردة</h2>
+                <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
                 <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث القائمة 🔄</button>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">رقم الطلب</th>
-                            <th class="p-3">البريد الإلكتروني</th>
-                            <th class="p-3">المبلغ ($)</th>
-                            <th class="p-3">التاريخ</th>
-                            <th class="p-3 text-center">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deposit-requests-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
-                    </tbody>
-                </table>
+
+            <!-- الطلبات المعلقة -->
+            <div class="space-y-3">
+                <h3 class="text-sm font-bold text-amber-400">⏳ الطلبات المعلقة (قيد الانتظار)</h3>
+                <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-slate-800/60 text-slate-400">
+                            <tr>
+                                <th class="p-3">رقم الطلب</th>
+                                <th class="p-3">البريد الإلكتروني</th>
+                                <th class="p-3">المبلغ ($)</th>
+                                <th class="p-3">التاريخ</th>
+                                <th class="p-3 text-center">الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deposit-pending-table" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات معلقة.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- الطلبات المقبولة -->
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-emerald-400">✅ الطلبات المقبولة</h3>
+                <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-slate-800/60 text-slate-400">
+                            <tr>
+                                <th class="p-3">رقم الطلب</th>
+                                <th class="p-3">البريد الإلكتروني</th>
+                                <th class="p-3">المبلغ ($)</th>
+                                <th class="p-3">التاريخ</th>
+                                <th class="p-3 text-center">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deposit-approved-table" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مقبولة.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- الطلبات المرفوضة -->
+            <div class="space-y-3 pt-4 border-t border-slate-800">
+                <h3 class="text-sm font-bold text-red-400">❌ الطلبات المرفوضة</h3>
+                <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                    <table class="w-full text-right text-sm">
+                        <thead class="bg-slate-800/60 text-slate-400">
+                            <tr>
+                                <th class="p-3">رقم الطلب</th>
+                                <th class="p-3">البريد الإلكتروني</th>
+                                <th class="p-3">المبلغ ($)</th>
+                                <th class="p-3">التاريخ</th>
+                                <th class="p-3 text-center">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deposit-rejected-table" class="divide-y divide-slate-800">
+                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مرفوضة.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -184,50 +231,98 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    renderDepositRequests(data.requests || []);
+                    renderDepositTables(data.requests || []);
                 }
             } catch(e) {
-                let tbody = document.getElementById('deposit-requests-table');
-                if(tbody) tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-red-400">فشل جلب الطلبات.</td></tr>';
+                console.error(e);
             }
         }
 
-        function renderDepositRequests(requests) {
-            const tbody = document.getElementById('deposit-requests-table');
-            if(!tbody) return;
-            if(!requests || requests.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن معلقة.</td></tr>';
-                return;
+        function renderDepositTables(requests) {
+            const pendingTbody = document.getElementById('deposit-pending-table');
+            const approvedTbody = document.getElementById('deposit-approved-table');
+            const rejectedTbody = document.getElementById('deposit-rejected-table');
+
+            let pendingHtml = '';
+            let approvedHtml = '';
+            let rejectedHtml = '';
+
+            let pendingList = requests.filter(r => !r.status || r.status === 'Pending');
+            let approvedList = requests.filter(r => r.status === 'Approved');
+            let rejectedList = requests.filter(r => r.status === 'Rejected');
+
+            if(pendingList.length === 0) {
+                pendingHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات معلقة.</td></tr>';
+            } else {
+                pendingList.forEach(req => {
+                    pendingHtml += `
+                        <tr class="hover:bg-slate-800/40 transition">
+                            <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
+                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                            <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
+                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                            <td class="p-3 text-center flex justify-center gap-2">
+                                <button type="button" onclick="handleDeposit('${req.requestId}', 'Approved')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">موافقة ✅</button>
+                                <button type="button" onclick="handleDeposit('${req.requestId}', 'Rejected')" class="bg-red-500 hover:bg-red-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">رفض ❌</button>
+                            </td>
+                        </tr>
+                    `;
+                });
             }
-            tbody.innerHTML = '';
-            requests.forEach(req => {
-                let row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/40 transition";
-                row.innerHTML = `
-                    <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
-                    <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
-                    <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
-                    <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
-                    <td class="p-3 text-center">
-                        <button type="button" onclick="approveDeposit('${req.email}', ${req.amount})" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">اعتماد وشحن 💵</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+
+            if(approvedList.length === 0) {
+                approvedHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مقبولة.</td></tr>';
+            } else {
+                approvedList.forEach(req => {
+                    approvedHtml += `
+                        <tr class="hover:bg-slate-800/40 transition opacity-80">
+                            <td class="p-3 font-mono text-amber-400 text-xs">${req.requestId}</td>
+                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                            <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
+                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                            <td class="p-3 text-center text-emerald-400 font-bold text-xs">تمت الموافقة والشحن</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            if(rejectedList.length === 0) {
+                rejectedHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مرفوضة.</td></tr>';
+            } else {
+                rejectedList.forEach(req => {
+                    rejectedHtml += `
+                        <tr class="hover:bg-slate-800/40 transition opacity-60">
+                            <td class="p-3 font-mono text-slate-400 text-xs">${req.requestId}</td>
+                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                            <td class="p-3 text-slate-400 font-bold">${req.amount} $</td>
+                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                            <td class="p-3 text-center text-red-400 font-bold text-xs">مرفوض</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            pendingTbody.innerHTML = pendingHtml;
+            approvedTbody.innerHTML = approvedHtml;
+            rejectedTbody.innerHTML = rejectedHtml;
         }
 
-        async function approveDeposit(email, amount) {
-            if(!confirm(`هل أنت متأكد من اعتماد شحن مبلغ ${amount}$ للزبون (${email})؟`)) return;
+        async function handleDeposit(requestId, status) {
+            let msg = status === 'Approved' ? 'هل أنت متأكد من الموافقة على الطلب وشحن الرصيد للزبون؟' : 'هل أنت متأكد من رفض طلب الشحن؟';
+            if(!confirm(msg)) return;
 
             try {
-                let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'handleDepositAction', requestId: requestId, status: status })
+                });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم اعتماد الطلب وشحن رصيد الزبون بنجاح!');
+                    alert('تم تحديث حالة الطلب بنجاح!');
                     loadDepositRequests();
                     loadUsersList();
                 } else {
-                    alert('حدث خطأ أثناء اعتماد الشحن.');
+                    alert('حدث خطأ: ' + (data.message || 'خطأ'));
                 }
             } catch(e) {
                 alert('حدث خطأ في الاتصال.');
@@ -285,7 +380,7 @@
                 filtered.forEach(p => {
                     html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
                 });
-                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
+                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
                 titleSelect.innerHTML = html;
             }
         }
