@@ -16,20 +16,20 @@
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
             
             <nav class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold">
-                <button onclick="goHome()" id="nav-store" class="text-amber-400 transition hover:text-amber-300">المتجر الرئيسي</button>
-                <button onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300">مشترياتي وأكوادى</button>
-                <button onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300">شحن الرصيد</button>
+                <button type="button" onclick="goHome()" id="nav-store" class="text-amber-400 transition hover:text-amber-300 cursor-pointer">المتجر الرئيسي</button>
+                <button type="button" onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">مشترياتي وأكوادى</button>
+                <button type="button" onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">شحن الرصيد</button>
             </nav>
 
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div id="auth-box" class="flex items-center gap-2">
                     <input type="email" id="user-email-input" placeholder="أدخل بريدك الإلكتروني..." class="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-200">
-                    <button onclick="loginUser()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition">دخول</button>
+                    <button type="button" onclick="loginUser()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">دخول</button>
                 </div>
                 <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
                     <span>الحساب: <strong id="current-user-email" class="text-amber-400"></strong></span>
                     <span>الرصيد: <strong id="user-balance" class="text-emerald-400">0.00</strong> $</span>
-                    <button onclick="logoutUser()" class="text-red-400 hover:underline">خروج</button>
+                    <button type="button" onclick="logoutUser()" class="text-red-400 hover:underline cursor-pointer">خروج</button>
                 </div>
             </div>
         </div>
@@ -42,7 +42,7 @@
         <section id="tab-store" class="space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام المتجر الرقمي</h2>
-                <button onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">تحديث 🔄</button>
+                <button type="button" onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition cursor-pointer">تحديث 🔄</button>
             </div>
 
             <div id="categories-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -53,7 +53,7 @@
         <!-- الفئات التابعة للقسم المختار -->
         <section id="tab-category-products" class="hidden space-y-6">
             <div class="flex items-center justify-between">
-                <button onclick="goHome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2">
+                <button type="button" onclick="goHome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer">
                     <span>← العودة للأقسام الرئيسية</span>
                 </button>
                 <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
@@ -84,14 +84,22 @@
             </div>
         </section>
 
-        <!-- شحن الرصيد -->
+        <!-- طلب شحن الرصيد -->
         <section id="tab-wallet" class="hidden space-y-6 max-w-lg mx-auto">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">تعليمات شحن الرصيد</h2>
+            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">طلب شحن رصيد للحساب</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
-                <p class="text-slate-300">لشحن رصيدك، قم بالتحويل عبر شبكة USDT (BEP20) إلى العنوان أدناه وتواصل مع الإدارة:</p>
+                <p class="text-slate-300">أدخل القيمة المراد شحنها، وسيتم توليد رقم طلب خاص بك لتقوم الإدارة باعتماده:</p>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">عنوان المحفظة:</label>
-                    <input type="text" readonly value="0x1234...AbCdEf9876" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-amber-400 font-mono select-all">
+                    <label class="block text-xs text-slate-400 mb-1">المبلغ المطلوب شحنه ($)</label>
+                    <input type="number" id="deposit-amount" placeholder="مثال: 50" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                </div>
+                <button type="button" onclick="submitDepositRequest()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">إرسال طلب الشحن 🚀</button>
+                
+                <div id="deposit-result" class="hidden p-4 bg-slate-950 border border-emerald-500/50 rounded-lg text-center space-y-2 mt-4">
+                    <p class="text-xs text-emerald-400 font-bold">تم تقديم طلب الشحن بنجاح!</p>
+                    <p class="text-xs text-slate-300">رقم طلب الشحن الخاص بك:</p>
+                    <span id="generated-request-id" class="text-lg font-mono font-bold text-amber-400 select-all block bg-slate-900 p-2 rounded"></span>
+                    <p class="text-[11px] text-slate-400">يرجى تزويد الإدارة برقم الطلب لتتم إضافة الرصيد لحسابك فوراً.</p>
                 </div>
             </div>
         </section>
@@ -100,13 +108,13 @@
 
     <!-- شريط التنقل السفلي -->
     <div class="md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
-        <button onclick="goHome()" id="mob-store" class="text-amber-400 font-bold">المتجر</button>
-        <button onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400">مشترياتي</button>
-        <button onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400">الرصيد</button>
+        <button type="button" onclick="goHome()" id="mob-store" class="text-amber-400 font-bold cursor-pointer">المتجر</button>
+        <button type="button" onclick="switchTab('purchases')" id="mob-purchases" class="text-slate-400 cursor-pointer">مشترياتي</button>
+        <button type="button" onclick="switchTab('wallet')" id="mob-wallet" class="text-slate-400 cursor-pointer">الرصيد</button>
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4hytj1Tz_QSq55KLvTDQJx-wHkhmZQbD9AHoDxsZllLpVSVuHgPVDlOddJ-j7zWU/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzGwWg148elSACN54v0kyMe6nNbJTImlbVudGwf4LhXPFRseaY469pDqhkKN-DZ_QbE/exec";
         let currentUser = localStorage.getItem('store_user') || "";
         let productsList = [];
 
@@ -146,6 +154,10 @@
         }
 
         function switchTab(tabId) {
+            if(tabId === 'wallet' && !currentUser) {
+                alert('الرجاء تسجيل الدخول بريدك الإلكتروني أولاً لتتمكن من طلب شحن الرصيد.');
+                return;
+            }
             hideAllTabs();
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             if(tabId === 'purchases') fetchUserPurchases();
@@ -153,7 +165,8 @@
 
         function hideAllTabs() {
             ['tab-store', 'tab-category-products', 'tab-purchases', 'tab-wallet'].forEach(t => {
-                document.getElementById(t).classList.add('hidden');
+                let el = document.getElementById(t);
+                if(el) el.classList.add('hidden');
             });
         }
 
@@ -165,7 +178,7 @@
                 });
                 let result = await res.json();
                 if(result.status === 'success') {
-                    productsList = result.products;
+                    productsList = result.products || [];
                     if(result.userBalance !== undefined) {
                         document.getElementById('user-balance').innerText = result.userBalance.toFixed(2);
                     }
@@ -176,6 +189,7 @@
 
         function renderCategories() {
             const grid = document.getElementById('categories-grid');
+            if(!grid) return;
             grid.innerHTML = '';
 
             let activeCategories = [...new Set(productsList.map(p => p.category))];
@@ -212,6 +226,7 @@
             document.getElementById('category-title').innerText = "قسم: " + catName;
 
             const grid = document.getElementById('category-products-grid');
+            if(!grid) return;
             grid.innerHTML = '';
 
             let filteredProducts = productsList.filter(p => p.category === catName);
@@ -232,11 +247,36 @@
                     </div>
                     <div class="mt-4 flex justify-between items-center pt-3 border-t border-slate-800">
                         <span class="text-amber-400 font-bold text-lg">${p.price} $</span>
-                        <button onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold transition">شراء فوري</button>
+                        <button type="button" onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer">شراء فوري</button>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        async function submitDepositRequest() {
+            let amount = parseFloat(document.getElementById('deposit-amount').value);
+            if(isNaN(amount) || amount <= 0) {
+                alert('الرجاء إدخال مبلغ صحيح للشحن.');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'createDepositRequest', email: currentUser, amount: amount })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    document.getElementById('generated-request-id').innerText = data.requestId;
+                    document.getElementById('deposit-result').classList.remove('hidden');
+                    document.getElementById('deposit-amount').value = '';
+                } else {
+                    alert('حدث خطأ أثناء تقديم الطلب.');
+                }
+            } catch(e) {
+                alert('خطأ في الاتصال.');
+            }
         }
 
         async function buyProduct(productId) {
@@ -253,7 +293,7 @@
                     alert('تم الشراء بنجاح! كود البطاقة الخاص بك:\n\n' + data.code);
                     loadStoreData();
                 } else {
-                    alert('خطأ: ' + data.message);
+                    alert('خطأ: ' + (data.message || 'خطأ'));
                 }
             } catch(e) { alert('حدث خطأ أثناء الاتصال.'); }
         }
@@ -274,6 +314,7 @@
 
         function renderPurchases(list) {
             const tbody = document.getElementById('purchases-table');
+            if(!tbody) return;
             if(!list || list.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-slate-500">لا توجد مشتريات سابقة.</td></tr>';
                 return;
