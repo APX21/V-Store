@@ -18,7 +18,7 @@
         </header>
 
         <!-- أزرار التنقل الرئيسية (التبويبات) -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 shadow-md">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-50 relative">
             <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة فئة/قسم</button>
             <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
             <button type="button" onclick="openTab('depositReqTab')" id="tab-btn-depositReqTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💳 طلبات الشحن</button>
@@ -89,74 +89,36 @@
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن -->
+        <!-- 3. طلبات الشحن (مع أزرار فرعية للتصفية لمنع العجقة) -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
-                <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث القائمة 🔄</button>
+                <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button>
             </div>
 
-            <!-- المعلقة -->
-            <div class="space-y-3">
-                <h3 class="text-sm font-bold text-amber-400">⏳ الطلبات المعلقة (قيد الانتظار)</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-lg">
-                    <table class="w-full text-right text-sm">
-                        <thead class="bg-slate-800/60 text-slate-400">
-                            <tr>
-                                <th class="p-3">رقم الطلب</th>
-                                <th class="p-3">البريد الإلكتروني</th>
-                                <th class="p-3">المبلغ ($)</th>
-                                <th class="p-3">التاريخ</th>
-                                <th class="p-3 text-center">الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deposit-pending-table" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات معلقة.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- أزرار التصفية الفرعية لطلبات الشحن -->
+            <div class="flex gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer">⏳ المعلقة</button>
+                <button type="button" onclick="filterDeposit('Approved')" id="sub-btn-Approved" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">✅ المقبولة</button>
+                <button type="button" onclick="filterDeposit('Rejected')" id="sub-btn-Rejected" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">❌ المرفوضة</button>
             </div>
 
-            <!-- المقبولة -->
-            <div class="space-y-3 pt-4 border-t border-slate-800">
-                <h3 class="text-sm font-bold text-emerald-400">✅ الطلبات المقبولة</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-lg">
-                    <table class="w-full text-right text-sm">
-                        <thead class="bg-slate-800/60 text-slate-400">
-                            <tr>
-                                <th class="p-3">رقم الطلب</th>
-                                <th class="p-3">البريد الإلكتروني</th>
-                                <th class="p-3">المبلغ ($)</th>
-                                <th class="p-3">التاريخ</th>
-                                <th class="p-3 text-center">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deposit-approved-table" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مقبولة.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- المرفوضة -->
-            <div class="space-y-3 pt-4 border-t border-slate-800">
-                <h3 class="text-sm font-bold text-red-400">❌ الطلبات المرفوضة</h3>
-                <div class="overflow-x-auto border border-slate-800 rounded-lg">
-                    <table class="w-full text-right text-sm">
-                        <thead class="bg-slate-800/60 text-slate-400">
-                            <tr>
-                                <th class="p-3">رقم الطلب</th>
-                                <th class="p-3">البريد الإلكتروني</th>
-                                <th class="p-3">المبلغ ($)</th>
-                                <th class="p-3">التاريخ</th>
-                                <th class="p-3 text-center">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deposit-rejected-table" class="divide-y divide-slate-800">
-                            <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مرفوضة.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- جدول عرض الطلبات حسب الفلتر -->
+            <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">رقم الطلب</th>
+                            <th class="p-3">البريد الإلكتروني</th>
+                            <th class="p-3">المبلغ ($)</th>
+                            <th class="p-3">التاريخ</th>
+                            <th class="p-3 text-center">الإجراء / الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deposit-filtered-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -200,6 +162,8 @@
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe4XIb7PL6m69sKl6xorYRere8fyvPhzpYKYV3zWUJGO9uFBCiSvlhVRd-J57NAq1v/exec";
         let globalProducts = [];
+        let allDepositRequests = [];
+        let currentDepositFilter = 'Pending';
 
         window.onload = function() {
             loadAdminProducts();
@@ -207,15 +171,12 @@
             loadDepositRequests();
         };
 
-        // دالة التنقل بين التبويبات الفعالة والبسيطة جداً
         function openTab(tabId) {
-            // إخفاء كافة المحتويات
             let contents = document.getElementsByClassName('admin-content');
             for (let i = 0; i < contents.length; i++) {
                 contents[i].classList.add('hidden');
             }
 
-            // إزالة التنسيق النشط من كافة الأزرار
             let buttons = ['addProductTab', 'manageStockTab', 'depositReqTab', 'addBalanceTab', 'usersListTab'];
             buttons.forEach(id => {
                 let btn = document.getElementById('tab-btn-' + id);
@@ -224,7 +185,6 @@
                 }
             });
 
-            // اظهار المحتوى المطلوب وتنشيط زره
             let targetContent = document.getElementById(tabId);
             let targetBtn = document.getElementById('tab-btn-' + tabId);
 
@@ -244,80 +204,70 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    renderDepositTables(data.requests || []);
+                    allDepositRequests = data.requests || [];
+                    renderFilteredDepositTable();
                 }
             } catch(e) {
                 console.error(e);
             }
         }
 
-        function renderDepositTables(requests) {
-            const pendingTbody = document.getElementById('deposit-pending-table');
-            const approvedTbody = document.getElementById('deposit-approved-table');
-            const rejectedTbody = document.getElementById('deposit-rejected-table');
+        function filterDeposit(status) {
+            currentDepositFilter = status;
+            ['Pending', 'Approved', 'Rejected'].forEach(s => {
+                let btn = document.getElementById('sub-btn-' + s);
+                if(btn) {
+                    if(s === status) {
+                        btn.className = "flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow";
+                    } else {
+                        btn.className = "flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
+                    }
+                }
+            });
+            renderFilteredDepositTable();
+        }
 
-            let pendingHtml = '';
-            let approvedHtml = '';
-            let rejectedHtml = '';
+        function renderFilteredDepositTable() {
+            const tbody = document.getElementById('deposit-filtered-table');
+            if(!tbody) return;
 
-            let pendingList = requests.filter(r => !r.status || r.status === 'Pending');
-            let approvedList = requests.filter(r => r.status === 'Approved');
-            let rejectedList = requests.filter(r => r.status === 'Rejected');
+            let filteredList = allDepositRequests.filter(r => {
+                let s = r.status || 'Pending';
+                return s === currentDepositFilter;
+            });
 
-            if(pendingList.length === 0) {
-                pendingHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات معلقة.</td></tr>';
-            } else {
-                pendingList.forEach(req => {
-                    pendingHtml += `
-                        <tr class="hover:bg-slate-800/40 transition">
-                            <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
-                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
-                            <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
-                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
-                            <td class="p-3 text-center flex justify-center gap-2">
-                                <button type="button" onclick="handleDeposit('${req.requestId}', 'Approved')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">موافقة ✅</button>
-                                <button type="button" onclick="handleDeposit('${req.requestId}', 'Rejected')" class="bg-red-500 hover:bg-red-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">رفض ❌</button>
-                            </td>
-                        </tr>
-                    `;
-                });
+            if(filteredList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات في هذا القسم.</td></tr>`;
+                return;
             }
 
-            if(approvedList.length === 0) {
-                approvedHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مقبولة.</td></tr>';
-            } else {
-                approvedList.forEach(req => {
-                    approvedHtml += `
-                        <tr class="hover:bg-slate-800/40 transition opacity-80">
-                            <td class="p-3 font-mono text-amber-400 text-xs">${req.requestId}</td>
-                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
-                            <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
-                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
-                            <td class="p-3 text-center text-emerald-400 font-bold text-xs">تمت الموافقة والشحن</td>
-                        </tr>
+            let html = '';
+            filteredList.forEach(req => {
+                let actionTd = '';
+                if(currentDepositFilter === 'Pending') {
+                    actionTd = `
+                        <td class="p-3 text-center flex justify-center gap-2">
+                            <button type="button" onclick="handleDeposit('${req.requestId}', 'Approved')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">موافقة ✅</button>
+                            <button type="button" onclick="handleDeposit('${req.requestId}', 'Rejected')" class="bg-red-500 hover:bg-red-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">رفض ❌</button>
+                        </td>
                     `;
-                });
-            }
+                } else if(currentDepositFilter === 'Approved') {
+                    actionTd = `<td class="p-3 text-center text-emerald-400 font-bold text-xs">تمت الموافقة والشحن</td>`;
+                } else {
+                    actionTd = `<td class="p-3 text-center text-red-400 font-bold text-xs">مرفوض</td>`;
+                }
 
-            if(rejectedList.length === 0) {
-                rejectedHtml = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات مرفوضة.</td></tr>';
-            } else {
-                rejectedList.forEach(req => {
-                    rejectedHtml += `
-                        <tr class="hover:bg-slate-800/40 transition opacity-60">
-                            <td class="p-3 font-mono text-slate-400 text-xs">${req.requestId}</td>
-                            <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
-                            <td class="p-3 text-slate-400 font-bold">${req.amount} $</td>
-                            <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
-                            <td class="p-3 text-center text-red-400 font-bold text-xs">مرفوض</td>
-                        </tr>
-                    `;
-                });
-            }
-
-            if(pendingTbody) pendingTbody.innerHTML = pendingHtml;
-            if(approvedTbody) approvedTbody.innerHTML = approvedHtml;
-            if(rejectedTbody) rejectedTbody.innerHTML = rejectedHtml;
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
+                        <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                        <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
+                        <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                        ${actionTd}
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
         }
 
         async function handleDeposit(requestId, status) {
@@ -590,7 +540,7 @@
             document.getElementById('adm-new-title').value = '';
             document.getElementById('adm-new-title').classList.add('hidden');
             document.getElementById('adm-cost-price').value = '';
-            document.getElementById('adm-price').value,value = '';
+            document.getElementById('adm-price').value = '';
             document.getElementById('adm-codes').value = '';
         }
     </script>
