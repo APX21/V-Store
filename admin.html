@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن (مع أزرار فرعية للتصفية لمنع العجقة) -->
+        <!-- 3. طلبات الشحن ( مرتبة تلقائياً الأحدث للأقدم ) -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
@@ -98,7 +98,7 @@
 
             <!-- أزرار التصفية الفرعية لطلبات الشحن -->
             <div class="flex gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
-                <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer">⏳ المعلقة</button>
+                <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">⏳ المعلقة</button>
                 <button type="button" onclick="filterDeposit('Approved')" id="sub-btn-Approved" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">✅ المقبولة</button>
                 <button type="button" onclick="filterDeposit('Rejected')" id="sub-btn-Rejected" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">❌ المرفوضة</button>
             </div>
@@ -236,6 +236,9 @@
                 return s === currentDepositFilter;
             });
 
+            // ترتيب الطلبات من الأحدث إلى الأقدم بناءً على الترتيب العكسي للوصول
+            filteredList.reverse();
+
             if(filteredList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات في هذا القسم.</td></tr>`;
                 return;
@@ -285,7 +288,7 @@
                     loadDepositRequests();
                     loadUsersList();
                 } else {
-                    alert('حدث خطأ: ' + (data.message || 'خطأ'));
+                    alert('خطأ: ' + (data.message || 'خطأ'));
                 }
             } catch(e) {
                 alert('حدث خطأ في الاتصال.');
