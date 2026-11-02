@@ -10,26 +10,25 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16">
 
-    <!-- نافذة منبثقة عصرية مخصصة للتنبيهات (Modal) -->
+    <!-- نافذة منبثقة عصرية للتنبيهات -->
     <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl transform transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
             <div id="modal-icon" class="text-4xl">✨</div>
             <h3 id="modal-title" class="text-lg font-bold text-slate-100">عنوان التنبيه</h3>
-            <p id="modal-message" class="text-xs text-slate-300 leading-relaxed select-all bg-slate-950 p-3 rounded-xl border border-slate-800/80 font-mono"></p>
+            <p id="modal-message" class="text-xs text-slate-300 leading-relaxed select-all bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono"></p>
             <div id="modal-buttons" class="flex gap-2 pt-2">
                 <button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>
             </div>
         </div>
     </div>
 
-    <!-- شريط التنقل العلوي -->
+    <!-- شريط التنقل العلوي (مرحباً + خروج فقط) -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
                     <span>مرحباً: <strong id="current-user-name" class="text-amber-400"></strong></span>
-                    <span>الرصيد: <strong id="user-balance" class="text-emerald-400">0.00</strong> $</span>
                     <button type="button" onclick="logoutUser()" class="text-red-400 hover:underline cursor-pointer">خروج</button>
                 </div>
             </div>
@@ -117,11 +116,14 @@
 
     </main>
 
-    <!-- الشريط السفلي -->
+    <!-- الشريط السفلي مع الرصيد الفعلي بجانب كلمة الرصيد -->
     <div id="mob-nav" class="hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-40">
         <button type="button" onclick="switchTab('store')" id="nav-btn-store" class="text-amber-400 font-bold cursor-pointer transition">المتجر</button>
         <button type="button" onclick="switchTab('purchases')" id="nav-btn-purchases" class="text-slate-400 cursor-pointer transition">مشترياتي</button>
-        <button type="button" onclick="switchTab('wallet')" id="nav-btn-wallet" class="text-slate-400 cursor-pointer transition">الرصيد</button>
+        <button type="button" onclick="switchTab('wallet')" id="nav-btn-wallet" class="text-slate-400 cursor-pointer transition flex items-center gap-1">
+            <span>الرصيد:</span>
+            <strong id="footer-user-balance" class="text-emerald-400">0.00 $</strong>
+        </button>
     </div>
 
     <script>
@@ -135,7 +137,6 @@
             }
         };
 
-        // دالة عرض النافذة المنبثقة العصرية بدل الـ alert القديم
         function showModal(title, message, icon = "✨") {
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = message;
@@ -144,9 +145,7 @@
             document.getElementById('custom-modal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('custom-modal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
 
         function toggleAuthMode(mode) {
             if(mode === 'register') {
@@ -215,7 +214,10 @@
             document.getElementById('user-info').classList.remove('hidden');
             document.querySelector('main').classList.remove('justify-center');
             document.getElementById('current-user-name').innerText = user.name || user.email;
-            document.getElementById('user-balance').innerText = (user.balance || 0).toFixed(2);
+            
+            let bal = (user.balance || 0).toFixed(2) + ' $';
+            document.getElementById('footer-user-balance').innerText = bal;
+            
             switchTab('store');
         }
 
@@ -230,7 +232,13 @@
             }
             ['store', 'purchases', 'wallet'].forEach(id => {
                 let btn = document.getElementById('nav-btn-' + id);
-                if(btn) btn.className = (id === tabId) ? "text-amber-400 font-bold cursor-pointer transition" : "text-slate-400 cursor-pointer transition";
+                if(btn) {
+                    if(id === tabId) {
+                        btn.className = "text-amber-400 font-bold cursor-pointer transition flex items-center gap-1";
+                    } else {
+                        btn.className = "text-slate-400 cursor-pointer transition flex items-center gap-1";
+                    }
+                }
             });
         }
 
@@ -250,7 +258,8 @@
                     productsList = result.products || [];
                     if(result.userBalance !== undefined) {
                         currentUser.balance = result.userBalance;
-                        document.getElementById('user-balance').innerText = result.userBalance.toFixed(2);
+                        let bal = result.userBalance.toFixed(2) + ' $';
+                        document.getElementById('footer-user-balance').innerText = bal;
                         localStorage.setItem('store_user_data', JSON.stringify(currentUser));
                     }
                     renderCategories();
@@ -319,7 +328,8 @@
                 if(data.status === 'success') {
                     showModal('تم الشراء بنجاح! 🎉', 'كود البطاقة الخاص بك:\n\n' + data.code, '🎁');
                     currentUser.balance = data.newBalance;
-                    document.getElementById('user-balance').innerText = data.newBalance.toFixed(2);
+                    let bal = data.newBalance.toFixed(2) + ' $';
+                    document.getElementById('footer-user-balance').innerText = bal;
                     localStorage.setItem('store_user_data', JSON.stringify(currentUser));
                     loadStoreData();
                 } else {
