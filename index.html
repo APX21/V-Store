@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16">
 
-    <!-- نافذة منبثقة عصرية للتنبيهات -->
+    <!-- نافذة منبثقة عصرية عامة للتنبيهات -->
     <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
             <div id="modal-icon" class="text-4xl">✨</div>
@@ -22,13 +22,46 @@
         </div>
     </div>
 
-    <!-- شريط التنقل العلوي (مرحباً + خروج فقط) -->
+    <!-- نافذة ملف الحساب الشخصي وتغيير كلمة المرور -->
+    <div id="profile-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl text-right">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-amber-400">👤 معلومات الحساب الشخصي</h3>
+                <button type="button" onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-100 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            
+            <div class="space-y-2 text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800">
+                <p>الاسم الكامل: <strong id="profile-fullname" class="text-slate-100"></strong></p>
+                <p>البريد الإلكتروني: <strong id="profile-email" class="text-slate-100 font-mono"></strong></p>
+                <p>رقم الموبايل: <strong id="profile-phone" class="text-slate-100 font-mono"></strong></p>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-800">
+                <h4 class="text-sm font-bold text-slate-200">🔒 تغيير كلمة المرور</h4>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">كلمة المرور القديمة</label>
+                    <input type="password" id="old-pass" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">كلمة المرور الجديدة</label>
+                    <input type="password" id="new-pass" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                </div>
+                <div>
+                    <label class="block text-[11px] text-slate-400 mb-1">تأكيد كلمة المرور الجديدة</label>
+                    <input type="password" id="confirm-new-pass" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                </div>
+                <button type="button" onclick="submitChangePassword()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition cursor-pointer mt-2">تحديث كلمة المرور 🔑</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- شريط التنقل العلوي -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
-                    <span>مرحباً: <strong id="current-user-name" class="text-amber-400"></strong></span>
+                    <span>مرحباً: <button type="button" onclick="openProfileModal()" id="current-user-name" class="text-amber-400 font-bold underline hover:text-amber-300 cursor-pointer"></button></span>
                     <button type="button" onclick="logoutUser()" class="text-red-400 hover:underline cursor-pointer">خروج</button>
                 </div>
             </div>
@@ -116,7 +149,7 @@
 
     </main>
 
-    <!-- الشريط السفلي مع الرصيد الفعلي بجانب كلمة الرصيد -->
+    <!-- الشريط السفلي -->
     <div id="mob-nav" class="hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-40">
         <button type="button" onclick="switchTab('store')" id="nav-btn-store" class="text-amber-400 font-bold cursor-pointer transition">المتجر</button>
         <button type="button" onclick="switchTab('purchases')" id="nav-btn-purchases" class="text-slate-400 cursor-pointer transition">مشترياتي</button>
@@ -127,7 +160,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ5uMecsVqbNE7pNcXy0at98o8uLJ7kULlkpYtvYLkbATqMveQAruxVd5jJQouAJ1A/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbylRtWN4WHqz137fKO6LvUoqrwiWjU_Dm0OKOXd-EYj15VRRsgUKG3G5WsXSz3emym3/exec";
         let currentUser = JSON.parse(localStorage.getItem('store_user_data')) || null;
         let productsList = [];
 
@@ -146,6 +179,52 @@
         }
 
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
+
+        function openProfileModal() {
+            if(!currentUser) return;
+            document.getElementById('profile-fullname').innerText = (currentUser.name || "") + " " + (currentUser.lastName || "");
+            document.getElementById('profile-email').innerText = currentUser.email || "";
+            document.getElementById('profile-phone').innerText = currentUser.phone || "غير متوفر";
+            document.getElementById('old-pass').value = '';
+            document.getElementById('new-pass').value = '';
+            document.getElementById('confirm-new-pass').value = '';
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+
+        async function submitChangePassword() {
+            let oldPassword = document.getElementById('old-pass').value;
+            let newPassword = document.getElementById('new-pass').value;
+            let confirmNewPass = document.getElementById('confirm-new-pass').value;
+
+            if(!oldPassword || !newPassword || !confirmNewPass) {
+                showModal('تنبيه', 'الرجاء تعبئة جميع حقول كلمة المرور.', '⚠️');
+                return;
+            }
+            if(newPassword !== confirmNewPass) {
+                showModal('تنبيه', 'كلمة المرور الجديدة غير متطابقة مع التأكيد.', '⚠️');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'changePassword', email: currentUser.email, oldPassword, newPassword })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    showModal('نجاح 🔑', 'تم تحديث كلمة المرور بنجاح!', '✅');
+                    closeProfileModal();
+                } else {
+                    showModal('خطأ', data.message || 'فشل تغيير كلمة المرور', '❌');
+                }
+            } catch(e) {
+                showModal('خطأ', 'حدث خطأ في الاتصال.', '❌');
+            }
+        }
 
         function toggleAuthMode(mode) {
             if(mode === 'register') {
