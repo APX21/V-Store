@@ -22,7 +22,7 @@
             <label class="block text-xs text-slate-400 mb-1">كلمة المرور</label>
             <input type="password" id="admin-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
         </div>
-        <button type="button" onclick="verifyAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول لوحة التحكم 🔐</button>
+        <button type="button" id="login-btn" onclick="verifyAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول لوحة التحكم 🔐</button>
         <div class="text-center mt-2">
             <a href="index.html" class="text-xs text-slate-400 hover:text-amber-400 underline">العودة للمتجر الرئيسي 🌐</a>
         </div>
@@ -186,11 +186,15 @@
         async function verifyAdminLogin() {
             let email = document.getElementById('admin-email').value.trim();
             let password = document.getElementById('admin-password').value;
+            let loginBtn = document.getElementById('login-btn');
 
             if(!email || !password) {
                 alert('الرجاء إدخال الإيميل وكلمة المرور.');
                 return;
             }
+
+            loginBtn.innerText = 'جاري التحقق... ⏳';
+            loginBtn.disabled = true;
 
             try {
                 let res = await fetch(SCRIPT_URL, {
@@ -198,14 +202,19 @@
                     body: JSON.stringify({ action: 'adminLogin', email: email, password: password })
                 });
                 let data = await res.json();
+                
                 if(data.status === 'success') {
                     localStorage.setItem('admin_logged_in', 'true');
                     showAdminDashboard();
                 } else {
                     alert('خطأ: ' + (data.message || 'بيانات الدخول غير صحيحة أو ليس لديك صلاحية أدمن.'));
+                    loginBtn.innerText = 'دخول لوحة التحكم 🔐';
+                    loginBtn.disabled = false;
                 }
             } catch(e) {
-                alert('حدث خطأ في الاتصال.');
+                alert('حدث خطأ في الاتصال بالسيرفر. تأكد من الرابط.');
+                loginBtn.innerText = 'دخول لوحة التحكم 🔐';
+                loginBtn.disabled = false;
             }
         }
 
@@ -390,7 +399,7 @@
                 filtered.forEach(p => {
                     html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
                 });
-                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
+                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
             }
         }
@@ -436,7 +445,7 @@
                             <div class="flex flex-col gap-2">
                                 <input type="number" id="batch-cost-${p.id}" placeholder="سعر شراء الكود ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
                                 <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
-                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1.5 rounded text-xs transition w-full cursor-pointer">إضافة دفعة للمخزون ➕</button>
+                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold py-3.5 rounded text-xs transition w-full cursor-pointer">إضافة دفعة للمخزون ➕</button>
                             </div>
                         </td>
                     </tr>
