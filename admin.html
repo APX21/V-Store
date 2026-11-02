@@ -89,7 +89,7 @@
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن ( مرتبة تلقائياً الأحدث للأقدم ) -->
+        <!-- 3. طلبات الشحن ( مرتبة الأحدث للأقدم مع أزرار تصفية ) -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
@@ -160,7 +160,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwe4XIb7PL6m69sKl6xorYRere8fyvPhzpYKYV3zWUJGO9uFBCiSvlhVRd-J57NAq1v/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz94Sqp9rCFKfFIt_7sDSyduZXQuZM5ziuILMS8itVElIoH73TUfgswdw9nXuSl5HL_/exec";
         let globalProducts = [];
         let allDepositRequests = [];
         let currentDepositFilter = 'Pending';
@@ -236,7 +236,7 @@
                 return s === currentDepositFilter;
             });
 
-            // ترتيب الطلبات من الأحدث إلى الأقدم بناءً على الترتيب العكسي للوصول
+            // ترتيب الطلبات من الأحدث إلى الأقدم
             filteredList.reverse();
 
             if(filteredList.length === 0) {
@@ -288,7 +288,7 @@
                     loadDepositRequests();
                     loadUsersList();
                 } else {
-                    alert('خطأ: ' + (data.message || 'خطأ'));
+                    alert('حدث خطأ: ' + (data.message || 'خطأ'));
                 }
             } catch(e) {
                 alert('حدث خطأ في الاتصال.');
