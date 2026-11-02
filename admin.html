@@ -8,16 +8,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-center">
 
-    <div class="max-w-4xl mx-auto space-y-6">
-        <!-- رأس الصفحة -->
+    <!-- نموذج تسجيل دخول الأدمن -->
+    <div id="admin-login-box" class="max-w-md mx-auto w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+        <h1 class="text-xl font-bold text-amber-400 text-center">🛡️ تسجيل دخول الأدمن</h1>
+        <p class="text-xs text-slate-400 text-center">الرجاء إدخال إيميل وكلمة مرور حساب الصلاحيات الإدارية.</p>
+        <div>
+            <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للإدارة</label>
+            <input type="email" id="admin-email" placeholder="admin@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+        </div>
+        <div>
+            <label class="block text-xs text-slate-400 mb-1">كلمة المرور</label>
+            <input type="password" id="admin-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+        </div>
+        <button type="button" onclick="verifyAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول لوحة التحكم 🔐</button>
+        <div class="text-center mt-2">
+            <a href="index.html" class="text-xs text-slate-400 hover:text-amber-400 underline">العودة للمتجر الرئيسي 🌐</a>
+        </div>
+    </div>
+
+    <!-- محتوى لوحة التحكم (مخفي لحين تسجيل الدخول بصلاحية admin) -->
+    <div id="admin-dashboard" class="max-w-4xl mx-auto space-y-6 hidden w-full">
         <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h1 class="text-xl font-bold text-amber-400">🛡️ لوحة تحكم الأدمن</h1>
-            <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-slate-300 transition">عرض المتجر 🌐</a>
+                <button type="button" onclick="logoutAdmin()" class="text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1.5 rounded-lg transition cursor-pointer">خروج 🚪</button>
+            </div>
         </header>
 
-        <!-- أزرار التنقل الرئيسية (التبويبات) -->
+        <!-- أزرار التنقل الرئيسية -->
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-50 relative">
             <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة فئة/قسم</button>
             <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
@@ -26,12 +47,9 @@
             <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
-        <!-- المحتويات (التبويبات) -->
-
         <!-- 1. إضافة فئة أو قسم جديد -->
         <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة مع التكلفة وسعر البيع</h2>
-            
             <div>
                 <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
                 <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
@@ -40,7 +58,6 @@
                 </select>
                 <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
-
             <div>
                 <label class="block text-xs text-slate-400 mb-1">فئة المنتج</label>
                 <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
@@ -48,7 +65,6 @@
                 </select>
                 <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
-
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">سعر الشراء للكود الواحد ($)</label>
@@ -59,7 +75,6 @@
                     <input type="number" id="adm-price" placeholder="مثال: 10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
                 </div>
             </div>
-
             <div>
                 <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
                 <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
@@ -89,21 +104,17 @@
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن ( مرتبة الأحدث للأقدم مع أزرار تصفية ) -->
+        <!-- 3. طلبات الشحن -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center">
                 <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
                 <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button>
             </div>
-
-            <!-- أزرار التصفية الفرعية لطلبات الشحن -->
             <div class="flex gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
                 <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">⏳ المعلقة</button>
                 <button type="button" onclick="filterDeposit('Approved')" id="sub-btn-Approved" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">✅ المقبولة</button>
                 <button type="button" onclick="filterDeposit('Rejected')" id="sub-btn-Rejected" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">❌ المرفوضة</button>
             </div>
-
-            <!-- جدول عرض الطلبات حسب الفلتر -->
             <div class="overflow-x-auto border border-slate-800 rounded-lg">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400">
@@ -160,16 +171,57 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz94Sqp9rCFKfFIt_7sDSyduZXQuZM5ziuILMS8itVElIoH73TUfgswdw9nXuSl5HL_/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ5uMecsVqbNE7pNcXy0at98o8uLJ7kULlkpYtvYLkbATqMveQAruxVd5jJQouAJ1A/exec";
         let globalProducts = [];
         let allDepositRequests = [];
         let currentDepositFilter = 'Pending';
 
         window.onload = function() {
+            let adminAuth = localStorage.getItem('admin_logged_in');
+            if(adminAuth === 'true') {
+                showAdminDashboard();
+            }
+        };
+
+        async function verifyAdminLogin() {
+            let email = document.getElementById('admin-email').value.trim();
+            let password = document.getElementById('admin-password').value;
+
+            if(!email || !password) {
+                alert('الرجاء إدخال الإيميل وكلمة المرور.');
+                return;
+            }
+
+            try {
+                let res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'adminLogin', email: email, password: password })
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    localStorage.setItem('admin_logged_in', 'true');
+                    showAdminDashboard();
+                } else {
+                    alert('خطأ: ' + (data.message || 'بيانات الدخول غير صحيحة أو ليس لديك صلاحية أدمن.'));
+                }
+            } catch(e) {
+                alert('حدث خطأ في الاتصال.');
+            }
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('admin-login-box').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            document.body.classList.remove('justify-center');
             loadAdminProducts();
             loadUsersList();
             loadDepositRequests();
-        };
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('admin_logged_in');
+            location.reload();
+        }
 
         function openTab(tabId) {
             let contents = document.getElementsByClassName('admin-content');
@@ -207,9 +259,7 @@
                     allDepositRequests = data.requests || [];
                     renderFilteredDepositTable();
                 }
-            } catch(e) {
-                console.error(e);
-            }
+            } catch(e) {}
         }
 
         function filterDeposit(status) {
@@ -235,8 +285,6 @@
                 let s = r.status || 'Pending';
                 return s === currentDepositFilter;
             });
-
-            // ترتيب الطلبات من الأحدث إلى الأقدم
             filteredList.reverse();
 
             if(filteredList.length === 0) {
@@ -287,12 +335,8 @@
                     alert('تم تحديث حالة الطلب بنجاح!');
                     loadDepositRequests();
                     loadUsersList();
-                } else {
-                    alert('حدث خطأ: ' + (data.message || 'خطأ'));
                 }
-            } catch(e) {
-                alert('حدث خطأ في الاتصال.');
-            }
+            } catch(e) {}
         }
 
         async function loadAdminProducts() {
@@ -346,7 +390,7 @@
                 filtered.forEach(p => {
                     html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
                 });
-                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
+                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
                 titleSelect.innerHTML = html;
             }
         }
@@ -379,32 +423,30 @@
             }
             tbody.innerHTML = '';
             products.forEach(p => {
-                let row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/40 transition";
                 let costVal = (p.costPrice !== undefined) ? p.costPrice.toFixed(2) : "0.00";
-                row.innerHTML = `
-                    <td class="p-3">
-                        <span class="text-xs text-amber-400 block">${p.category}</span>
-                        <strong class="text-slate-100">${p.title}</strong>
-                        <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة الكود: <span class="text-emerald-400 font-bold">${costVal}$</span></div>
-                    </td>
-                    <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
-                    <td class="p-3 text-center">
-                        <div class="flex flex-col gap-2">
-                            <input type="number" id="batch-cost-${p.id}" placeholder="سعر شراء الكود ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
-                            <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
-                            <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1.5 rounded text-xs transition w-full cursor-pointer">إضافة دفعة للمخزون ➕</button>
-                        </div>
-                    </td>
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3">
+                            <span class="text-xs text-amber-400 block">${p.category}</span>
+                            <strong class="text-slate-100">${p.title}</strong>
+                            <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة الكود: <span class="text-emerald-400 font-bold">${costVal}$</span></div>
+                        </td>
+                        <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
+                        <td class="p-3 text-center">
+                            <div class="flex flex-col gap-2">
+                                <input type="number" id="batch-cost-${p.id}" placeholder="سعر شراء الكود ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
+                                <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
+                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1.5 rounded text-xs transition w-full cursor-pointer">إضافة دفعة للمخزون ➕</button>
+                            </div>
+                        </td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
             });
         }
 
         async function addCodesWithCost(productId) {
             let batchCostInput = document.getElementById('batch-cost-' + productId);
             let textarea = document.getElementById('codes-' + productId);
-            
             let batchSingleCost = parseFloat(batchCostInput.value);
             let newCodes = textarea.value.trim();
 
@@ -420,16 +462,12 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة الأكواد وتحديث التكلفة الوسطية بنجاح!');
+                    alert('تم إضافة الأكواد بنجاح!');
                     batchCostInput.value = '';
                     textarea.value = '';
                     loadAdminProducts();
-                } else {
-                    alert('خطأ: ' + (data.message || 'حدث خطأ'));
                 }
-            } catch(e) {
-                alert('حدث خطأ في الاتصال.');
-            }
+            } catch(e) {}
         }
 
         async function quickAddBalance() {
@@ -445,14 +483,12 @@
                 let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم شحن الرصيد بنجاح! الرصيد الحالي للزبون: ' + data.newBalance + ' $');
+                    alert('تم شحن الرصيد بنجاح! الرصيد الحالي: ' + data.newBalance + ' $');
                     document.getElementById('quick-user-email').value = '';
                     document.getElementById('quick-user-amount').value = '';
                     loadUsersList();
                 }
-            } catch(e) {
-                alert('تم إرسال الطلب بنجاح.');
-            }
+            } catch(e) {}
         }
 
         async function loadUsersList() {
@@ -472,14 +508,13 @@
             if(!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
             tbody.innerHTML = '';
             users.forEach(u => {
-                let row = document.createElement('tr');
-                row.className = "hover:bg-slate-800/40 transition";
                 let bal = (u.balance !== undefined) ? u.balance.toFixed(2) : "0.00";
-                row.innerHTML = `
-                    <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
-                    <td class="p-3 text-emerald-400 font-bold">${bal} $</td>
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
+                        <td class="p-3 text-emerald-400 font-bold">${bal} $</td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
             });
         }
 
@@ -506,7 +541,7 @@
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || isNaN(costPrice) || !codes) {
-                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة سعر شراء الكود، السعر، والأكواد.');
+                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة الحقول بشكل صحيح.');
                 return;
             }
 
@@ -517,7 +552,7 @@
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('الفئة موجودة، وتم إضافة الأكواد وتحديث التكلفة الوسطية بنجاح!');
+                    alert('تم إضافة الأكواد بنجاح!');
                     clearForm();
                     loadAdminProducts();
                 }
