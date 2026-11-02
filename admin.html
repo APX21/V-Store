@@ -47,8 +47,8 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs text-slate-400 mb-1">إجمالي سعر الشراء للدفعة ($)</label>
-                    <input type="number" id="adm-cost-price" placeholder="مثال: 80" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
+                    <label class="block text-xs text-slate-400 mb-1">سعر الشراء للكود الواحد ($)</label>
+                    <input type="number" id="adm-cost-price" placeholder="مثال: 9" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-400 mb-1">سعر المبيع للزبون ($)</label>
@@ -75,7 +75,7 @@
                         <tr>
                             <th class="p-3">الفئة والأسعار</th>
                             <th class="p-3">المتوفر</th>
-                            <th class="p-3 text-center">إضافة دفعة أكواد وتكلفة</th>
+                            <th class="p-3 text-center">إضافة دفعة أكواد وتكلفة الكود</th>
                         </tr>
                     </thead>
                     <tbody id="admin-products-table" class="divide-y divide-slate-800">
@@ -123,7 +123,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwj0uH9eFvnKubx5bUEcLRvZ9hCCvvOgN6ET6MsxLfMogeZ-Zp_bNELo-8kr5EW-wQp/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4hytj1Tz_QSq55KLvTDQJx-wHkhmZQbD9AHoDxsZllLpVSVuHgPVDlOddJ-j7zWU/exec";
         let globalProducts = [];
 
         window.onload = function() {
@@ -198,7 +198,7 @@
                 filtered.forEach(p => {
                     html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
                 });
-                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
+                html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
                 titleSelect.innerHTML = html;
             }
         }
@@ -236,12 +236,12 @@
                     <td class="p-3">
                         <span class="text-xs text-amber-400 block">${p.category}</span>
                         <strong class="text-slate-100">${p.title}</strong>
-                        <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة وسطية: <span class="text-emerald-400 font-bold">${p.costPrice.toFixed(2)}$</span></div>
+                        <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة الكود الوسطية: <span class="text-emerald-400 font-bold">${p.costPrice.toFixed(2)}$</span></div>
                     </td>
                     <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
                     <td class="p-3 text-center">
                         <div class="flex flex-col gap-2">
-                            <input type="number" id="batch-cost-${p.id}" placeholder="إجمالي سعر شراء الدفعة ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
+                            <input type="number" id="batch-cost-${p.id}" placeholder="سعر شراء الكود الواحد ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
                             <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
                             <button onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold px-3 py-1.5 rounded text-xs transition w-full">إضافة دفعة للمخزون ➕</button>
                         </div>
@@ -255,22 +255,22 @@
             let batchCostInput = document.getElementById('batch-cost-' + productId);
             let textarea = document.getElementById('codes-' + productId);
             
-            let batchTotalCost = parseFloat(batchCostInput.value);
+            let batchSingleCost = parseFloat(batchCostInput.value);
             let newCodes = textarea.value.trim();
 
-            if(isNaN(batchTotalCost) || batchTotalCost < 0 || !newCodes) {
-                alert('الرجاء إدخال إجمالي سعر شراء الدفعة والأكواد الجديدة بشكل صحيح.');
+            if(isNaN(batchSingleCost) || batchSingleCost < 0 || !newCodes) {
+                alert('الرجاء إدخال سعر شراء الكود والأكواد الجديدة بشكل صحيح.');
                 return;
             }
 
             try {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes, batchTotalCost })
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes, batchSingleCost })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة الدفعة وتحديث التكلفة الوسطية بنجاح!');
+                    alert('تم إضافة الأكواد وتحديث التكلفة الوسطية بنجاح!');
                     batchCostInput.value = '';
                     textarea.value = '';
                     loadAdminProducts();
@@ -354,14 +354,14 @@
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || isNaN(costPrice) || !codes) {
-                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة تكلفة الدفعة، السعر، والأكواد.');
+                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة سعر شراء الكود، السعر، والأكواد.');
                 return;
             }
 
             if (productIdToUpdate) {
                 let res = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes, batchTotalCost: costPrice })
+                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes, batchSingleCost: costPrice })
                 });
                 let data = await res.json();
                 if(data.status === 'success') {
