@@ -8,19 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <style>body { font-family: 'Cairo', sans-serif; }</style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col pb-16">
 
-    <!-- شريط التنقل العلوي -->
+    <!-- شريط التنقل العلوي (بدون القائمة القديمة) -->
     <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <span class="text-2xl font-bold text-amber-400">⚡ متجر البطاقات</span>
-            
-            <!-- أزرار التنقل (تظهر فقط عند تسجيل الدخول) -->
-            <nav id="main-nav" class="hidden md:flex space-x-6 space-x-reverse text-sm font-semibold">
-                <button type="button" onclick="goHome()" id="nav-store" class="text-amber-400 transition hover:text-amber-300 cursor-pointer">المتجر الرئيسي</button>
-                <button type="button" onclick="switchTab('purchases')" id="nav-purchases" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">مشترياتي وأكوادى</button>
-                <button type="button" onclick="switchTab('wallet')" id="nav-wallet" class="text-slate-400 transition hover:text-amber-300 cursor-pointer">شحن الرصيد</button>
-            </nav>
 
             <div class="flex items-center space-x-3 space-x-reverse">
                 <div id="user-info" class="hidden text-xs bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 flex items-center gap-3">
@@ -102,7 +95,7 @@
         <!-- الفئات التابعة للقسم المختار -->
         <section id="tab-category-products" class="hidden space-y-6">
             <div class="flex items-center justify-between">
-                <button type="button" onclick="goHome()" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer">
+                <button type="button" onclick="switchTab('store')" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer">
                     <span>← العودة للأقسام الرئيسية</span>
                 </button>
                 <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
@@ -151,11 +144,11 @@
 
     </main>
 
-    <!-- شريط التنقل السفلي للهواتف -->
-    <div id="mob-nav" class="hidden md:hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
-        <button type="button" onclick="goHome()" class="text-amber-400 font-bold cursor-pointer">المتجر</button>
-        <button type="button" onclick="switchTab('purchases')" class="text-slate-400 cursor-pointer">مشترياتي</button>
-        <button type="button" onclick="switchTab('wallet')" class="text-slate-400 cursor-pointer">الرصيد</button>
+    <!-- شريط التنقل السفلي التفاعلي الملون -->
+    <div id="mob-nav" class="hidden bg-slate-900 border-t border-slate-800 flex justify-around py-3 text-xs fixed bottom-0 left-0 right-0 z-50">
+        <button type="button" onclick="switchTab('store')" id="nav-btn-store" class="text-amber-400 font-bold cursor-pointer transition">المتجر</button>
+        <button type="button" onclick="switchTab('purchases')" id="nav-btn-purchases" class="text-slate-400 cursor-pointer transition">مشترياتي</button>
+        <button type="button" onclick="switchTab('wallet')" id="nav-btn-wallet" class="text-slate-400 cursor-pointer transition">الرصيد</button>
     </div>
 
     <script>
@@ -244,7 +237,6 @@
             localStorage.removeItem('store_user_data');
             currentUser = null;
             document.getElementById('user-info').classList.add('hidden');
-            document.getElementById('main-nav').classList.add('hidden');
             document.getElementById('mob-nav').classList.add('hidden');
             document.getElementById('auth-container').classList.remove('hidden');
             document.querySelector('main').classList.add('justify-center');
@@ -255,25 +247,37 @@
 
         function activateUserSession(user) {
             document.getElementById('auth-container').classList.add('hidden');
-            document.getElementById('main-nav').classList.remove('hidden');
             document.getElementById('mob-nav').classList.remove('hidden');
             document.getElementById('user-info').classList.remove('hidden');
             document.querySelector('main').classList.remove('justify-center');
             document.getElementById('current-user-name').innerText = user.name || user.email;
             document.getElementById('user-balance').innerText = (user.balance || 0).toFixed(2);
-            goHome();
-        }
-
-        function goHome() {
-            hideAllTabs();
-            document.getElementById('tab-store').classList.remove('hidden');
-            loadStoreData();
+            switchTab('store');
         }
 
         function switchTab(tabId) {
             hideAllTabs();
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            if(tabId === 'purchases') fetchUserPurchases();
+            
+            // إدارة تبديل التبويبات الرئيسية
+            if(tabId === 'store') {
+                document.getElementById('tab-store').classList.remove('hidden');
+                loadStoreData();
+            } else {
+                document.getElementById('tab-' + tabId).classList.remove('hidden');
+                if(tabId === 'purchases') fetchUserPurchases();
+            }
+
+            // تحديث ألوان الأزرار في الشريط السفلي
+            ['store', 'purchases', 'wallet'].forEach(id => {
+                let btn = document.getElementById('nav-btn-' + id);
+                if(btn) {
+                    if(id === tabId) {
+                        btn.className = "text-amber-400 font-bold cursor-pointer transition";
+                    } else {
+                        btn.className = "text-slate-400 cursor-pointer transition";
+                    }
+                }
+            });
         }
 
         function hideAllTabs() {
