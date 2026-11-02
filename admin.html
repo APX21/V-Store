@@ -10,25 +10,28 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-center">
 
-    <!-- نموذج تسجيل دخول الأدمن -->
-    <div id="admin-login-box" class="max-w-md mx-auto w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-        <h1 class="text-xl font-bold text-amber-400 text-center">🛡️ تسجيل دخول الأدمن</h1>
-        <p class="text-xs text-slate-400 text-center">الرجاء إدخال إيميل وكلمة مرور حساب الصلاحيات الإدارية.</p>
-        <div>
-            <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للإدارة</label>
-            <input type="email" id="admin-email" placeholder="admin@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-        </div>
-        <div>
-            <label class="block text-xs text-slate-400 mb-1">كلمة المرور</label>
-            <input type="password" id="admin-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-        </div>
-        <button type="button" id="login-btn" onclick="verifyAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول لوحة التحكم 🔐</button>
-        <div class="text-center mt-2">
-            <a href="index.html" class="text-xs text-slate-400 hover:text-amber-400 underline">العودة للمتجر الرئيسي 🌐</a>
+    <!-- نافذة منبثقة عصرية للإدارة (Modal) -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div id="modal-icon" class="text-4xl">🛡️</div>
+            <h3 id="modal-title" class="text-lg font-bold text-slate-100">عنوان التنبيه</h3>
+            <p id="modal-message" class="text-xs text-slate-300 leading-relaxed select-all bg-slate-950 p-3 rounded-xl border border-slate-800 font-mono"></p>
+            <div id="modal-buttons" class="flex gap-2 pt-2">
+                <button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>
+            </div>
         </div>
     </div>
 
-    <!-- محتوى لوحة التحكم (مخفي لحين تسجيل الدخول بصلاحية admin) -->
+    <!-- تسجيل دخول الأدمن -->
+    <div id="admin-login-box" class="max-w-md mx-auto w-full bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+        <h1 class="text-xl font-bold text-amber-400 text-center">🛡️ تسجيل دخول الأدمن</h1>
+        <div><label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني</label><input type="email" id="admin-email" placeholder="admin@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+        <div><label class="block text-xs text-slate-400 mb-1">كلمة المرور</label><input type="password" id="admin-password" placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+        <button type="button" id="login-btn" onclick="verifyAdminLogin()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">دخول لوحة التحكم 🔐</button>
+        <div class="text-center mt-2"><a href="index.html" class="text-xs text-slate-400 hover:text-amber-400 underline">العودة للمتجر 🌐</a></div>
+    </div>
+
+    <!-- لوحة التحكم -->
     <div id="admin-dashboard" class="max-w-4xl mx-auto space-y-6 hidden w-full">
         <header class="flex justify-between items-center bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-lg">
             <h1 class="text-xl font-bold text-amber-400">🛡️ لوحة تحكم الأدمن</h1>
@@ -38,8 +41,8 @@
             </div>
         </header>
 
-        <!-- أزرار التنقل الرئيسية -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-50 relative">
+        <!-- الأزرار الرئيسية -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-30 relative">
             <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة فئة/قسم</button>
             <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
             <button type="button" onclick="openTab('depositReqTab')" id="tab-btn-depositReqTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💳 طلبات الشحن</button>
@@ -47,69 +50,45 @@
             <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
-        <!-- 1. إضافة فئة أو قسم جديد -->
+        <!-- 1. إضافة منتج -->
         <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة مع التكلفة وسعر البيع</h2>
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة</h2>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
                 <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
-                    <option value="">-- اختر القسم --</option>
-                    <option value="NEW_CAT">➕ إضافة قسم جديد...</option>
+                    <option value="">-- اختر القسم --</option><option value="NEW_CAT">➕ إضافة قسم جديد...</option>
                 </select>
-                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
             <div>
                 <label class="block text-xs text-slate-400 mb-1">فئة المنتج</label>
                 <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
                     <option value="">-- اختر القسم أولاً --</option>
                 </select>
-                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة هنا..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
             </div>
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">سعر الشراء للكود الواحد ($)</label>
-                    <input type="number" id="adm-cost-price" placeholder="مثال: 9" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">سعر المبيع للزبون ($)</label>
-                    <input type="number" id="adm-price" placeholder="مثال: 10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-                </div>
+                <div><label class="block text-xs text-slate-400 mb-1">سعر الشراء ($)</label><input type="number" id="adm-cost-price" placeholder="9" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+                <div><label class="block text-xs text-slate-400 mb-1">سعر المبيع ($)</label><input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
             </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود في سطر)</label>
-                <textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea>
-            </div>
-            <button type="button" onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">حفظ الأكواد / الفئة الجديدة</button>
+            <div><label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود بسطر)</label><textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea></div>
+            <button type="button" onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">حفظ الأكواد 💾</button>
         </div>
 
-        <!-- 2. إدارة المخزون -->
+        <!-- 2. المخزون -->
         <div id="manageStockTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون وتكلفة الدفعات</h2>
-                <button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer">تحديث 🔄</button>
-            </div>
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون</h2><button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">الفئة والأسعار</th>
-                            <th class="p-3">المتوفر</th>
-                            <th class="p-3 text-center">إضافة دفعة أكواد وتكلفة الكود</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-products-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
-                    </tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الفئة</th><th class="p-3">المتوفر</th><th class="p-3 text-center">إضافة دفعة</th></tr></thead>
+                    <tbody id="admin-products-table" class="divide-y divide-slate-800"><tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr></tbody>
                 </table>
             </div>
         </div>
 
         <!-- 3. طلبات الشحن -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إدارة طلبات شحن الرصيد</h2>
-                <button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button>
-            </div>
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات الشحن</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="flex gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
                 <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">⏳ المعلقة</button>
                 <button type="button" onclick="filterDeposit('Approved')" id="sub-btn-Approved" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">✅ المقبولة</button>
@@ -117,53 +96,27 @@
             </div>
             <div class="overflow-x-auto border border-slate-800 rounded-lg">
                 <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">رقم الطلب</th>
-                            <th class="p-3">البريد الإلكتروني</th>
-                            <th class="p-3">المبلغ ($)</th>
-                            <th class="p-3">التاريخ</th>
-                            <th class="p-3 text-center">الإجراء / الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deposit-filtered-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
-                    </tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">رقم الطلب</th><th class="p-3">الإيميل</th><th class="p-3">المبلغ</th><th class="p-3">التاريخ</th><th class="p-3 text-center">الإجراء</th></tr></thead>
+                    <tbody id="deposit-filtered-table" class="divide-y divide-slate-800"><tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات.</td></tr></tbody>
                 </table>
             </div>
         </div>
 
         <!-- 4. شحن رصيد مباشر -->
         <div id="addBalanceTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد لزبون مباشرة</h2>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">البريد الإلكتروني للزبون</label>
-                <input type="email" id="quick-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-            </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">المبلغ المراد إضافته ($)</label>
-                <input type="number" id="quick-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200">
-            </div>
-            <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">إضافة الرصيد للحساب 💵</button>
+            <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد مباشر</h2>
+            <div><label class="block text-xs text-slate-400 mb-1">إيميل الزبون</label><input type="email" id="quick-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+            <div><label class="block text-xs text-slate-400 mb-1">المبلغ ($)</label><input type="number" id="quick-user-amount" placeholder="25" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+            <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">شحن الرصيد 💵</button>
         </div>
 
-        <!-- 5. قائمة الزبائن -->
+        <!-- 5. الزبائن -->
         <div id="usersListTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <div class="flex justify-between items-center">
-                <h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن المسجلين</h2>
-                <button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button>
-            </div>
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن</h2><button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">البريد الإلكتروني</th>
-                            <th class="p-3">الرصيد الحالي</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="2" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
-                    </tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الإيميل</th><th class="p-3">الرصيد</th></tr></thead>
+                    <tbody id="users-table" class="divide-y divide-slate-800"><tr><td colspan="2" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -172,49 +125,42 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZ5uMecsVqbNE7pNcXy0at98o8uLJ7kULlkpYtvYLkbATqMveQAruxVd5jJQouAJ1A/exec";
-        let globalProducts = [];
-        let allDepositRequests = [];
-        let currentDepositFilter = 'Pending';
+        let globalProducts = [], allDepositRequests = [], currentDepositFilter = 'Pending';
 
         window.onload = function() {
-            let adminAuth = localStorage.getItem('admin_logged_in');
-            if(adminAuth === 'true') {
-                showAdminDashboard();
-            }
+            if(localStorage.getItem('admin_logged_in') === 'true') showAdminDashboard();
         };
+
+        function showModal(title, message, icon = "🛡️") {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-message').innerText = message;
+            document.getElementById('modal-icon').innerText = icon;
+            document.getElementById('modal-buttons').innerHTML = `<button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>`;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
 
         async function verifyAdminLogin() {
             let email = document.getElementById('admin-email').value.trim();
             let password = document.getElementById('admin-password').value;
             let loginBtn = document.getElementById('login-btn');
+            if(!email || !password) { showModal('تنبيه', 'الرجاء إدخال الإيميل وكلمة المرور.', '⚠️'); return; }
 
-            if(!email || !password) {
-                alert('الرجاء إدخال الإيميل وكلمة المرور.');
-                return;
-            }
-
-            loginBtn.innerText = 'جاري التحقق... ⏳';
-            loginBtn.disabled = true;
-
+            loginBtn.innerText = 'جاري التحقق... ⏳'; loginBtn.disabled = true;
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'adminLogin', email: email, password: password })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'adminLogin', email, password }) });
                 let data = await res.json();
-                
                 if(data.status === 'success') {
                     localStorage.setItem('admin_logged_in', 'true');
                     showAdminDashboard();
                 } else {
-                    alert('خطأ: ' + (data.message || 'بيانات الدخول غير صحيحة أو ليس لديك صلاحية أدمن.'));
-                    loginBtn.innerText = 'دخول لوحة التحكم 🔐';
-                    loginBtn.disabled = false;
+                    showModal('خطأ في الصلاحية', data.message || 'بيانات الدخول غير صحيحة.', '❌');
+                    loginBtn.innerText = 'دخول لوحة التحكم 🔐'; loginBtn.disabled = false;
                 }
             } catch(e) {
-                alert('حدث خطأ في الاتصال بالسيرفر. تأكد من الرابط.');
-                loginBtn.innerText = 'دخول لوحة التحكم 🔐';
-                loginBtn.disabled = false;
+                showModal('خطأ', 'حدث خطأ في الاتصال.', '❌');
+                loginBtn.innerText = 'دخول لوحة التحكم 🔐'; loginBtn.disabled = false;
             }
         }
 
@@ -222,35 +168,22 @@
             document.getElementById('admin-login-box').classList.add('hidden');
             document.getElementById('admin-dashboard').classList.remove('hidden');
             document.body.classList.remove('justify-center');
-            loadAdminProducts();
-            loadUsersList();
-            loadDepositRequests();
+            loadAdminProducts(); loadUsersList(); loadDepositRequests();
         }
 
-        function logoutAdmin() {
-            localStorage.removeItem('admin_logged_in');
-            location.reload();
-        }
+        function logoutAdmin() { localStorage.removeItem('admin_logged_in'); location.reload(); }
 
         function openTab(tabId) {
             let contents = document.getElementsByClassName('admin-content');
-            for (let i = 0; i < contents.length; i++) {
-                contents[i].classList.add('hidden');
-            }
+            for (let i = 0; i < contents.length; i++) contents[i].classList.add('hidden');
 
-            let buttons = ['addProductTab', 'manageStockTab', 'depositReqTab', 'addBalanceTab', 'usersListTab'];
-            buttons.forEach(id => {
+            ['addProductTab', 'manageStockTab', 'depositReqTab', 'addBalanceTab', 'usersListTab'].forEach(id => {
                 let btn = document.getElementById('tab-btn-' + id);
-                if (btn) {
-                    btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
-                }
+                if (btn) btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
             });
 
-            let targetContent = document.getElementById(tabId);
-            let targetBtn = document.getElementById('tab-btn-' + tabId);
-
-            if (targetContent) targetContent.classList.remove('hidden');
-            if (targetBtn) targetBtn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById('tab-btn-' + tabId).className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
 
             if (tabId === 'depositReqTab') loadDepositRequests();
             if (tabId === 'usersListTab') loadUsersList();
@@ -259,15 +192,9 @@
 
         async function loadDepositRequests() {
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getDepositRequests' })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getDepositRequests' }) });
                 let data = await res.json();
-                if(data.status === 'success') {
-                    allDepositRequests = data.requests || [];
-                    renderFilteredDepositTable();
-                }
+                if(data.status === 'success') { allDepositRequests = data.requests || []; renderFilteredDepositTable(); }
             } catch(e) {}
         }
 
@@ -275,13 +202,7 @@
             currentDepositFilter = status;
             ['Pending', 'Approved', 'Rejected'].forEach(s => {
                 let btn = document.getElementById('sub-btn-' + s);
-                if(btn) {
-                    if(s === status) {
-                        btn.className = "flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow";
-                    } else {
-                        btn.className = "flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
-                    }
-                }
+                if(btn) btn.className = (s === status) ? "flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow" : "flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
             });
             renderFilteredDepositTable();
         }
@@ -289,77 +210,38 @@
         function renderFilteredDepositTable() {
             const tbody = document.getElementById('deposit-filtered-table');
             if(!tbody) return;
-
-            let filteredList = allDepositRequests.filter(r => {
-                let s = r.status || 'Pending';
-                return s === currentDepositFilter;
-            });
+            let filteredList = allDepositRequests.filter(r => (r.status || 'Pending') === currentDepositFilter);
             filteredList.reverse();
 
-            if(filteredList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات في هذا القسم.</td></tr>`;
-                return;
-            }
+            if(filteredList.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات.</td></tr>`; return; }
 
             let html = '';
             filteredList.forEach(req => {
-                let actionTd = '';
-                if(currentDepositFilter === 'Pending') {
-                    actionTd = `
-                        <td class="p-3 text-center flex justify-center gap-2">
-                            <button type="button" onclick="handleDeposit('${req.requestId}', 'Approved')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">موافقة ✅</button>
-                            <button type="button" onclick="handleDeposit('${req.requestId}', 'Rejected')" class="bg-red-500 hover:bg-red-400 text-slate-950 font-bold px-3 py-1 rounded text-xs transition cursor-pointer">رفض ❌</button>
-                        </td>
-                    `;
-                } else if(currentDepositFilter === 'Approved') {
-                    actionTd = `<td class="p-3 text-center text-emerald-400 font-bold text-xs">تمت الموافقة والشحن</td>`;
-                } else {
-                    actionTd = `<td class="p-3 text-center text-red-400 font-bold text-xs">مرفوض</td>`;
-                }
+                let actionTd = (currentDepositFilter === 'Pending') ? 
+                    `<td class="p-3 text-center flex justify-center gap-2"><button type="button" onclick="handleDeposit('${req.requestId}', 'Approved')" class="bg-emerald-500 text-slate-950 font-bold px-3 py-1 rounded text-xs cursor-pointer">موافقة ✅</button><button type="button" onclick="handleDeposit('${req.requestId}', 'Rejected')" class="bg-red-500 text-slate-950 font-bold px-3 py-1 rounded text-xs cursor-pointer">رفض ❌</button></td>` :
+                    `<td class="p-3 text-center font-bold text-xs ${currentDepositFilter === 'Approved' ? 'text-emerald-400' : 'text-red-400'}">${currentDepositFilter === 'Approved' ? 'تمت الموافقة والشحن' : 'مرفوض'}</td>`;
 
-                html += `
-                    <tr class="hover:bg-slate-800/40 transition">
-                        <td class="p-3 font-mono text-amber-400 font-bold text-xs">${req.requestId}</td>
-                        <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
-                        <td class="p-3 text-emerald-400 font-bold">${req.amount} $</td>
-                        <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
-                        ${actionTd}
-                    </tr>
-                `;
+                html += `<tr class="hover:bg-slate-800/40 transition"><td class="p-3 font-mono text-amber-400 text-xs">${req.requestId}</td><td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td><td class="p-3 text-emerald-400 font-bold">${req.amount} $</td><td class="p-3 text-xs text-slate-400">${req.timestamp}</td>${actionTd}</tr>`;
             });
             tbody.innerHTML = html;
         }
 
         async function handleDeposit(requestId, status) {
-            let msg = status === 'Approved' ? 'هل أنت متأكد من الموافقة على الطلب وشحن الرصيد للزبون؟' : 'هل أنت متأكد من رفض طلب الشحن؟';
-            if(!confirm(msg)) return;
-
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'handleDepositAction', requestId: requestId, status: status })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'handleDepositAction', requestId, status }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم تحديث حالة الطلب بنجاح!');
-                    loadDepositRequests();
-                    loadUsersList();
+                    showModal('نجاح', 'تم تحديث حالة الطلب بنجاح!', '✅');
+                    loadDepositRequests(); loadUsersList();
                 }
             } catch(e) {}
         }
 
         async function loadAdminProducts() {
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getStoreData' })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getStoreData' }) });
                 let data = await res.json();
-                if(data.status === 'success') {
-                    globalProducts = data.products || [];
-                    renderAdminProducts(globalProducts);
-                    updateCategoriesDropdown(globalProducts);
-                }
+                if(data.status === 'success') { globalProducts = data.products || []; renderAdminProducts(globalProducts); updateCategoriesDropdown(globalProducts); }
             } catch(e) {}
         }
 
@@ -367,11 +249,8 @@
             let categories = [...new Set(products.map(p => p.category))];
             const select = document.getElementById('adm-category-select');
             if(!select) return;
-            
             let html = '<option value="">-- اختر القسم الرئيسي --</option>';
-            categories.forEach(cat => {
-                html += `<option value="${cat}">${cat}</option>`;
-            });
+            categories.forEach(cat => html += `<option value="${cat}">${cat}</option>`);
             html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
             select.innerHTML = html;
         }
@@ -383,22 +262,13 @@
             let newTitleInput = document.getElementById('adm-new-title');
 
             if (selectVal === 'NEW_CAT') {
-                newCatInput.classList.remove('hidden');
-                newCatInput.value = '';
-                newCatInput.focus();
-                titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>';
-                titleSelect.value = 'NEW_TITLE';
-                newTitleInput.classList.remove('hidden');
-                newTitleInput.value = '';
+                newCatInput.classList.remove('hidden'); newCatInput.value = ''; newCatInput.focus();
+                titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>'; titleSelect.value = 'NEW_TITLE'; newTitleInput.classList.remove('hidden');
             } else {
-                newCatInput.classList.add('hidden');
-                newTitleInput.classList.add('hidden');
-
+                newCatInput.classList.add('hidden'); newTitleInput.classList.add('hidden');
                 let filtered = globalProducts.filter(p => p.category === selectVal);
                 let html = '<option value="">-- اختر الفئة --</option>';
-                filtered.forEach(p => {
-                    html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (مبيع: ${p.price}$)</option>`;
-                });
+                filtered.forEach(p => html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (${p.price}$)</option>`);
                 html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
             }
@@ -408,44 +278,30 @@
             let titleSelectVal = document.getElementById('adm-title-select').value;
             let newTitleInput = document.getElementById('adm-new-title');
             let priceInput = document.getElementById('adm-price');
-
             if (titleSelectVal === 'NEW_TITLE') {
-                newTitleInput.classList.remove('hidden');
-                newTitleInput.value = '';
-                newTitleInput.focus();
-                priceInput.value = '';
+                newTitleInput.classList.remove('hidden'); newTitleInput.value = ''; newTitleInput.focus(); priceInput.value = '';
             } else {
                 newTitleInput.classList.add('hidden');
                 let selectedOption = document.getElementById('adm-title-select').selectedOptions[0];
-                if (selectedOption && selectedOption.dataset.price) {
-                    priceInput.value = selectedOption.dataset.price;
-                }
+                if (selectedOption && selectedOption.dataset.price) priceInput.value = selectedOption.dataset.price;
             }
         }
 
         function renderAdminProducts(products) {
             const tbody = document.getElementById('admin-products-table');
             if(!tbody) return;
-            if(!products || products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا توجد منتجات مضافة.</td></tr>';
-                return;
-            }
+            if(!products || products.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا توجد منتجات.</td></tr>'; return; }
             tbody.innerHTML = '';
             products.forEach(p => {
-                let costVal = (p.costPrice !== undefined) ? p.costPrice.toFixed(2) : "0.00";
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-800/40 transition">
-                        <td class="p-3">
-                            <span class="text-xs text-amber-400 block">${p.category}</span>
-                            <strong class="text-slate-100">${p.title}</strong>
-                            <div class="text-xs text-slate-400 mt-0.5">مبيع: <span class="text-amber-400 font-bold">${p.price}$</span> | تكلفة الكود: <span class="text-emerald-400 font-bold">${costVal}$</span></div>
-                        </td>
+                        <td class="p-3"><span class="text-xs text-amber-400 block">${p.category}</span><strong class="text-slate-100">${p.title}</strong><div class="text-xs text-slate-400 mt-0.5">مبيع: ${p.price}$</div></td>
                         <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
                         <td class="p-3 text-center">
                             <div class="flex flex-col gap-2">
-                                <input type="number" id="batch-cost-${p.id}" placeholder="سعر شراء الكود ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
+                                <input type="number" id="batch-cost-${p.id}" placeholder="سعر الشراء ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
                                 <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
-                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold py-3.5 rounded text-xs transition w-full cursor-pointer">إضافة دفعة للمخزون ➕</button>
+                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 text-slate-950 font-bold py-2 rounded text-xs transition w-full cursor-pointer">إضافة للمخزون ➕</button>
                             </div>
                         </td>
                     </tr>
@@ -459,22 +315,14 @@
             let batchSingleCost = parseFloat(batchCostInput.value);
             let newCodes = textarea.value.trim();
 
-            if(isNaN(batchSingleCost) || batchSingleCost < 0 || !newCodes) {
-                alert('الرجاء إدخال سعر شراء الكود والأكواد الجديدة بشكل صحيح.');
-                return;
-            }
+            if(isNaN(batchSingleCost) || batchSingleCost < 0 || !newCodes) { showModal('تنبيه', 'الرجاء إدخال السعر والأكواد بشكل صحيح.', '⚠️'); return; }
 
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes, batchSingleCost })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'addCodesToProduct', productId, newCodes, batchSingleCost }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة الأكواد بنجاح!');
-                    batchCostInput.value = '';
-                    textarea.value = '';
-                    loadAdminProducts();
+                    showModal('نجاح', 'تم إضافة الأكواد بنجاح للمخزون!', '📦');
+                    batchCostInput.value = ''; textarea.value = ''; loadAdminProducts();
                 }
             } catch(e) {}
         }
@@ -482,17 +330,13 @@
         async function quickAddBalance() {
             let email = document.getElementById('quick-user-email').value.trim();
             let amount = parseFloat(document.getElementById('quick-user-amount').value);
-
-            if(!email || isNaN(amount) || amount <= 0) {
-                alert('الرجاء إدخال البريد الإلكتروني والمبلغ بشكل صحيح.');
-                return;
-            }
+            if(!email || isNaN(amount) || amount <= 0) { showModal('تنبيه', 'الرجاء إدخال الإيميل والمبلغ.', '⚠️'); return; }
 
             try {
                 let res = await fetch(`${SCRIPT_URL}?action=addBalance&email=${encodeURIComponent(email)}&amount=${amount}`);
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم شحن الرصيد بنجاح! الرصيد الحالي: ' + data.newBalance + ' $');
+                    showModal('نجاح الشحن! 💵', `تم شحن الرصيد بنجاح!\nالرصيد الحالي: ${data.newBalance} $`, '💳');
                     document.getElementById('quick-user-email').value = '';
                     document.getElementById('quick-user-amount').value = '';
                     loadUsersList();
@@ -502,47 +346,32 @@
 
         async function loadUsersList() {
             try {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getUsersList' })
-                });
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsersList' }) });
                 let data = await res.json();
-                if(data.status === 'success') { renderUsersTable(data.users || []); }
+                if(data.status === 'success') {
+                    const tbody = document.getElementById('users-table');
+                    if(!tbody) return;
+                    if(!data.users || data.users.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
+                    tbody.innerHTML = '';
+                    data.users.forEach(u => {
+                        tbody.innerHTML += `<tr class="hover:bg-slate-800/40 transition"><td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td><td class="p-3 text-emerald-400 font-bold">${(u.balance || 0).toFixed(2)} $</td></tr>`;
+                    });
+                }
             } catch(e) {}
-        }
-
-        function renderUsersTable(users) {
-            const tbody = document.getElementById('users-table');
-            if(!tbody) return;
-            if(!users || users.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
-            tbody.innerHTML = '';
-            users.forEach(u => {
-                let bal = (u.balance !== undefined) ? u.balance.toFixed(2) : "0.00";
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 transition">
-                        <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
-                        <td class="p-3 text-emerald-400 font-bold">${bal} $</td>
-                    </tr>
-                `;
-            });
         }
 
         async function addNewProduct() {
             let catSelect = document.getElementById('adm-category-select').value;
             let category = (catSelect === 'NEW_CAT') ? document.getElementById('adm-new-category').value.trim() : catSelect;
-
             let titleSelect = document.getElementById('adm-title-select').value;
-            let title = '';
-            let productIdToUpdate = '';
+            let title = '', productIdToUpdate = '';
 
             if (titleSelect === 'NEW_TITLE') {
                 title = document.getElementById('adm-new-title').value.trim();
             } else {
                 let selectedOption = document.getElementById('adm-title-select').selectedOptions[0];
                 title = titleSelect;
-                if (selectedOption) {
-                    productIdToUpdate = selectedOption.dataset.id;
-                }
+                if (selectedOption) productIdToUpdate = selectedOption.dataset.id;
             }
 
             let price = parseFloat(document.getElementById('adm-price').value);
@@ -550,33 +379,21 @@
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || isNaN(costPrice) || !codes) {
-                alert('الرجاء اختيار/كتابة القسم والفئة، وتعبئة الحقول بشكل صحيح.');
+                showModal('تنبيه', 'الرجاء تعبئة كافة الحقول المطلوبة.', '⚠️');
                 return;
             }
 
-            if (productIdToUpdate) {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addCodesToProduct', productId: productIdToUpdate, newCodes: codes, batchSingleCost: costPrice })
-                });
+            let actionName = productIdToUpdate ? 'addCodesToProduct' : 'addProduct';
+            let payload = productIdToUpdate ? { action: actionName, productId: productIdToUpdate, newCodes: codes, batchSingleCost: costPrice } : { action: actionName, title, price, costPrice, category, codes };
+
+            try {
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    alert('تم إضافة الأكواد بنجاح!');
-                    clearForm();
-                    loadAdminProducts();
+                    showModal('نجاح 🌟', 'تمت العملية بنجاح وتحديث المخزون!', '✅');
+                    clearForm(); loadAdminProducts();
                 }
-            } else {
-                let res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'addProduct', title, price, costPrice, category, codes })
-                });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    alert('تم إضافة الفئة الجديدة بنجاح!');
-                    clearForm();
-                    loadAdminProducts();
-                }
-            }
+            } catch(e) {}
         }
 
         function clearForm() {
