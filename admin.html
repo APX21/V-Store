@@ -41,13 +41,14 @@
             </div>
         </header>
 
-        <!-- الأزرار الرئيسية -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-30 relative">
-            <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة فئة/قسم</button>
-            <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
-            <button type="button" onclick="openTab('depositReqTab')" id="tab-btn-depositReqTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💳 طلبات الشحن والذمم</button>
-            <button type="button" onclick="openTab('addBalanceTab')" id="tab-btn-addBalanceTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💵 شحن رصيد</button>
-            <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
+        <!-- الأزرار الرئيسية (تم فصل طلبات الشحن عن الذمم بوضوح) -->
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-30 relative">
+            <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة منتج</button>
+            <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
+            <button type="button" onclick="openTab('depositReqTab')" id="tab-btn-depositReqTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💳 طلبات الشحن</button>
+            <button type="button" onclick="openTab('debtsTab')" id="tab-btn-debtsTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📋 إدارة الذمم</button>
+            <button type="button" onclick="openTab('addBalanceTab')" id="tab-btn-addBalanceTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">💵 شحن مباشر</button>
+            <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
         <!-- 1. إضافة منتج -->
@@ -86,34 +87,50 @@
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن والذمم -->
+        <!-- 3. طلبات الشحن (الطلبات الجديدة / قيد المعالجة) -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
-            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات الشحن والذمم المالية</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button></div>
-            <div class="flex gap-2 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
-                <button type="button" onclick="filterDeposit('Pending')" id="sub-btn-Pending" class="flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">⏳ المعلقة / الذمم</button>
-                <button type="button" onclick="filterDeposit('Approved')" id="sub-btn-Approved" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">✅ المسددة بالكامل</button>
-                <button type="button" onclick="filterDeposit('Rejected')" id="sub-btn-Rejected" class="flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">❌ المرفوضة</button>
-            </div>
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات الشحن الواردة</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto border border-slate-800 rounded-lg">
                 <table class="w-full text-right text-xs">
                     <thead class="bg-slate-800/60 text-slate-400">
                         <tr>
-                            <th class="p-2.5">رقم الطلب</th>
-                            <th class="p-2.5">الإيميل</th>
-                            <th class="p-2.5">المطلوب</th>
-                            <th class="p-2.5 text-emerald-400">المدفوع</th>
-                            <th class="p-2.5 text-red-400">المتبقي (ذمم)</th>
-                            <th class="p-2.5 text-center">تسجيل دفعة جزئية / إجراء</th>
+                            <th class="p-3">رقم الطلب</th>
+                            <th class="p-3">الإيميل</th>
+                            <th class="p-3">المبلغ المطلوب</th>
+                            <th class="p-3">التاريخ</th>
+                            <th class="p-3 text-center">الإجراء</th>
                         </tr>
                     </thead>
-                    <tbody id="deposit-filtered-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد طلبات.</td></tr>
+                    <tbody id="deposit-requests-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات جديدة.</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 4. شحن رصيد مباشر -->
+        <!-- 4. إدارة الذمم (الزبائن الذين عليهم مبالغ متبقية) -->
+        <div id="debtsTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-red-400 pr-3">إدارة الذمم المالية (المبالغ غير المسددة)</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-red-400 cursor-pointer">تحديث 🔄</button></div>
+            <div class="overflow-x-auto border border-slate-800 rounded-lg">
+                <table class="w-full text-right text-xs">
+                    <thead class="bg-slate-800/60 text-slate-400">
+                        <tr>
+                            <th class="p-3">رقم الطلب</th>
+                            <th class="p-3">الإيميل</th>
+                            <th class="p-3">إجمالي الطلب</th>
+                            <th class="p-3 text-emerald-400">المدفوع</th>
+                            <th class="p-3 text-red-400 font-bold">المتبقي (الذمة)</th>
+                            <th class="p-3 text-center">تسجيل دفعة نقدية جديدة 💵</th>
+                        </tr>
+                    </thead>
+                    <tbody id="debts-table" class="divide-y divide-slate-800">
+                        <tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد ذمم مالية حالياً.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 5. شحن رصيد مباشر -->
         <div id="addBalanceTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <h2 class="text-lg font-bold border-r-4 border-emerald-400 pr-3">شحن رصيد مباشر</h2>
             <div><label class="block text-xs text-slate-400 mb-1">إيميل الزبون</label><input type="email" id="quick-user-email" placeholder="client@gmail.com" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
@@ -121,7 +138,7 @@
             <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">شحن الرصيد 💵</button>
         </div>
 
-        <!-- 5. الزبائن -->
+        <!-- 6. الزبائن -->
         <div id="usersListTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن</h2><button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto">
@@ -135,8 +152,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxHDAlt7KJYJ_voLrL3DIkZIbk9aYL6ASdr5Mf8m7zKGyEO4RjB66HZoC-3g7wZP3Nu/exec";
-        let globalProducts = [], allDepositRequests = [], currentDepositFilter = 'Pending';
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTP3--KnAc1X6dplcQwIIc12jp40xTJcL0einynZnTSGOvPt_NrT-VJ47Wb0hoFUHu/exec";
+        let globalProducts = [], allDepositRequests = [];
 
         window.onload = function() {
             if(localStorage.getItem('admin_logged_in') === 'true') showAdminDashboard();
@@ -188,15 +205,15 @@
             let contents = document.getElementsByClassName('admin-content');
             for (let i = 0; i < contents.length; i++) contents[i].classList.add('hidden');
 
-            ['addProductTab', 'manageStockTab', 'depositReqTab', 'addBalanceTab', 'usersListTab'].forEach(id => {
+            ['addProductTab', 'manageStockTab', 'depositReqTab', 'debtsTab', 'addBalanceTab', 'usersListTab'].forEach(id => {
                 let btn = document.getElementById('tab-btn-' + id);
-                if (btn) btn.className = "py-2.5 px-3 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
+                if (btn) btn.className = "py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
             });
 
             document.getElementById(tabId).classList.remove('hidden');
-            document.getElementById('tab-btn-' + tabId).className = "py-2.5 px-3 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
+            document.getElementById('tab-btn-' + tabId).className = "py-2.5 px-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 shadow cursor-pointer";
 
-            if (tabId === 'depositReqTab') loadDepositRequests();
+            if (tabId === 'depositReqTab' || tabId === 'debtsTab') loadDepositRequests();
             if (tabId === 'usersListTab') loadUsersList();
             if (tabId === 'manageStockTab') loadAdminProducts();
         }
@@ -205,44 +222,58 @@
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getDepositRequests' }) });
                 let data = await res.json();
-                if(data.status === 'success') { allDepositRequests = data.requests || []; renderFilteredDepositTable(); }
+                if(data.status === 'success') {
+                    allDepositRequests = data.requests || [];
+                    renderDepositRequestsTable();
+                    renderDebtsTable();
+                }
             } catch(e) {}
         }
 
-        function filterDeposit(status) {
-            currentDepositFilter = status;
-            ['Pending', 'Approved', 'Rejected'].forEach(s => {
-                let btn = document.getElementById('sub-btn-' + s);
-                if(btn) btn.className = (s === status) ? "flex-1 py-2 rounded text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow" : "flex-1 py-2 rounded text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer";
-            });
-            renderFilteredDepositTable();
-        }
-
-        function renderFilteredDepositTable() {
-            const tbody = document.getElementById('deposit-filtered-table');
+        // عرض طلبات الشحن الواردة والقيد معالجة
+        function renderDepositRequestsTable() {
+            const tbody = document.getElementById('deposit-requests-table');
             if(!tbody) return;
-            let filteredList = allDepositRequests.filter(r => (r.status || 'Pending') === currentDepositFilter);
-            filteredList.reverse();
+            let pendingList = allDepositRequests.filter(r => (r.status || 'Pending') === 'Pending' && r.remaining > 0);
+            pendingList.reverse();
 
-            if(filteredList.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد طلبات.</td></tr>`; return; }
+            if(pendingList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن جديدة.</td></tr>`;
+                return;
+            }
 
             let html = '';
-            filteredList.forEach(req => {
-                let actionTd = '';
-                if(currentDepositFilter === 'Pending') {
-                    actionTd = `
-                        <div class="flex items-center justify-center gap-1.5 flex-wrap">
-                            <input type="number" id="pay-input-${req.requestId}" placeholder="الدفعة ($)" class="bg-slate-950 border border-slate-800 rounded p-1 text-[11px] text-slate-200 w-20">
-                            <button type="button" onclick="recordPayment('${req.requestId}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-2 py-1 rounded text-[11px] cursor-pointer">دفعة 💵</button>
-                            <button type="button" onclick="handleDepositStatus('${req.requestId}', 'Rejected')" class="bg-red-500 text-slate-950 font-bold px-2 py-1 rounded text-[11px] cursor-pointer">رفض ❌</button>
-                        </div>
-                    `;
-                } else if(currentDepositFilter === 'Approved') {
-                    actionTd = `<span class="text-emerald-400 font-bold text-xs">تم السداد والشحن بالكامل</span>`;
-                } else {
-                    actionTd = `<span class="text-red-400 font-bold text-xs">مرفوض</span>`;
-                }
+            pendingList.forEach(req => {
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-mono text-amber-400 text-xs">${req.requestId}</td>
+                        <td class="p-3 font-mono text-slate-300 text-xs">${req.email}</td>
+                        <td class="p-3 text-slate-100 font-bold">${req.amount} $</td>
+                        <td class="p-3 text-xs text-slate-400">${req.timestamp}</td>
+                        <td class="p-3 text-center">
+                            <button type="button" onclick="handleDepositStatus('${req.requestId}', 'Rejected')" class="bg-red-500 text-slate-950 font-bold px-3 py-1 rounded text-xs cursor-pointer">رفض الطلب ❌</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
 
+        // عرض إدارة الذمم المالية للمبالغ غير المسددة
+        function renderDebtsTable() {
+            const tbody = document.getElementById('debts-table');
+            if(!tbody) return;
+            // الطلبات التي عليها ذمم متبقية (Remaining > 0 ولم يتم رفضها)
+            let debtList = allDepositRequests.filter(r => r.remaining > 0 && r.status !== 'Rejected');
+            debtList.reverse();
+
+            if(debtList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد ذمم مالية معلقة حالياً.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            debtList.forEach(req => {
                 html += `
                     <tr class="hover:bg-slate-800/40 transition">
                         <td class="p-2.5 font-mono text-amber-400 text-xs">${req.requestId}</td>
@@ -250,7 +281,12 @@
                         <td class="p-2.5 text-slate-100 font-bold">${req.amount} $</td>
                         <td class="p-2.5 text-emerald-400 font-bold">${req.paid} $</td>
                         <td class="p-2.5 text-red-400 font-bold">${req.remaining} $</td>
-                        <td class="p-2.5 text-center">${actionTd}</td>
+                        <td class="p-2.5 text-center">
+                            <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                                <input type="number" id="pay-input-${req.requestId}" placeholder="قيمة الدفعة ($)" class="bg-slate-950 border border-slate-800 rounded p-1 text-[11px] text-slate-200 w-24">
+                                <button type="button" onclick="recordPayment('${req.requestId}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-2.5 py-1 rounded text-[11px] cursor-pointer">تسجيل دفعة 💵</button>
+                            </div>
+                        </td>
                     </tr>
                 `;
             });
@@ -277,7 +313,7 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'handleDepositAction', requestId, status }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('نجاح', 'تم رفض الطلب بنجاح.', '✅');
+                    showModal('نجاح', 'تم تحديث حالة الطلب بنجاح.', '✅');
                     loadDepositRequests(); loadUsersList();
                 }
             } catch(e) {}
