@@ -483,8 +483,9 @@
                 `;
                 
                 catProducts.forEach(p => {
+                    let safeTitle = String(p.title || '').replace(/'/g, "\\'");
                     html += `
-                        <div class="flex justify-between items-center cursor-pointer p-4 bg-slate-900 hover:bg-slate-800/80 transition" onclick="openAddCodesModal('${p.id}', '${p.title.replace(/'/g, "\\'")}')">
+                        <div class="flex justify-between items-center cursor-pointer p-4 bg-slate-900 hover:bg-slate-800/80 transition" onclick="openAddCodesModal('${p.id}', '${safeTitle}')">
                             <div>
                                 <strong class="text-slate-100 text-sm">${p.title}</strong>
                                 <p class="text-xs text-slate-400 mt-1">سعر المبيع للزبون: <span class="text-amber-400 font-bold">${p.price}$</span></p>
