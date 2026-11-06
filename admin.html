@@ -185,7 +185,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHfAnJi3dKWCv7Qp0alhoy3uRSF3vjuYuiAz5J6n9v6VLXZHKgmPY1wiAUlctVA2E/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJojyifWJrtexTyIvlttVkEHTfsJQ8zlkWc5Fmq17waAXAq2CWhuz9f3vAheEq9JxA/exec";
         let globalProducts = [], allDepositRequests = [];
 
         window.onload = function() {
@@ -384,7 +384,7 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'handleDepositPayment', requestId, paidAmount }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('نجاح 💵', 'تم تسجيل الدفعة وشحن الرصيد بنجاح وتحديث الذمم!', '✅');
+                    showModal('نجاح 💵', 'تم تسجيل الدفعة وتحديث الذمم المالية!', '✅');
                     loadDepositRequests(); loadUsersList();
                 }
             } catch(e) {}
@@ -395,7 +395,7 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'handleDepositAction', requestId, status }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('نجاح', 'تم تحديث حالة الطلب بنجاح وشحن الرصيد للزبون.', '✅');
+                    showModal('نجاح', 'تمت الموافقة على الطلب وشحن رصيد الزبون كذمة مالية.', '✅');
                     loadDepositRequests(); loadUsersList();
                 }
             } catch(e) {}
