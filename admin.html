@@ -41,7 +41,7 @@
             </div>
         </header>
 
-        <!-- الأزرار الرئيسية (تم فصل طلبات الشحن عن الذمم بوضوح) -->
+        <!-- الأزرار الرئيسية -->
         <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800 z-30 relative">
             <button type="button" onclick="openTab('addProductTab')" id="tab-btn-addProductTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition bg-amber-500 text-slate-950 cursor-pointer shadow">➕ إضافة منتج</button>
             <button type="button" onclick="openTab('manageStockTab')" id="tab-btn-manageStockTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">📦 المخزون</button>
@@ -51,29 +51,67 @@
             <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
-        <!-- 1. إضافة منتج -->
-        <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">إضافة قسم أو فئة جديدة</h2>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
-                <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
-                    <option value="">-- اختر القسم --</option><option value="NEW_CAT">➕ إضافة قسم جديد...</option>
-                </select>
-                <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+        <!-- 1. إضافة منتج (بنظام الخطوات المتسلسلة) -->
+        <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-lg relative">
+            <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3 mb-6">إضافة منتج جديد (نظام الخطوات)</h2>
+            
+            <!-- الخطوة 1 -->
+            <div id="step-1" class="transition-all duration-300">
+                <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 1: اختيار القسم الرئيسي</h3>
+                <div>
+                    <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
+                        <option value="">-- اختر القسم --</option><option value="NEW_CAT">➕ إضافة قسم جديد...</option>
+                    </select>
+                    <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+                </div>
+                <button type="button" onclick="goToStep(2)" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">متابعة للفئة ⬅️</button>
             </div>
-            <div>
-                <label class="block text-xs text-slate-400 mb-1">فئة المنتج</label>
-                <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
-                    <option value="">-- اختر القسم أولاً --</option>
-                </select>
-                <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+
+            <!-- الخطوة 2 -->
+            <div id="step-2" class="hidden transition-all duration-300">
+                <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 2: اختيار فئة المنتج</h3>
+                <div>
+                    <select id="adm-title-select" onchange="onTitleChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
+                        <option value="">-- اختر القسم أولاً --</option>
+                    </select>
+                    <input type="text" id="adm-new-title" placeholder="اكتب اسم الفئة الجديدة..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="goToStep(3)" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">متابعة للأسعار ⬅️</button>
+                    <button type="button" onclick="goToStep(1)" class="bg-slate-800/50 hover:bg-slate-700 text-slate-400 font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer">رجوع</button>
+                </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-xs text-slate-400 mb-1">سعر الشراء ($)</label><input type="number" id="adm-cost-price" placeholder="9" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
-                <div><label class="block text-xs text-slate-400 mb-1">سعر المبيع ($)</label><input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+
+            <!-- الخطوة 3 -->
+            <div id="step-3" class="hidden transition-all duration-300">
+                <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 3: تحديد الأسعار</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="block text-xs text-slate-400 mb-1">سعر الشراء ($)</label><input type="number" id="adm-cost-price" placeholder="9" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+                    <div><label class="block text-xs text-slate-400 mb-1">سعر المبيع ($)</label><input type="number" id="adm-price" placeholder="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="goToStep(4)" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">متابعة للأكواد ⬅️</button>
+                    <button type="button" onclick="goToStep(2)" class="bg-slate-800/50 hover:bg-slate-700 text-slate-400 font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer">رجوع</button>
+                </div>
             </div>
-            <div><label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود بسطر)</label><textarea id="adm-codes" rows="3" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea></div>
-            <button type="button" onclick="addNewProduct()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">حفظ الأكواد 💾</button>
+
+            <!-- الخطوة 4 -->
+            <div id="step-4" class="hidden transition-all duration-300">
+                <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 4: إضافة الأكواد</h3>
+                <div><label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود بسطر)</label><textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea></div>
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="addNewProduct()" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">حفظ المنتج والأكواد 💾</button>
+                    <button type="button" onclick="goToStep(3)" class="bg-slate-800/50 hover:bg-slate-700 text-slate-400 font-bold py-2.5 px-4 rounded-lg text-sm transition cursor-pointer">رجوع</button>
+                </div>
+            </div>
+
+            <!-- مؤشرات الخطوات -->
+            <div class="flex justify-center gap-2 mt-8 pt-4 border-t border-slate-800" id="step-indicators">
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500 indicator-1 transition-colors"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-700 indicator-2 transition-colors"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-700 indicator-3 transition-colors"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-slate-700 indicator-4 transition-colors"></div>
+            </div>
         </div>
 
         <!-- 2. المخزون -->
@@ -218,6 +256,47 @@
             if (tabId === 'manageStockTab') loadAdminProducts();
         }
 
+        // دالة التنقل بين خطوات إضافة المنتج
+        function goToStep(step) {
+            // التحقق قبل الانتقال
+            if (step === 2) {
+                let catSelect = document.getElementById('adm-category-select').value;
+                let newCat = document.getElementById('adm-new-category').value.trim();
+                if (!catSelect || (catSelect === 'NEW_CAT' && !newCat)) {
+                    showModal('تنبيه', 'الرجاء اختيار أو كتابة القسم الرئيسي.', '⚠️'); return;
+                }
+            } else if (step === 3) {
+                let titleSelect = document.getElementById('adm-title-select').value;
+                let newTitle = document.getElementById('adm-new-title').value.trim();
+                if (!titleSelect || (titleSelect === 'NEW_TITLE' && !newTitle)) {
+                    showModal('تنبيه', 'الرجاء اختيار أو كتابة فئة المنتج.', '⚠️'); return;
+                }
+            } else if (step === 4) {
+                let cost = parseFloat(document.getElementById('adm-cost-price').value);
+                let price = parseFloat(document.getElementById('adm-price').value);
+                if (isNaN(cost) || isNaN(price) || cost < 0 || price < 0) {
+                    showModal('تنبيه', 'الرجاء إدخال أسعار صحيحة.', '⚠️'); return;
+                }
+            }
+
+            // إخفاء كافة الخطوات وتحديث المؤشرات
+            for(let i=1; i<=4; i++) {
+                document.getElementById('step-' + i).classList.add('hidden');
+                let ind = document.querySelector('.indicator-' + i);
+                if(ind) {
+                    if(i <= step) {
+                        ind.classList.remove('bg-slate-700');
+                        ind.classList.add('bg-amber-500');
+                    } else {
+                        ind.classList.remove('bg-amber-500');
+                        ind.classList.add('bg-slate-700');
+                    }
+                }
+            }
+            // إظهار الخطوة المطلوبة
+            document.getElementById('step-' + step).classList.remove('hidden');
+        }
+
         async function loadDepositRequests() {
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getDepositRequests' }) });
@@ -230,7 +309,6 @@
             } catch(e) {}
         }
 
-        // عرض طلبات الشحن الواردة والقيد معالجة
         function renderDepositRequestsTable() {
             const tbody = document.getElementById('deposit-requests-table');
             if(!tbody) return;
@@ -259,11 +337,9 @@
             tbody.innerHTML = html;
         }
 
-        // عرض إدارة الذمم المالية للمبالغ غير المسددة
         function renderDebtsTable() {
             const tbody = document.getElementById('debts-table');
             if(!tbody) return;
-            // الطلبات التي عليها ذمم متبقية (Remaining > 0 ولم يتم رفضها)
             let debtList = allDepositRequests.filter(r => r.remaining > 0 && r.status !== 'Rejected');
             debtList.reverse();
 
@@ -461,7 +537,7 @@
             let codes = document.getElementById('adm-codes').value.trim();
 
             if(!category || !title || isNaN(price) || isNaN(costPrice) || !codes) {
-                showModal('تنبيه', 'الرجاء تعبئة كافة الحقول المطلوبة.', '⚠️');
+                showModal('تنبيه', 'الرجاء تعبئة كافة الحقول المطلوبة قبل الحفظ.', '⚠️');
                 return;
             }
 
@@ -472,7 +548,7 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('نجاح 🌟', 'تمت العملية بنجاح وتحديث المخزون!', '✅');
+                    showModal('نجاح 🌟', 'تمت إضافة المنتج بنجاح وتحديث المخزون!', '✅');
                     clearForm(); loadAdminProducts();
                 }
             } catch(e) {}
@@ -488,6 +564,7 @@
             document.getElementById('adm-cost-price').value = '';
             document.getElementById('adm-price').value = '';
             document.getElementById('adm-codes').value = '';
+            goToStep(1); // إعادة التوجيه للخطوة الأولى بعد الحفظ
         }
     </script>
 </body>
