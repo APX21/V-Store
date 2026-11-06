@@ -161,20 +161,20 @@
         </section>
 
         <!-- الشحن والذمم -->
-        <section id="tab-wallet" class="hidden space-y-6 max-w-2xl mx-auto w-full">
-            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">طلب شحن رصيد وإدارة الذمم</h2>
+        <section id="tab-wallet" class="hidden space-y-6 max-w-3xl mx-auto w-full">
+            <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">طلب شحن رصيد وإدارة الذمم المالية</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
-                <p class="text-slate-300">أدخل القيمة المراد شحنها، وسيتم توليد رقم طلب خاص بك ومتابعة الدفعات والذمم:</p>
-                <div><label class="block text-xs text-slate-400 mb-1">المبلغ المطلوب شحنه ($)</label><input type="number" id="deposit-amount" placeholder="مثال: 100" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+                <p class="text-slate-300">أدخل القيمة المراد شحنها، وسيتم توليد رقم طلب خاص بك وتتبع حركة الذمم والدفعات:</p>
+                <div><label class="block text-xs text-slate-400 mb-1">المبلغ المطلوب شحنه ($)</label><input type="number" id="deposit-amount" placeholder="مثال: 500" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
                 <button type="button" onclick="submitDepositRequest()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">إرسال طلب الشحن 🚀</button>
             </div>
 
             <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg p-4 space-y-3">
-                <h3 class="font-bold text-amber-400 text-sm">سجل طلبات الشحن والذمم المالية الخاصة بك</h3>
+                <h3 class="font-bold text-amber-400 text-sm">سجل طلبات الشحن والحركات والذمم المالية الخاصة بك</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
                         <thead class="bg-slate-800/60 text-slate-400">
-                            <tr><th class="p-2.5">رقم الطلب</th><th class="p-2.5">الإجمالي</th><th class="p-2.5">المدفوع</th><th class="p-2.5 text-red-400">المتبقي (الذمم)</th><th class="p-2.5">الحالة</th></tr>
+                            <tr><th class="p-2.5">رقم الطلب</th><th class="p-2.5">إجمالي الطلب</th><th class="p-2.5 text-emerald-400">المدفوع</th><th class="p-2.5 text-red-400">المتبقي (الذمة)</th><th class="p-2.5">الحالة</th></tr>
                         </thead>
                         <tbody id="user-deposits-table" class="divide-y divide-slate-800">
                             <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
@@ -197,7 +197,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyHfAnJi3dKWCv7Qp0alhoy3uRSF3vjuYuiAz5J6n9v6VLXZHKgmPY1wiAUlctVA2E/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJojyifWJrtexTyIvlttVkEHTfsJQ8zlkWc5Fmq17waAXAq2CWhuz9f3vAheEq9JxA/exec";
         let currentUser = JSON.parse(localStorage.getItem('store_user_data')) || null;
         let productsList = [];
 
@@ -454,7 +454,7 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'createDepositRequest', email: currentUser.email, amount }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب الخاص بك:\n' + data.requestId + '\n\nيرجى تزويد الإدارة برقم الطلب.', '🚀');
+                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب الخاص بك:\n' + data.requestId + '\n\nسيظهر في جدول الذمم والحركات ريثما تعتمده الإدارة.', '🚀');
                     document.getElementById('deposit-amount').value = '';
                     fetchUserDeposits();
                 }
@@ -471,19 +471,19 @@
                     const tbody = document.getElementById('user-deposits-table');
                     if(!tbody) return;
                     if(userReqs.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن أو ذمم سابقة.</td></tr>';
                         return;
                     }
                     tbody.innerHTML = '';
                     userReqs.reverse().forEach(req => {
-                        let statusText = req.status === 'Approved' ? '✅ معتمد' : (req.status === 'Rejected' ? '❌ مرفوض' : '⏳ قيد المعالجة');
+                        let statusText = req.status === 'Approved' ? '✅ معتمد (ذمة نشطة)' : (req.status === 'Completed' ? '🎉 مسدد بالكامل' : (req.status === 'Rejected' ? '❌ مرفوض' : '⏳ قيد المعالجة'));
                         tbody.innerHTML += `
                             <tr class="hover:bg-slate-800/40 transition">
                                 <td class="p-2.5 font-mono text-amber-400">${req.requestId}</td>
-                                <td class="p-2.5">${req.amount} $</td>
-                                <td class="p-2.5 text-emerald-400">${req.paid} $</td>
+                                <td class="p-2.5 font-bold text-slate-100">${req.amount} $</td>
+                                <td class="p-2.5 text-emerald-400 font-bold">${req.paid} $</td>
                                 <td class="p-2.5 text-red-400 font-bold">${req.remaining} $</td>
-                                <td class="p-2.5">${statusText}</td>
+                                <td class="p-2.5 text-xs">${statusText}</td>
                             </tr>
                         `;
                     });
