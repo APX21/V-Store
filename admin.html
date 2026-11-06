@@ -11,7 +11,7 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-center">
 
     <!-- نافذة منبثقة عصرية للإدارة (Modal) -->
-    <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 z-[100]">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
             <div id="modal-icon" class="text-4xl">🛡️</div>
             <h3 id="modal-title" class="text-lg font-bold text-slate-100">عنوان التنبيه</h3>
@@ -51,11 +51,10 @@
             <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
-        <!-- 1. إضافة منتج (بنظام الخطوات المتسلسلة) -->
+        <!-- 1. إضافة منتج (نظام الخطوات) -->
         <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-lg relative">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3 mb-6">إضافة منتج جديد (نظام الخطوات)</h2>
             
-            <!-- الخطوة 1 -->
             <div id="step-1" class="transition-all duration-300">
                 <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 1: اختيار القسم الرئيسي</h3>
                 <div>
@@ -67,7 +66,6 @@
                 <button type="button" onclick="goToStep(2)" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">متابعة للفئة ⬅️</button>
             </div>
 
-            <!-- الخطوة 2 -->
             <div id="step-2" class="hidden transition-all duration-300">
                 <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 2: اختيار فئة المنتج</h3>
                 <div>
@@ -82,7 +80,6 @@
                 </div>
             </div>
 
-            <!-- الخطوة 3 -->
             <div id="step-3" class="hidden transition-all duration-300">
                 <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 3: تحديد الأسعار</h3>
                 <div class="grid grid-cols-2 gap-4">
@@ -95,7 +92,6 @@
                 </div>
             </div>
 
-            <!-- الخطوة 4 -->
             <div id="step-4" class="hidden transition-all duration-300">
                 <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 4: إضافة الأكواد</h3>
                 <div><label class="block text-xs text-slate-400 mb-1">الأكواد (كل كود بسطر)</label><textarea id="adm-codes" rows="4" placeholder="XXXX-XXXX" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 font-mono"></textarea></div>
@@ -105,7 +101,6 @@
                 </div>
             </div>
 
-            <!-- مؤشرات الخطوات -->
             <div class="flex justify-center gap-2 mt-8 pt-4 border-t border-slate-800" id="step-indicators">
                 <div class="w-2.5 h-2.5 rounded-full bg-amber-500 indicator-1 transition-colors"></div>
                 <div class="w-2.5 h-2.5 rounded-full bg-slate-700 indicator-2 transition-colors"></div>
@@ -114,56 +109,37 @@
             </div>
         </div>
 
-        <!-- 2. المخزون -->
+        <!-- 2. المخزون المطور (بنظام القوائم المنسدلة / Accordion) -->
         <div id="manageStockTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون</h2><button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer">تحديث 🔄</button></div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الفئة</th><th class="p-3">المتوفر</th><th class="p-3 text-center">إضافة دفعة</th></tr></thead>
-                    <tbody id="admin-products-table" class="divide-y divide-slate-800"><tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr></tbody>
-                </table>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (بالأقسام)</h2>
+                <button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer shadow">تحديث 🔄</button>
+            </div>
+            
+            <!-- حاوية الأقسام المنسدلة -->
+            <div id="admin-products-accordion" class="space-y-3">
+                <p class="text-center text-slate-500 py-6">جاري تحميل المخزون...</p>
             </div>
         </div>
 
-        <!-- 3. طلبات الشحن (الطلبات الجديدة / قيد المعالجة) -->
+        <!-- 3. طلبات الشحن -->
         <div id="depositReqTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3">طلبات الشحن الواردة</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-amber-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto border border-slate-800 rounded-lg">
                 <table class="w-full text-right text-xs">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">رقم الطلب</th>
-                            <th class="p-3">الإيميل</th>
-                            <th class="p-3">المبلغ المطلوب</th>
-                            <th class="p-3">التاريخ</th>
-                            <th class="p-3 text-center">الإجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deposit-requests-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات جديدة.</td></tr>
-                    </tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">رقم الطلب</th><th class="p-3">الإيميل</th><th class="p-3">المبلغ المطلوب</th><th class="p-3">التاريخ</th><th class="p-3 text-center">الإجراء</th></tr></thead>
+                    <tbody id="deposit-requests-table" class="divide-y divide-slate-800"><tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات جديدة.</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- 4. إدارة الذمم (الزبائن الذين عليهم مبالغ متبقية) -->
+        <!-- 4. إدارة الذمم -->
         <div id="debtsTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-6 shadow-lg">
             <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-red-400 pr-3">إدارة الذمم المالية (المبالغ غير المسددة)</h2><button type="button" onclick="loadDepositRequests()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-red-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto border border-slate-800 rounded-lg">
                 <table class="w-full text-right text-xs">
-                    <thead class="bg-slate-800/60 text-slate-400">
-                        <tr>
-                            <th class="p-3">رقم الطلب</th>
-                            <th class="p-3">الإيميل</th>
-                            <th class="p-3">إجمالي الطلب</th>
-                            <th class="p-3 text-emerald-400">المدفوع</th>
-                            <th class="p-3 text-red-400 font-bold">المتبقي (الذمة)</th>
-                            <th class="p-3 text-center">تسجيل دفعة نقدية جديدة 💵</th>
-                        </tr>
-                    </thead>
-                    <tbody id="debts-table" class="divide-y divide-slate-800">
-                        <tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد ذمم مالية حالياً.</td></tr>
-                    </tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">رقم الطلب</th><th class="p-3">الإيميل</th><th class="p-3">إجمالي الطلب</th><th class="p-3 text-emerald-400">المدفوع</th><th class="p-3 text-red-400 font-bold">المتبقي (الذمة)</th><th class="p-3 text-center">تسجيل دفعة 💵</th></tr></thead>
+                    <tbody id="debts-table" class="divide-y divide-slate-800"><tr><td colspan="6" class="p-4 text-center text-slate-500">لا توجد ذمم مالية حالياً.</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -206,6 +182,20 @@
         }
 
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
+
+        // دالة التبديل لنظام المخزون (الأكورديون)
+        function toggleAccordion(id) {
+            let el = document.getElementById(id);
+            if(el) {
+                if(el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                    el.classList.add('flex');
+                } else {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            }
+        }
 
         async function verifyAdminLogin() {
             let email = document.getElementById('admin-email').value.trim();
@@ -256,44 +246,29 @@
             if (tabId === 'manageStockTab') loadAdminProducts();
         }
 
-        // دالة التنقل بين خطوات إضافة المنتج
         function goToStep(step) {
-            // التحقق قبل الانتقال
             if (step === 2) {
                 let catSelect = document.getElementById('adm-category-select').value;
                 let newCat = document.getElementById('adm-new-category').value.trim();
-                if (!catSelect || (catSelect === 'NEW_CAT' && !newCat)) {
-                    showModal('تنبيه', 'الرجاء اختيار أو كتابة القسم الرئيسي.', '⚠️'); return;
-                }
+                if (!catSelect || (catSelect === 'NEW_CAT' && !newCat)) { showModal('تنبيه', 'الرجاء اختيار أو كتابة القسم الرئيسي.', '⚠️'); return; }
             } else if (step === 3) {
                 let titleSelect = document.getElementById('adm-title-select').value;
                 let newTitle = document.getElementById('adm-new-title').value.trim();
-                if (!titleSelect || (titleSelect === 'NEW_TITLE' && !newTitle)) {
-                    showModal('تنبيه', 'الرجاء اختيار أو كتابة فئة المنتج.', '⚠️'); return;
-                }
+                if (!titleSelect || (titleSelect === 'NEW_TITLE' && !newTitle)) { showModal('تنبيه', 'الرجاء اختيار أو كتابة فئة المنتج.', '⚠️'); return; }
             } else if (step === 4) {
                 let cost = parseFloat(document.getElementById('adm-cost-price').value);
                 let price = parseFloat(document.getElementById('adm-price').value);
-                if (isNaN(cost) || isNaN(price) || cost < 0 || price < 0) {
-                    showModal('تنبيه', 'الرجاء إدخال أسعار صحيحة.', '⚠️'); return;
-                }
+                if (isNaN(cost) || isNaN(price) || cost < 0 || price < 0) { showModal('تنبيه', 'الرجاء إدخال أسعار صحيحة.', '⚠️'); return; }
             }
 
-            // إخفاء كافة الخطوات وتحديث المؤشرات
             for(let i=1; i<=4; i++) {
                 document.getElementById('step-' + i).classList.add('hidden');
                 let ind = document.querySelector('.indicator-' + i);
                 if(ind) {
-                    if(i <= step) {
-                        ind.classList.remove('bg-slate-700');
-                        ind.classList.add('bg-amber-500');
-                    } else {
-                        ind.classList.remove('bg-amber-500');
-                        ind.classList.add('bg-slate-700');
-                    }
+                    if(i <= step) { ind.classList.remove('bg-slate-700'); ind.classList.add('bg-amber-500'); }
+                    else { ind.classList.remove('bg-amber-500'); ind.classList.add('bg-slate-700'); }
                 }
             }
-            // إظهار الخطوة المطلوبة
             document.getElementById('step-' + step).classList.remove('hidden');
         }
 
@@ -445,26 +420,70 @@
             }
         }
 
+        // دالة عرض المخزون بنظام الأقسام (الأكورديون)
         function renderAdminProducts(products) {
-            const tbody = document.getElementById('admin-products-table');
-            if(!tbody) return;
-            if(!products || products.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا توجد منتجات.</td></tr>'; return; }
-            tbody.innerHTML = '';
-            products.forEach(p => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 transition">
-                        <td class="p-3"><span class="text-xs text-amber-400 block">${p.category}</span><strong class="text-slate-100">${p.title}</strong><div class="text-xs text-slate-400 mt-0.5">مبيع: ${p.price}$</div></td>
-                        <td class="p-3 text-slate-200 font-bold">${p.codesCount} كود</td>
-                        <td class="p-3 text-center">
-                            <div class="flex flex-col gap-2">
-                                <input type="number" id="batch-cost-${p.id}" placeholder="سعر الشراء ($)" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200">
-                                <textarea id="codes-${p.id}" placeholder="الأكواد الجديدة (كل كود بسطر)" rows="2" class="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-slate-200 font-mono"></textarea>
-                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="bg-blue-500 text-slate-950 font-bold py-2 rounded text-xs transition w-full cursor-pointer">إضافة للمخزون ➕</button>
+            const container = document.getElementById('admin-products-accordion');
+            if(!container) return;
+            if(!products || products.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 py-6">لا توجد منتجات مضافة في المخزون.</p>';
+                return;
+            }
+
+            let html = '';
+            let categories = [...new Set(products.map(p => p.category))];
+
+            categories.forEach((cat, index) => {
+                let catProducts = products.filter(p => p.category === cat);
+                
+                html += `
+                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow">
+                    <!-- عنوان القسم -->
+                    <button type="button" onclick="toggleAccordion('cat-list-${index}')" class="w-full text-right p-4 bg-slate-800/50 hover:bg-slate-800 transition flex justify-between items-center cursor-pointer">
+                        <span class="font-bold text-amber-400 text-base">🏷️ ${cat}</span>
+                        <span class="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">${catProducts.length} فئات متوفرة ⬇️</span>
+                    </button>
+                    
+                    <!-- فئات القسم -->
+                    <div id="cat-list-${index}" class="hidden flex-col divide-y divide-slate-800/60">
+                `;
+                
+                catProducts.forEach(p => {
+                    html += `
+                        <div class="p-4 bg-slate-900 hover:bg-slate-800/80 transition">
+                            <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('prod-add-${p.id}')">
+                                <div>
+                                    <strong class="text-slate-100 text-sm">${p.title}</strong>
+                                    <p class="text-xs text-slate-400 mt-1">سعر المبيع للزبون: <span class="text-amber-400 font-bold">${p.price}$</span></p>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-slate-200 text-xs font-bold bg-slate-950 border border-slate-700 px-2 py-1 rounded">${p.codesCount} كود</span>
+                                    <span class="text-xs text-blue-400 font-bold bg-blue-500/10 px-2 py-1 rounded">إضافة أكواد ➕</span>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
+                            
+                            <!-- نموذج إضافة الأكواد المخفي -->
+                            <div id="prod-add-${p.id}" class="hidden mt-4 bg-slate-950 p-4 rounded-xl border border-blue-500/30 space-y-3">
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 mb-1">سعر شراء الكود الجديد للمتجر ($)</label>
+                                    <input type="number" id="batch-cost-${p.id}" placeholder="مثال: 8.5" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-400 mb-1">الأكواد الجديدة المتوفرة (كل كود بسطر)</label>
+                                    <textarea id="codes-${p.id}" placeholder="XXXX-XXXX" rows="3" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 font-mono"></textarea>
+                                </div>
+                                <button type="button" onclick="addCodesWithCost('${p.id}')" class="w-full bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition cursor-pointer shadow">حفظ الأكواد في المخزون 💾</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    </div>
+                </div>
                 `;
             });
+            
+            container.innerHTML = html;
         }
 
         async function addCodesWithCost(productId) {
