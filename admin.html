@@ -177,7 +177,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
                     <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الإيميل</th><th class="p-3">الرصيد</th></tr></thead>
-                    <tbody id="users-table" class="divide-y divide-slate-800"><tr><td colspan="2" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr></tbody>
+                    <tbody id="users-table" class="divide-y divide-slate-800"><tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -439,8 +439,15 @@
             } else {
                 newCatInput.classList.add('hidden'); newTitleInput.classList.add('hidden');
                 let filtered = globalProducts.filter(p => p.category === selectVal);
+                
+                // الترتيب من الأصغر للأكبر حسب السعر (مثل 5، 10، 15...)
+                filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+
                 let html = '<option value="">-- اختر الفئة --</option>';
-                filtered.forEach(p => html += `<option value="${p.title}" data-price="${p.price}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (${p.price}$)</option>`);
+                filtered.forEach(p => {
+                    let displayPrice = parseFloat(p.price) || 0;
+                    html += `<option value="${p.title}" data-price="${displayPrice}" data-cost="${p.costPrice}" data-id="${p.id}">${p.title} (${displayPrice}$)</option>`;
+                });
                 html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
             }
