@@ -129,7 +129,7 @@
             </div>
         </div>
 
-        <!-- 2. المخزون (بنظام القوائم المنبثقة) -->
+        <!-- 2. المخزون -->
         <div id="manageStockTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (بالأقسام)</h2>
@@ -245,7 +245,7 @@
                     loginBtn.innerText = 'دخول لوحة التحكم 🔐'; loginBtn.disabled = false;
                 }
             } catch(e) {
-                showModal('خطأ', 'حدث خطأ في الاتصال.', '❌');
+                showModal('خطأ شبكة', e.toString(), '❌');
                 loginBtn.innerText = 'دخول لوحة التحكم 🔐'; loginBtn.disabled = false;
             }
         }
@@ -404,8 +404,16 @@
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getStoreData' }) });
                 let data = await res.json();
-                if(data.status === 'success') { globalProducts = data.products || []; renderAdminProducts(globalProducts); updateCategoriesDropdown(globalProducts); }
-            } catch(e) {}
+                if(data.status === 'success') { 
+                    globalProducts = data.products || []; 
+                    renderAdminProducts(globalProducts); 
+                    updateCategoriesDropdown(globalProducts); 
+                } else {
+                    showModal('خطأ', data.message || 'فشل تحميل المنتجات', '❌');
+                }
+            } catch(e) {
+                showModal('خطأ اتصال', e.toString(), '❌');
+            }
         }
 
         function updateCategoriesDropdown(products) {
@@ -513,8 +521,12 @@
                     closeAddCodesModal();
                     showModal('نجاح', 'تم إضافة الأكواد بنجاح للمخزون!', '📦');
                     loadAdminProducts();
+                } else {
+                    showModal('خطأ', data.message || 'فشلت إضافة الأكواد', '❌');
                 }
-            } catch(e) {}
+            } catch(e) {
+                showModal('خطأ اتصال', e.toString(), '❌');
+            }
         }
 
         async function quickAddBalance() {
@@ -582,8 +594,12 @@
                 if(data.status === 'success') {
                     showModal('نجاح 🌟', 'تمت إضافة المنتج بنجاح وتحديث المخزون!', '✅');
                     clearForm(); loadAdminProducts();
+                } else {
+                    showModal('خطأ', data.message || 'فشلت إضافة المنتج', '❌');
                 }
-            } catch(e) {}
+            } catch(e) {
+                showModal('خطأ اتصال', e.toString(), '❌');
+            }
         }
 
         function clearForm() {
