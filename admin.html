@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8 flex flex-col justify-center">
 
-    <!-- نافذة منبثقة عصرية عامة للإدارة (Modal) -->
+    <!-- نافذة منبثقة عامة للإدارة -->
     <div id="custom-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
             <div id="modal-icon" class="text-4xl">🛡️</div>
@@ -22,9 +22,9 @@
         </div>
     </div>
 
-    <!-- نافذة إضافة الأكواد للمخزون (صغيرة ومخصصة) -->
+    <!-- نافذة إضافة الأكواد للفئة المحددة -->
     <div id="add-codes-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-right space-y-4 shadow-2xl transform transition-all">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-right space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 class="text-sm font-bold text-amber-400">➕ إضافة مخزون: <span id="add-codes-title" class="text-slate-100"></span></h3>
                 <button type="button" onclick="closeAddCodesModal()" class="text-slate-400 hover:text-slate-100 font-bold text-lg cursor-pointer">✕</button>
@@ -71,7 +71,7 @@
             <button type="button" onclick="openTab('usersListTab')" id="tab-btn-usersListTab" class="py-2.5 px-2 rounded-lg text-xs font-bold transition text-slate-400 hover:text-slate-200 cursor-pointer">👥 الزبائن</button>
         </div>
 
-        <!-- 1. إضافة منتج (نظام الخطوات) -->
+        <!-- 1. إضافة منتج -->
         <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-lg relative">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3 mb-6">إضافة منتج جديد (نظام الخطوات)</h2>
             
@@ -129,14 +129,13 @@
             </div>
         </div>
 
-        <!-- 2. المخزون المطور (بنظام القوائم والنوافذ المنبثقة) -->
+        <!-- 2. المخزون (بنظام القوائم المنبثقة) -->
         <div id="manageStockTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold border-r-4 border-blue-400 pr-3">إدارة المخزون (بالأقسام)</h2>
                 <button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer shadow">تحديث 🔄</button>
             </div>
             
-            <!-- حاوية الأقسام المنسدلة -->
             <div id="admin-products-accordion" class="space-y-3">
                 <p class="text-center text-slate-500 py-6">جاري تحميل المخزون...</p>
             </div>
@@ -203,7 +202,6 @@
 
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
 
-        // فتح وإغلاق نافذة الأكواد الجانبية
         function openAddCodesModal(id, title) {
             document.getElementById('add-codes-id').value = id;
             document.getElementById('add-codes-title').innerText = title;
@@ -216,7 +214,6 @@
             document.getElementById('add-codes-modal').classList.add('hidden');
         }
 
-        // دالة التبديل لنظام المخزون (الأكورديون)
         function toggleAccordion(id) {
             let el = document.getElementById(id);
             if(el) {
@@ -453,7 +450,6 @@
             }
         }
 
-        // عرض المخزون واستدعاء نافذة الإضافة المخصصة بدلاً من الأكورديون
         function renderAdminProducts(products) {
             const container = document.getElementById('admin-products-accordion');
             if(!container) return;
@@ -470,18 +466,15 @@
                 
                 html += `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow">
-                    <!-- عنوان القسم -->
                     <button type="button" onclick="toggleAccordion('cat-list-${index}')" class="w-full text-right p-4 bg-slate-800/50 hover:bg-slate-800 transition flex justify-between items-center cursor-pointer">
                         <span class="font-bold text-amber-400 text-base">🏷️ ${cat}</span>
                         <span class="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">${catProducts.length} فئات متوفرة ⬇️</span>
                     </button>
                     
-                    <!-- فئات القسم -->
                     <div id="cat-list-${index}" class="hidden flex-col divide-y divide-slate-800/60">
                 `;
                 
                 catProducts.forEach(p => {
-                    // جعل الفئة قابلة للنقر وتستدعي openAddCodesModal
                     html += `
                         <div class="flex justify-between items-center cursor-pointer p-4 bg-slate-900 hover:bg-slate-800/80 transition" onclick="openAddCodesModal('${p.id}', '${p.title.replace(/'/g, "\\'")}')">
                             <div>
