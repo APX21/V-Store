@@ -454,7 +454,10 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'createDepositRequest', email: currentUser.email, amount }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب الخاص بك:\n' + data.requestId + '\n\nيرجى تزويد الإدارة برقم الطلب.', '🚀');
+                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب الخاص بك:
+' + data.requestId + '
+
+يرجى تزويد الإدارة برقم الطلب.', '🚀');
                     document.getElementById('deposit-amount').value = '';
                     fetchUserDeposits();
                 }
@@ -496,7 +499,9 @@
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'buyProduct', email: currentUser.email, productId }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('تم الشراء بنجاح! 🎉', 'كود البطاقة الخاص بك:\n\n' + data.code, '🎁');
+                    showModal('تم الشراء بنجاح! 🎉', 'كود البطاقة الخاص بك:
+
+' + data.code, '🎁');
                     currentUser.balance = data.newBalance;
                     let bal = data.newBalance.toFixed(2) + ' $';
                     document.getElementById('footer-user-balance').innerText = bal;
