@@ -22,6 +22,19 @@
         </div>
     </div>
 
+    <!-- نافذة منبثقة لعرض فئات القسم في المخزون -->
+    <div id="stock-category-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 text-right space-y-4 shadow-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-sm font-bold text-amber-400">📦 فئات قسم: <span id="modal-category-name" class="text-slate-100"></span></h3>
+                <button type="button" onclick="closeStockCategoryModal()" class="text-slate-400 hover:text-slate-100 font-bold text-lg cursor-pointer">✕</button>
+            </div>
+            <div id="modal-category-products-list" class="overflow-y-auto space-y-2 flex-grow divide-y divide-slate-800/60">
+                <!-- تعبئة ديناميكية -->
+            </div>
+        </div>
+    </div>
+
     <!-- نافذة إضافة الأكواد للفئة المحددة -->
     <div id="add-codes-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-6 text-right space-y-4 shadow-2xl">
@@ -136,7 +149,7 @@
                 <button type="button" onclick="loadAdminProducts()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-blue-400 cursor-pointer shadow">تحديث 🔄</button>
             </div>
             
-            <div id="admin-products-accordion" class="space-y-3">
+            <div id="admin-products-accordion">
                 <p class="text-center text-slate-500 py-6">جاري تحميل المخزون...</p>
             </div>
         </div>
@@ -214,17 +227,43 @@
             document.getElementById('add-codes-modal').classList.add('hidden');
         }
 
-        function toggleAccordion(id) {
-            let el = document.getElementById(id);
-            if(el) {
-                if(el.classList.contains('hidden')) {
-                    el.classList.remove('hidden');
-                    el.classList.add('flex');
-                } else {
-                    el.classList.add('hidden');
-                    el.classList.remove('flex');
-                }
+        function openStockCategoryModal(catName) {
+            document.getElementById('modal-category-name').innerText = catName;
+            let catProducts = globalProducts.filter(p => p.category === catName);
+            
+            // ترتيب الفئات من الأصغر للأكبر حسب السعر (مثل 5، 10، 15...)
+            catProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+
+            const listContainer = document.getElementById('modal-category-products-list');
+            if(!listContainer) return;
+            
+            if(catProducts.length === 0) {
+                listContainer.innerHTML = '<p class="text-center text-slate-500 py-4">لا توجد فئات في هذا القسم.</p>';
+            } else {
+                let html = '';
+                catProducts.forEach(p => {
+                    let safeTitle = String(p.title || '').replace(/'/g, "\\'");
+                    let priceVal = parseFloat(p.price) || 0;
+                    html += `
+                        <div class="flex justify-between items-center p-3 hover:bg-slate-800/50 transition cursor-pointer rounded-lg" onclick="openAddCodesModal('${p.id}', '${safeTitle}'); closeStockCategoryModal();">
+                            <div>
+                                <strong class="text-slate-100 text-sm">${p.title}</strong>
+                                <p class="text-xs text-slate-400 mt-0.5">سعر المبيع: <span class="text-amber-400 font-bold">${priceVal}$</span></p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-slate-200 text-xs font-bold bg-slate-950 border border-slate-700 px-2.5 py-1 rounded">${p.codesCount} كود</span>
+                                <span class="text-xs text-blue-400 font-bold bg-blue-500/10 hover:bg-blue-500/20 px-2 py-1 rounded transition">إضافة ➕</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                listContainer.innerHTML = html;
             }
+            document.getElementById('stock-category-modal').classList.remove('hidden');
+        }
+
+        function closeStockCategoryModal() {
+            document.getElementById('stock-category-modal').classList.add('hidden');
         }
 
         async function verifyAdminLogin() {
@@ -474,44 +513,27 @@
                 return;
             }
 
-            let html = '';
             let categories = [...new Set(products.map(p => p.category))];
+            let html = '<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">';
 
-            categories.forEach((cat, index) => {
+            categories.forEach(cat => {
                 let catProducts = products.filter(p => p.category === cat);
-                
+                let safeCat = String(cat).replace(/'/g, "\\'");
                 html += `
-                <div class="bg-slate-950 border border-slate-800 rounded-xl overflow-hidden shadow">
-                    <button type="button" onclick="toggleAccordion('cat-list-${index}')" class="w-full text-right p-4 bg-slate-800/50 hover:bg-slate-800 transition flex justify-between items-center cursor-pointer">
-                        <span class="font-bold text-amber-400 text-base">🏷️ ${cat}</span>
-                        <span class="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1 rounded-full">${catProducts.length} فئات متوفرة ⬇️</span>
-                    </button>
-                    
-                    <div id="cat-list-${index}" class="hidden flex-col divide-y divide-slate-800/60">
-                `;
-                
-                catProducts.forEach(p => {
-                    let safeTitle = String(p.title || '').replace(/'/g, "\\'");
-                    html += `
-                        <div class="flex justify-between items-center cursor-pointer p-4 bg-slate-900 hover:bg-slate-800/80 transition" onclick="openAddCodesModal('${p.id}', '${safeTitle}')">
-                            <div>
-                                <strong class="text-slate-100 text-sm">${p.title}</strong>
-                                <p class="text-xs text-slate-400 mt-1">سعر المبيع للزبون: <span class="text-amber-400 font-bold">${p.price}$</span></p>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-slate-200 text-xs font-bold bg-slate-950 border border-slate-700 px-2 py-1 rounded">${p.codesCount} كود</span>
-                                <span class="text-xs text-blue-400 font-bold bg-blue-500/10 hover:bg-blue-500/20 px-2 py-1 rounded transition">إضافة ➕</span>
-                            </div>
+                    <div onclick="openStockCategoryModal('${safeCat}')" class="bg-slate-950 border border-slate-800 hover:border-amber-400 p-5 rounded-xl flex flex-col justify-between shadow cursor-pointer transition transform hover:-translate-y-1">
+                        <div>
+                            <div class="text-2xl mb-2">🏷️</div>
+                            <h3 class="font-bold text-base text-slate-100">${cat}</h3>
+                            <p class="text-xs text-slate-400 mt-1">اضغط لعرض الفئات وإدارة المخزون</p>
                         </div>
-                    `;
-                });
-                
-                html += `
+                        <div class="mt-4 pt-3 border-t border-slate-800 flex justify-between items-center">
+                            <span class="text-xs bg-slate-900 border border-slate-700 text-amber-400 px-2.5 py-1 rounded-full font-bold">${catProducts.length} فئات</span>
+                            <span class="text-amber-400 text-xs font-bold">استعراض ←</span>
+                        </div>
                     </div>
-                </div>
                 `;
             });
-            
+            html += '</div>';
             container.innerHTML = html;
         }
 
