@@ -142,7 +142,6 @@
                 <button type="button" onclick="switchTab('store')" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer"><span>← العودة للأقسام</span></button>
                 <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
             </div>
-            <!-- شبكة بطاقات المنتجات المحدثة -->
             <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
         </section>
 
@@ -165,17 +164,16 @@
         <section id="tab-wallet" class="hidden space-y-6 max-w-3xl mx-auto w-full">
             <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">طلب شحن رصيد وإدارة الذمم المالية</h2>
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg text-sm">
-                <p class="text-slate-300">أدخل القيمة المراد شحنها، وسيتم توليد رقم طلب خاص بك وتتبع حركة الذمم والدفعات:</p>
-                <div><label class="block text-xs text-slate-400 mb-1">المبلغ المطلوب شحنه ($)</label><input type="number" id="deposit-amount" placeholder="مثال: 500" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
-                <button type="button" onclick="submitDepositRequest()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">إرسال طلب الشحن 🚀</button>
+                <p class="text-slate-300">أدخل القيمة المراد شحنها:</p>
+                <div><label class="block text-xs text-slate-400 mb-1">المبلغ المطلوب ($)</label><input type="number" id="deposit-amount" placeholder="مثال: 50" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200"></div>
+                <button type="button" onclick="submitDepositRequest()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-lg text-xs transition cursor-pointer">إرسال طلب الشحن 🚀</button>
             </div>
-
             <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg p-4 space-y-3">
-                <h3 class="font-bold text-amber-400 text-sm">سجل طلبات الشحن والحركات والذمم المالية الخاصة بك</h3>
+                <h3 class="font-bold text-amber-400 text-sm">سجل طلبات الشحن والذمم</h3>
                 <div class="overflow-x-auto">
                     <table class="w-full text-right text-xs">
                         <thead class="bg-slate-800/60 text-slate-400">
-                            <tr><th class="p-2.5">رقم الطلب</th><th class="p-2.5">إجمالي الطلب</th><th class="p-2.5 text-emerald-400">المدفوع</th><th class="p-2.5 text-red-400">المتبقي (الذمة)</th><th class="p-2.5">الحالة</th></tr>
+                            <tr><th class="p-2.5">رقم الطلب</th><th class="p-2.5">الإجمالي</th><th class="p-2.5 text-emerald-400">المدفوع</th><th class="p-2.5 text-red-400">المتبقي</th><th class="p-2.5">الحالة</th></tr>
                         </thead>
                         <tbody id="user-deposits-table" class="divide-y divide-slate-800">
                             <tr><td colspan="5" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr>
@@ -184,7 +182,6 @@
                 </div>
             </div>
         </section>
-
     </main>
 
     <!-- الشريط السفلي -->
@@ -198,18 +195,13 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqpn0XfZLy0-Ad3I43cdx_qBnIpTYvveShsNDmgdXxp1EusqXSpTw_uWkQiE_Um7Ll/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXZdElhBDLzDHImywizQSzRqZwjVLh0zHczT-A_jmXE5_Vj-aGwoDyHyLULyv8cYpd/exec";
         let currentUser = JSON.parse(localStorage.getItem('store_user_data')) || null;
         let productsList = [];
+        let globalCategoryLogos = {};
 
         window.onload = function() {
             if(currentUser && currentUser.email) {
-                let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
-                if(blockedUsers[currentUser.email]) {
-                    showModal('حساب محظور 🚫', 'عذراً، تم حظر هذا الحساب من قبل الإدارة.', '❌');
-                    logoutUser();
-                    return;
-                }
                 activateUserSession(currentUser);
             }
         };
@@ -223,76 +215,6 @@
         }
 
         function closeModal() { document.getElementById('custom-modal').classList.add('hidden'); }
-
-        function openProfileModal() {
-            if(!currentUser) return;
-            document.getElementById('profile-fullname').innerText = (currentUser.name || "") + " " + (currentUser.lastName || "");
-            document.getElementById('profile-email').innerText = currentUser.email || "";
-            document.getElementById('profile-phone').innerText = currentUser.phone || "غير متوفر";
-            
-            ['edit-name-box', 'edit-email-box', 'edit-phone-box', 'edit-pass-box'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            document.getElementById('profile-modal').classList.remove('hidden');
-        }
-
-        function closeProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
-
-        function toggleEditSection(sectionId) {
-            let box = document.getElementById(sectionId);
-            let isHidden = box.classList.contains('hidden');
-            ['edit-name-box', 'edit-email-box', 'edit-phone-box', 'edit-pass-box'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            if(isHidden) box.classList.remove('hidden');
-        }
-
-        async function updateProfileData(type) {
-            let payload = { action: 'updateUserProfile', oldEmail: currentUser.email, type: type };
-            if(type === 'name') {
-                payload.firstName = document.getElementById('up-firstname').value.trim();
-                payload.lastName = document.getElementById('up-lastname').value.trim();
-                if(!payload.firstName) { showModal('تنبيه', 'الرجاء إدخال الاسم.', '⚠️'); return; }
-                currentUser.name = payload.firstName; currentUser.lastName = payload.lastName;
-            } else if(type === 'email') {
-                payload.newEmail = document.getElementById('up-email').value.trim();
-                if(!payload.newEmail) { showModal('تنبيه', 'الرجاء إدخال البريد الجديد.', '⚠️'); return; }
-                currentUser.email = payload.newEmail;
-            } else if(type === 'phone') {
-                payload.phone = document.getElementById('up-phone').value.trim();
-                if(!payload.phone) { showModal('تنبيه', 'الرجاء إدخال رقم الموبايل.', '⚠️'); return; }
-                currentUser.phone = payload.phone;
-            }
-
-            try {
-                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    showModal('نجاح ✅', 'تم تحديث البيانات بنجاح!', '✨');
-                    localStorage.setItem('store_user_data', JSON.stringify(currentUser));
-                    activateUserSession(currentUser);
-                    openProfileModal();
-                } else {
-                    showModal('خطأ', data.message || 'فشل التحديث', '❌');
-                }
-            } catch(e) { showModal('خطأ', 'حدث خطأ في الاتصال.', '❌'); }
-        }
-
-        async function submitChangePassword() {
-            let oldPassword = document.getElementById('old-pass').value;
-            let newPassword = document.getElementById('new-pass').value;
-            let confirmNewPass = document.getElementById('confirm-new-pass').value;
-
-            if(!oldPassword || !newPassword || !confirmNewPass) { showModal('تنبيه', 'الرجاء تعبئة جميع حقول كلمة المرور.', '⚠️'); return; }
-            if(newPassword !== confirmNewPass) { showModal('تنبيه', 'كلمة المرور الجديدة غير متطابقة.', '⚠️'); return; }
-
-            try {
-                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'changePassword', email: currentUser.email, oldPassword, newPassword }) });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    showModal('نجاح 🔑', 'تم تحديث كلمة المرور بنجاح!', '✅');
-                    closeProfileModal();
-                } else {
-                    showModal('خطأ', data.message || 'فشل تغيير كلمة المرور', '❌');
-                }
-            } catch(e) { showModal('خطأ', 'حدث خطأ في الاتصال.', '❌'); }
-        }
 
         function toggleAuthMode(mode) {
             if(mode === 'register') {
@@ -308,12 +230,6 @@
             let email = document.getElementById('login-email').value.trim();
             let password = document.getElementById('login-password').value;
             if(!email || !password) { showModal('تنبيه', 'الرجاء إدخال البريد وكلمة المرور.', '⚠️'); return; }
-
-            let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
-            if(blockedUsers[email]) {
-                showModal('حساب محظور 🚫', 'عذراً، هذا الحساب محظور من قبل الإدارة.', '❌');
-                return;
-            }
 
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'loginUser', email, password }) });
@@ -367,10 +283,8 @@
             document.getElementById('user-info').classList.remove('hidden');
             document.querySelector('main').classList.remove('justify-center');
             document.getElementById('current-user-name').innerText = (user.name || "") + " " + (user.lastName || "");
-            
             let bal = (user.balance || 0).toFixed(2) + ' $';
             document.getElementById('footer-user-balance').innerText = bal;
-            
             switchTab('store');
         }
 
@@ -408,10 +322,10 @@
                 let result = await res.json();
                 if(result.status === 'success') {
                     productsList = result.products || [];
+                    globalCategoryLogos = result.categoryLogos || {};
                     if(result.userBalance !== undefined) {
                         currentUser.balance = result.userBalance;
-                        let bal = result.userBalance.toFixed(2) + ' $';
-                        document.getElementById('footer-user-balance').innerText = bal;
+                        document.getElementById('footer-user-balance').innerText = result.userBalance.toFixed(2) + ' $';
                         localStorage.setItem('store_user_data', JSON.stringify(currentUser));
                     }
                     renderCategories();
@@ -423,18 +337,13 @@
             const grid = document.getElementById('categories-grid');
             if(!grid) return;
             grid.innerHTML = '';
-
-            let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
-            let activeCategories = [...new Set(productsList.map(p => p.category))].filter(cat => !disabledCategories[cat]);
-
-            if(activeCategories.length === 0) { grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام متاحة حالياً.</p>'; return; }
+            let activeCategories = [...new Set(productsList.map(p => p.category))];
+            if(activeCategories.length === 0) { grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام متاحة.</p>'; return; }
 
             activeCategories.sort((a, b) => a.localeCompare(b, 'ar'));
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-
             activeCategories.forEach(catName => {
-                let logoUrl = categoryLogos[catName] || "";
+                let logoUrl = globalCategoryLogos[catName] || "";
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl flex flex-col items-center justify-center text-center shadow cursor-pointer transition transform hover:-translate-y-0.5 aspect-square";
                 card.onclick = () => openCategory(catName);
@@ -457,41 +366,33 @@
             if(!grid) return;
             grid.innerHTML = '';
 
-            let disabledProducts = JSON.parse(localStorage.getItem('store_disabled_products') || '{}');
-            let filteredProducts = productsList.filter(p => p.category === catName && !disabledProducts[p.id]);
-            
+            let filteredProducts = productsList.filter(p => p.category === catName);
             filteredProducts.sort((a, b) => String(a.title).localeCompare(String(b.title), 'ar', {numeric: true}));
 
             if(filteredProducts.length === 0) {
-                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات متاحة في هذا القسم حالياً.</p>';
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات متاحة في هذا القسم.</p>';
                 return;
             }
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-            let logoUrl = categoryLogos[catName] || "";
+            let logoUrl = globalCategoryLogos[catName] || "";
 
             filteredProducts.forEach(p => {
                 let card = document.createElement('div');
                 card.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-between shadow transition hover:border-amber-500/50";
                 
-                // أيقونة أكبر حجماً (لوغو القسم أو أيقونة افتراضية)
                 let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${catName}" class="w-20 h-20 object-contain rounded-xl mb-2 bg-slate-950 p-1 border border-slate-800">` : `<div class="w-20 h-20 rounded-xl bg-slate-800 flex items-center justify-center text-4xl mb-2 border border-slate-700">⚡</div>`;
 
                 card.innerHTML = `
                     <div class="flex flex-col items-center w-full">
                         ${logoHtml}
-                        <!-- فئة البطاقة تحت الأيقونة مباشرة وبشكل واضح -->
                         <h3 class="font-bold text-sm text-slate-100 truncate w-full text-center mt-1 mb-3">${p.title}</h3>
                     </div>
-
                     <div class="w-full space-y-3 pt-3 border-t border-slate-800">
-                        <!-- عداد الكمية -->
                         <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
                             <button type="button" onclick="changeQty('${p.id}', -1, ${p.price})" class="text-slate-400 hover:text-white font-bold text-base px-2 cursor-pointer">-</button>
                             <span id="qty-${p.id}" class="text-xs font-bold text-slate-100">1</span>
                             <button type="button" onclick="changeQty('${p.id}', 1, ${p.price})" class="text-slate-400 hover:text-white font-bold text-base px-2 cursor-pointer">+</button>
                         </div>
-
                         <div class="flex items-center justify-between">
                             <span id="price-${p.id}" class="text-amber-400 font-extrabold text-base">$ ${parseFloat(p.price).toFixed(2)}</span>
                             <button type="button" onclick="buyProductWithQty('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow">شراء</button>
@@ -502,7 +403,6 @@
             });
         }
 
-        // دالة تغيير كمية البطاقات (بحد أقصى 5 وبحد أدنى 1)
         function changeQty(productId, delta, unitPrice) {
             let qtyEl = document.getElementById('qty-' + productId);
             let priceEl = document.getElementById('price-' + productId);
@@ -521,7 +421,6 @@
             priceEl.innerText = '$ ' + (unitPrice * newQty).toFixed(2);
         }
 
-        // دالة الشراء بالكمية المحددة
         async function buyProductWithQty(productId) {
             let qtyEl = document.getElementById('qty-' + productId);
             let qty = qtyEl ? parseInt(qtyEl.innerText) || 1 : 1;
@@ -547,10 +446,8 @@
 
             if(successCodes.length > 0) {
                 currentUser.balance = lastNewBalance;
-                let bal = lastNewBalance.toFixed(2) + ' $';
-                document.getElementById('footer-user-balance').innerText = bal;
+                document.getElementById('footer-user-balance').innerText = lastNewBalance.toFixed(2) + ' $';
                 localStorage.setItem('store_user_data', JSON.stringify(currentUser));
-
                 showModal('تمت عملية الشراء بنجاح! 🎉', 'أكواد البطاقات الخاصة بك:\n\n' + successCodes.join('\n'), '🎁');
                 loadStoreData();
             }
@@ -558,13 +455,12 @@
 
         async function submitDepositRequest() {
             let amount = parseFloat(document.getElementById('deposit-amount').value);
-            if(isNaN(amount) || amount <= 0) { showModal('تنبيه', 'الرجاء إدخال مبلغ صحيح للشحن.', '⚠️'); return; }
-
+            if(isNaN(amount) || amount <= 0) { showModal('تنبيه', 'الرجاء إدخال مبلغ صحيح.', '⚠️'); return; }
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'createDepositRequest', email: currentUser.email, amount }) });
                 let data = await res.json();
                 if(data.status === 'success') {
-                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب الخاص بك:\n' + data.requestId + '\n\nسيظهر في جدول الذمم والحركات ريثما تعتمده الإدارة.', '🚀');
+                    showModal('تم تقديم طلب الشحن بنجاح!', 'رقم الطلب:\n' + data.requestId, '🚀');
                     document.getElementById('deposit-amount').value = '';
                     fetchUserDeposits();
                 }
@@ -581,12 +477,12 @@
                     const tbody = document.getElementById('user-deposits-table');
                     if(!tbody) return;
                     if(userReqs.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات شحن أو ذمم سابقة.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-500">لا توجد طلبات سابقة.</td></tr>';
                         return;
                     }
                     tbody.innerHTML = '';
                     userReqs.reverse().forEach(req => {
-                        let statusText = req.status === 'Approved' ? '✅ معتمد (ذمة نشطة)' : (req.status === 'Completed' ? '🎉 مسدد بالكامل' : (req.status === 'Rejected' ? '❌ مرفوض' : '⏳ قيد المعالجة'));
+                        let statusText = req.status === 'Approved' ? '✅ معتمد' : (req.status === 'Completed' ? '🎉 مسدد' : (req.status === 'Rejected' ? '❌ مرفوض' : '⏳ قيد المعالجة'));
                         tbody.innerHTML += `
                             <tr class="hover:bg-slate-800/40 transition">
                                 <td class="p-2.5 font-mono text-amber-400">${req.requestId}</td>
