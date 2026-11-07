@@ -88,14 +88,27 @@
         <div id="addProductTab" class="admin-content bg-slate-900 border border-slate-800 p-6 rounded-xl shadow-lg relative">
             <h2 class="text-lg font-bold border-r-4 border-amber-400 pr-3 mb-6">إضافة منتج جديد (نظام الخطوات)</h2>
             
-            <div id="step-1" class="transition-all duration-300">
-                <h3 class="text-sm font-bold text-slate-300 mb-3">الخطوة 1: اختيار القسم الرئيسي</h3>
+            <div id="step-1" class="transition-all duration-300 space-y-4">
+                <h3 class="text-sm font-bold text-slate-300">الخطوة 1: اختيار القسم الرئيسي وتعيين اللوغو</h3>
                 <div>
+                    <label class="block text-xs text-slate-400 mb-1">القسم الرئيسي</label>
                     <select id="adm-category-select" onchange="onCategoryChange()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 mb-2">
                         <option value="">-- اختر القسم --</option><option value="NEW_CAT">➕ إضافة قسم جديد...</option>
                     </select>
                     <input type="text" id="adm-new-category" placeholder="اكتب اسم القسم الجديد..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 hidden">
                 </div>
+
+                <!-- قسم إدارة لوغو القسم -->
+                <div id="category-logo-section" class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <label class="block text-xs font-bold text-amber-400">لوغو القسم (رابط الصورة)</label>
+                    <div class="flex items-center gap-3">
+                        <div id="logo-preview-box" class="w-12 h-12 bg-slate-900 border border-slate-700 rounded-lg flex items-center justify-center text-xl overflow-hidden">🏷️</div>
+                        <input type="text" id="adm-category-logo-url" placeholder="https://example.com/logo.png" class="flex-grow bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 font-mono">
+                        <button type="button" onclick="saveCategoryLogo()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3 py-2 rounded-lg text-xs transition cursor-pointer">حفظ اللوغو 💾</button>
+                        <button type="button" onclick="deleteCategoryLogo()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 font-bold px-3 py-2 rounded-lg text-xs transition cursor-pointer">حذف 🗑️</button>
+                    </div>
+                </div>
+
                 <button type="button" onclick="goToStep(2)" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">متابعة للفئة ⬅️</button>
             </div>
 
@@ -184,13 +197,13 @@
             <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">شحن الرصيد 💵</button>
         </div>
 
-        <!-- 6. الزبائن -->
+        <!-- 6. الزبائن (مع أزرار الحظر والفك) -->
         <div id="usersListTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
-            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن</h2><button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button></div>
+            <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن (الحظر والتحكم)</h2><button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto">
                 <table class="w-full text-right text-sm">
-                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الإيميل</th><th class="p-3">الرصيد</th></tr></thead>
-                    <tbody id="users-table" class="divide-y divide-slate-800"><tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr></tbody>
+                    <thead class="bg-slate-800/60 text-slate-400"><tr><th class="p-3">الإيميل</th><th class="p-3">الرصيد</th><th class="p-3 text-center">الإجراء (حظر/إلغاء)</th></tr></thead>
+                    <tbody id="users-table" class="divide-y divide-slate-800"><tr><td colspan="3" class="p-4 text-center text-slate-500">جاري التحميل...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -199,7 +212,7 @@
 
     <script>
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqpn0XfZLy0-Ad3I43cdx_qBnIpTYvveShsNDmgdXxp1EusqXSpTw_uWkQiE_Um7Ll/exec";
-        let globalProducts = [], allDepositRequests = [];
+        let globalProducts = [], allDepositRequests = [], globalUsers = [];
 
         window.onload = function() {
             if(localStorage.getItem('admin_logged_in') === 'true') showAdminDashboard();
@@ -209,7 +222,7 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = message;
             document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('modal-buttons').innerHTML = `<button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>`;
+            document.getElementById('modal-buttons').innerHTML = '<button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>';
             document.getElementById('custom-modal').classList.remove('hidden');
         }
 
@@ -231,28 +244,52 @@
             document.getElementById('modal-category-name').innerText = catName;
             let catProducts = globalProducts.filter(p => p.category === catName);
             
-            // ترتيب الفئات من الأصغر للأكبر حسب السعر (مثل 5، 10، 15...)
-            catProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+            catProducts.sort((a, b) => String(a.title).localeCompare(String(b.title), 'ar', {numeric: true}));
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+            let logoUrl = categoryLogos[catName] || "";
+            let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
+            let isCatDisabled = disabledCategories[catName] || false;
 
             const listContainer = document.getElementById('modal-category-products-list');
             if(!listContainer) return;
             
+            let headerAction = `
+                <div class="flex justify-between items-center bg-slate-950 p-2.5 rounded-lg border border-slate-800 mb-2">
+                    <span class="text-xs text-slate-300 font-bold">حالة القسم كامل:</span>
+                    <button type="button" onclick="toggleCategoryDisable('${catName}')" class="${isCatDisabled ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-red-500 hover:bg-red-400 text-white'} text-[11px] font-bold px-3 py-1 rounded transition cursor-pointer">
+                        ${isCatDisabled ? 'تفعيل القسم ✅' : 'تعطيل القسم 🚫'}
+                    </button>
+                </div>
+            `;
+
             if(catProducts.length === 0) {
-                listContainer.innerHTML = '<p class="text-center text-slate-500 py-4">لا توجد فئات في هذا القسم.</p>';
+                listContainer.innerHTML = headerAction + '<p class="text-center text-slate-500 py-4">لا توجد فئات في هذا القسم.</p>';
             } else {
-                let html = '';
+                let html = headerAction;
                 catProducts.forEach(p => {
-                    let safeTitle = String(p.title || '').replace(/'/g, "\\\\'");
+                    let safeTitle = String(p.title || '').replace(/'/g, "\\'");
                     let priceVal = parseFloat(p.price) || 0;
+                    let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${catName}" class="w-8 h-8 object-contain rounded bg-slate-950 p-0.5 border border-slate-800">` : `<span class="text-base">🏷️</span>`;
+                    
+                    let disabledProducts = JSON.parse(localStorage.getItem('store_disabled_products') || '{}');
+                    let isProdDisabled = disabledProducts[p.id] || false;
+
                     html += `
-                        <div class="flex justify-between items-center p-2.5 hover:bg-slate-800/50 transition cursor-pointer rounded-lg text-xs" onclick="openAddCodesModal('${p.id}', '${safeTitle}'); closeStockCategoryModal();">
-                            <div>
-                                <strong class="text-slate-100">${p.title}</strong>
-                                <span class="text-amber-400 font-bold mr-2">(${priceVal}$)</span>
+                        <div class="flex justify-between items-center p-2 hover:bg-slate-800/50 transition rounded-lg text-xs">
+                            <div class="flex items-center gap-2.5 cursor-pointer" onclick="openAddCodesModal('${p.id}', '${safeTitle}'); closeStockCategoryModal();">
+                                ${logoHtml}
+                                <div>
+                                    <strong class="text-slate-100">${p.title}</strong>
+                                    <span class="text-amber-400 font-bold mr-1.5">(${priceVal}$)</span>
+                                </div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <span class="text-slate-200 font-bold bg-slate-950 border border-slate-700 px-2 py-0.5 rounded">${p.codesCount} كود</span>
-                                <span class="text-blue-400 font-bold bg-blue-500/10 px-2 py-0.5 rounded">إضافة ➕</span>
+                                <button type="button" onclick="toggleProductDisable('${p.id}', '${catName}')" class="${isProdDisabled ? 'bg-emerald-500 text-slate-950' : 'bg-red-500/20 text-red-400'} px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition">
+                                    ${isProdDisabled ? 'مفعل ✅' : 'معطل 🚫'}
+                                </button>
+                                <button type="button" onclick="openAddCodesModal('${p.id}', '${safeTitle}'); closeStockCategoryModal();" class="bg-blue-500/10 text-blue-400 px-2 py-1 rounded text-[10px] font-bold cursor-pointer">إضافة ➕</button>
                             </div>
                         </div>
                     `;
@@ -264,6 +301,22 @@
 
         function closeStockCategoryModal() {
             document.getElementById('stock-category-modal').classList.add('hidden');
+        }
+
+        function toggleCategoryDisable(catName) {
+            let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
+            disabledCategories[catName] = !disabledCategories[catName];
+            localStorage.setItem('store_disabled_categories', JSON.stringify(disabledCategories));
+            closeStockCategoryModal();
+            loadAdminProducts();
+            showModal('تحديث الحالة', `تم تغيير حالة القسم (${catName}) بنجاح!`, '✅');
+        }
+
+        function toggleProductDisable(productId, catName) {
+            let disabledProducts = JSON.parse(localStorage.getItem('store_disabled_products') || '{}');
+            disabledProducts[productId] = !disabledProducts[productId];
+            localStorage.setItem('store_disabled_products', JSON.stringify(disabledProducts));
+            openStockCategoryModal(catName);
         }
 
         async function verifyAdminLogin() {
@@ -464,6 +517,7 @@
             categories.forEach(cat => html += `<option value="${cat}">${cat}</option>`);
             html += `<option value="NEW_CAT">➕ إضافة قسم جديد...</option>`;
             select.innerHTML = html;
+            onCategoryChange();
         }
 
         function onCategoryChange() {
@@ -471,16 +525,20 @@
             let newCatInput = document.getElementById('adm-new-category');
             let titleSelect = document.getElementById('adm-title-select');
             let newTitleInput = document.getElementById('adm-new-title');
+            let logoInput = document.getElementById('adm-category-logo-url');
+            let previewBox = document.getElementById('logo-preview-box');
 
+            let activeCat = selectVal;
             if (selectVal === 'NEW_CAT') {
                 newCatInput.classList.remove('hidden'); newCatInput.value = ''; newCatInput.focus();
                 titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>'; titleSelect.value = 'NEW_TITLE'; newTitleInput.classList.remove('hidden');
+                logoInput.value = '';
+                previewBox.innerHTML = '🏷️';
             } else {
                 newCatInput.classList.add('hidden'); newTitleInput.classList.add('hidden');
                 let filtered = globalProducts.filter(p => p.category === selectVal);
                 
-                // الترتيب من الأصغر للأكبر حسب السعر (مثل 5، 10، 15...)
-                filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+                filtered.sort((a, b) => String(a.title).localeCompare(String(b.title), 'ar', {numeric: true}));
 
                 let html = '<option value="">-- اختر الفئة --</option>';
                 filtered.forEach(p => {
@@ -489,7 +547,53 @@
                 });
                 html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
+
+                let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+                let savedLogo = categoryLogos[selectVal] || "";
+                logoInput.value = savedLogo;
+                if(savedLogo) {
+                    previewBox.innerHTML = `<img src="${savedLogo}" class="w-full h-full object-contain">`;
+                } else {
+                    previewBox.innerHTML = '🏷️';
+                }
             }
+        }
+
+        function saveCategoryLogo() {
+            let selectVal = document.getElementById('adm-category-select').value;
+            let newCatInput = document.getElementById('adm-new-category').value.trim();
+            let catName = (selectVal === 'NEW_CAT') ? newCatInput : selectVal;
+            let logoUrl = document.getElementById('adm-category-logo-url').value.trim();
+
+            if(!catName) { showModal('تنبيه', 'الرجاء اختيار أو كتابة اسم القسم أولاً.', '⚠️'); return; }
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+            categoryLogos[catName] = logoUrl;
+            localStorage.setItem('store_category_logos', JSON.stringify(categoryLogos));
+
+            let previewBox = document.getElementById('logo-preview-box');
+            if(logoUrl) {
+                previewBox.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain">`;
+            } else {
+                previewBox.innerHTML = '🏷️';
+            }
+            showModal('نجاح 💾', 'تم حفظ لوغو القسم بنجاح!', '✅');
+        }
+
+        function deleteCategoryLogo() {
+            let selectVal = document.getElementById('adm-category-select').value;
+            let newCatInput = document.getElementById('adm-new-category').value.trim();
+            let catName = (selectVal === 'NEW_CAT') ? newCatInput : selectVal;
+
+            if(!catName) { showModal('تنبيه', 'الرجاء اختيار القسم أولاً.', '⚠️'); return; }
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+            delete categoryLogos[catName];
+            localStorage.setItem('store_category_logos', JSON.stringify(categoryLogos));
+
+            document.getElementById('adm-category-logo-url').value = '';
+            document.getElementById('logo-preview-box').innerHTML = '🏷️';
+            showModal('نجاح 🗑️', 'تم حذف لوغو القسم بنجاح.', '✅');
         }
 
         function onTitleChange() {
@@ -514,27 +618,80 @@
             }
 
             let categories = [...new Set(products.map(p => p.category))];
+            categories.sort((a, b) => a.localeCompare(b, 'ar'));
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+            let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
             let html = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">';
 
             categories.forEach(cat => {
                 let catProducts = products.filter(p => p.category === cat);
                 let safeCat = String(cat).replace(/'/g, "\\'");
+                let logoUrl = categoryLogos[cat] || "";
+                let isCatDisabled = disabledCategories[cat] || false;
+                let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${cat}" class="w-12 h-12 object-contain rounded-lg mb-1.5 bg-slate-900 p-0.5 border border-slate-700">` : `<div class="text-2xl mb-1.5">🏷️</div>`;
+
                 html += `
-                    <div onclick="openStockCategoryModal('${safeCat}')" class="bg-slate-950 border border-slate-800 hover:border-amber-400 p-3.5 rounded-xl flex flex-col justify-between shadow cursor-pointer transition transform hover:-translate-y-0.5">
-                        <div>
-                            <div class="text-xl mb-1.5">🏷️</div>
-                            <h3 class="font-bold text-xs text-slate-100 truncate">${cat}</h3>
-                            <p class="text-[10px] text-slate-400 mt-0.5">إدارة المخزون</p>
+                    <div onclick="openStockCategoryModal('${safeCat}')" class="bg-slate-950 border ${isCatDisabled ? 'border-red-500/50 opacity-60' : 'border-slate-800'} hover:border-amber-400 p-3.5 rounded-xl flex flex-col items-center justify-between shadow cursor-pointer transition transform hover:-translate-y-0.5 aspect-square text-center relative">
+                        ${isCatDisabled ? '<span class="absolute top-1.5 left-1.5 text-[9px] bg-red-500 text-white px-1.5 rounded">معطل</span>' : ''}
+                        <div class="flex flex-col items-center w-full">
+                            ${logoHtml}
+                            <h3 class="font-bold text-xs text-slate-100 truncate w-full">${cat}</h3>
                         </div>
-                        <div class="mt-2.5 pt-1.5 border-t border-slate-800/80 flex justify-between items-center">
-                            <span class="text-[10px] bg-slate-900 border border-slate-700 text-amber-400 px-2 py-0.5 rounded-full font-bold">${catProducts.length} فئات</span>
-                            <span class="text-amber-400 text-[11px] font-bold">استعراض ←</span>
+                        <div class="w-full pt-1.5 border-t border-slate-800/80 flex items-center justify-between">
+                            <span class="text-[9px] bg-slate-900 border border-slate-700 text-amber-400 px-2 py-0.5 rounded-full font-bold">${catProducts.length} فئات</span>
+                            <span class="text-amber-400 text-[10px] font-bold">استعراض ←</span>
                         </div>
                     </div>
                 `;
             });
             html += '</div>';
             container.innerHTML = html;
+        }
+
+        async function loadUsersList() {
+            try {
+                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsersList' }) });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    globalUsers = data.users || [];
+                    renderUsersTable();
+                }
+            } catch(e) {}
+        }
+
+        function renderUsersTable() {
+            const tbody = document.getElementById('users-table');
+            if(!tbody) return;
+            if(!globalUsers || globalUsers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>';
+                return;
+            }
+            let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
+            let html = '';
+            globalUsers.forEach(u => {
+                let isBlocked = blockedUsers[u.email] || false;
+                html += `
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td>
+                        <td class="p-3 text-emerald-400 font-bold">${(u.balance || 0).toFixed(2)} $</td>
+                        <td class="p-3 text-center">
+                            <button type="button" onclick="toggleUserBlock('${u.email}')" class="${isBlocked ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950' : 'bg-red-500 hover:bg-red-400 text-slate-950'} font-bold px-3 py-1 rounded text-xs transition cursor-pointer">
+                                ${isBlocked ? 'إلغاء الحظر (فك) 🔓' : 'حظر الحساب 🚫'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function toggleUserBlock(email) {
+            let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
+            blockedUsers[email] = !blockedUsers[email];
+            localStorage.setItem('store_blocked_users', JSON.stringify(blockedUsers));
+            renderUsersTable();
+            showModal('حالة الحساب', `تم تحديث حالة الحساب (${email}) بنجاح!`, '🛡️');
         }
 
         async function submitNewCodes() {
@@ -573,22 +730,6 @@
                     document.getElementById('quick-user-email').value = '';
                     document.getElementById('quick-user-amount').value = '';
                     loadUsersList();
-                }
-            } catch(e) {}
-        }
-
-        async function loadUsersList() {
-            try {
-                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'getUsersList' }) });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    const tbody = document.getElementById('users-table');
-                    if(!tbody) return;
-                    if(!data.users || data.users.length === 0) { tbody.innerHTML = '<tr><td colspan="2" class="p-4 text-center text-slate-500">لا يوجد زبائن.</td></tr>'; return; }
-                    tbody.innerHTML = '';
-                    data.users.forEach(u => {
-                        tbody.innerHTML += `<tr class="hover:bg-slate-800/40 transition"><td class="p-3 font-mono text-slate-300 text-xs">${u.email}</td><td class="p-3 text-emerald-400 font-bold">${(u.balance || 0).toFixed(2)} $</td></tr>`;
-                    });
                 }
             } catch(e) {}
         }
