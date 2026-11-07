@@ -197,7 +197,7 @@
             <button type="button" onclick="quickAddBalance()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition cursor-pointer">شحن الرصيد 💵</button>
         </div>
 
-        <!-- 6. الزبائن (مع أزرار الحظر والفك) -->
+        <!-- 6. الزبائن -->
         <div id="usersListTab" class="admin-content hidden bg-slate-900 border border-slate-800 p-6 rounded-xl space-y-4 shadow-lg">
             <div class="flex justify-between items-center"><h2 class="text-lg font-bold border-r-4 border-purple-400 pr-3">قائمة الزبائن (الحظر والتحكم)</h2><button type="button" onclick="loadUsersList()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-purple-400 cursor-pointer">تحديث 🔄</button></div>
             <div class="overflow-x-auto">
@@ -211,8 +211,8 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqpn0XfZLy0-Ad3I43cdx_qBnIpTYvveShsNDmgdXxp1EusqXSpTw_uWkQiE_Um7Ll/exec";
-        let globalProducts = [], allDepositRequests = [], globalUsers = [];
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyXZdElhBDLzDHImywizQSzRqZwjVLh0zHczT-A_jmXE5_Vj-aGwoDyHyLULyv8cYpd/exec";
+        let globalProducts = [], allDepositRequests = [], globalUsers = [], globalCategoryLogos = {};
 
         window.onload = function() {
             if(localStorage.getItem('admin_logged_in') === 'true') showAdminDashboard();
@@ -246,8 +246,7 @@
             
             catProducts.sort((a, b) => String(a.title).localeCompare(String(b.title), 'ar', {numeric: true}));
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-            let logoUrl = categoryLogos[catName] || "";
+            let logoUrl = globalCategoryLogos[catName] || "";
             let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
             let isCatDisabled = disabledCategories[catName] || false;
 
@@ -499,6 +498,7 @@
                 let data = await res.json();
                 if(data.status === 'success') { 
                     globalProducts = data.products || []; 
+                    globalCategoryLogos = data.categoryLogos || {};
                     renderAdminProducts(globalProducts); 
                     updateCategoriesDropdown(globalProducts); 
                 } else {
@@ -528,7 +528,6 @@
             let logoInput = document.getElementById('adm-category-logo-url');
             let previewBox = document.getElementById('logo-preview-box');
 
-            let activeCat = selectVal;
             if (selectVal === 'NEW_CAT') {
                 newCatInput.classList.remove('hidden'); newCatInput.value = ''; newCatInput.focus();
                 titleSelect.innerHTML = '<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>'; titleSelect.value = 'NEW_TITLE'; newTitleInput.classList.remove('hidden');
@@ -548,8 +547,7 @@
                 html += `<option value="NEW_TITLE">➕ إضافة فئة جديدة...</option>`;
                 titleSelect.innerHTML = html;
 
-                let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-                let savedLogo = categoryLogos[selectVal] || "";
+                let savedLogo = globalCategoryLogos[selectVal] || "";
                 logoInput.value = savedLogo;
                 if(savedLogo) {
                     previewBox.innerHTML = `<img src="${savedLogo}" class="w-full h-full object-contain">`;
@@ -559,7 +557,7 @@
             }
         }
 
-        function saveCategoryLogo() {
+        async function saveCategoryLogo() {
             let selectVal = document.getElementById('adm-category-select').value;
             let newCatInput = document.getElementById('adm-new-category').value.trim();
             let catName = (selectVal === 'NEW_CAT') ? newCatInput : selectVal;
@@ -567,33 +565,49 @@
 
             if(!catName) { showModal('تنبيه', 'الرجاء اختيار أو كتابة اسم القسم أولاً.', '⚠️'); return; }
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-            categoryLogos[catName] = logoUrl;
-            localStorage.setItem('store_category_logos', JSON.stringify(categoryLogos));
-
-            let previewBox = document.getElementById('logo-preview-box');
-            if(logoUrl) {
-                previewBox.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain">`;
-            } else {
-                previewBox.innerHTML = '🏷️';
+            try {
+                let res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'saveCategoryLogo', category: catName, logoUrl: logoUrl }) 
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    globalCategoryLogos[catName] = logoUrl;
+                    let previewBox = document.getElementById('logo-preview-box');
+                    if(logoUrl) {
+                        previewBox.innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain">`;
+                    } else {
+                        previewBox.innerHTML = '🏷️';
+                    }
+                    showModal('نجاح 💾', 'تم حفظ لوغو القسم في قاعدة البيانات بنجاح!', '✅');
+                    loadAdminProducts();
+                }
+            } catch(e) {
+                showModal('خطأ', 'فشل حفظ اللوغو', '❌');
             }
-            showModal('نجاح 💾', 'تم حفظ لوغو القسم بنجاح!', '✅');
         }
 
-        function deleteCategoryLogo() {
+        async function deleteCategoryLogo() {
             let selectVal = document.getElementById('adm-category-select').value;
             let newCatInput = document.getElementById('adm-new-category').value.trim();
             let catName = (selectVal === 'NEW_CAT') ? newCatInput : selectVal;
 
             if(!catName) { showModal('تنبيه', 'الرجاء اختيار القسم أولاً.', '⚠️'); return; }
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
-            delete categoryLogos[catName];
-            localStorage.setItem('store_category_logos', JSON.stringify(categoryLogos));
-
-            document.getElementById('adm-category-logo-url').value = '';
-            document.getElementById('logo-preview-box').innerHTML = '🏷️';
-            showModal('نجاح 🗑️', 'تم حذف لوغو القسم بنجاح.', '✅');
+            try {
+                let res = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ action: 'saveCategoryLogo', category: catName, logoUrl: "" }) 
+                });
+                let data = await res.json();
+                if(data.status === 'success') {
+                    delete globalCategoryLogos[catName];
+                    document.getElementById('adm-category-logo-url').value = '';
+                    document.getElementById('logo-preview-box').innerHTML = '🏷️';
+                    showModal('نجاح 🗑️', 'تم حذف لوغو القسم بنجاح.', '✅');
+                    loadAdminProducts();
+                }
+            } catch(e) {}
         }
 
         function onTitleChange() {
@@ -620,14 +634,13 @@
             let categories = [...new Set(products.map(p => p.category))];
             categories.sort((a, b) => a.localeCompare(b, 'ar'));
 
-            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
             let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
             let html = '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">';
 
             categories.forEach(cat => {
                 let catProducts = products.filter(p => p.category === cat);
                 let safeCat = String(cat).replace(/'/g, "\\'");
-                let logoUrl = categoryLogos[cat] || "";
+                let logoUrl = globalCategoryLogos[cat] || "";
                 let isCatDisabled = disabledCategories[cat] || false;
                 let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${cat}" class="w-12 h-12 object-contain rounded-lg mb-1.5 bg-slate-900 p-0.5 border border-slate-700">` : `<div class="text-2xl mb-1.5">🏷️</div>`;
 
