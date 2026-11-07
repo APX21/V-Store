@@ -131,8 +131,7 @@
                 <h2 class="text-xl font-bold border-r-4 border-amber-400 pr-3">أقسام المتجر الرقمي</h2>
                 <button type="button" onclick="loadStoreData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition cursor-pointer">تحديث 🔄</button>
             </div>
-            <!-- بطاقات أقسام صغيرة وعصرية -->
-            <div id="categories-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <div id="categories-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                 <p class="text-slate-500 col-span-full text-center py-6">جاري تحميل الأقسام...</p>
             </div>
         </section>
@@ -143,8 +142,8 @@
                 <button type="button" onclick="switchTab('store')" class="text-xs bg-slate-800 hover:bg-slate-700 text-amber-400 px-4 py-2 rounded-lg transition flex items-center gap-2 cursor-pointer"><span>← العودة للأقسام</span></button>
                 <h2 id="category-title" class="text-xl font-bold text-amber-400"></h2>
             </div>
-            <!-- بطاقات فئات صغيرة ومترتبة حسب السعر -->
-            <div id="category-products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+            <!-- شبكة بطاقات المنتجات المحدثة -->
+            <div id="category-products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
         </section>
 
         <!-- المشتريات -->
@@ -205,6 +204,12 @@
 
         window.onload = function() {
             if(currentUser && currentUser.email) {
+                let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
+                if(blockedUsers[currentUser.email]) {
+                    showModal('حساب محظور 🚫', 'عذراً، تم حظر هذا الحساب من قبل الإدارة.', '❌');
+                    logoutUser();
+                    return;
+                }
                 activateUserSession(currentUser);
             }
         };
@@ -213,7 +218,7 @@
             document.getElementById('modal-title').innerText = title;
             document.getElementById('modal-message').innerText = message;
             document.getElementById('modal-icon').innerText = icon;
-            document.getElementById('modal-buttons').innerHTML = `<button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>`;
+            document.getElementById('modal-buttons').innerHTML = '<button type="button" onclick="closeModal()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs transition cursor-pointer">حسناً 👍</button>';
             document.getElementById('custom-modal').classList.remove('hidden');
         }
 
@@ -303,6 +308,12 @@
             let email = document.getElementById('login-email').value.trim();
             let password = document.getElementById('login-password').value;
             if(!email || !password) { showModal('تنبيه', 'الرجاء إدخال البريد وكلمة المرور.', '⚠️'); return; }
+
+            let blockedUsers = JSON.parse(localStorage.getItem('store_blocked_users') || '{}');
+            if(blockedUsers[email]) {
+                showModal('حساب محظور 🚫', 'عذراً، هذا الحساب محظور من قبل الإدارة.', '❌');
+                return;
+            }
 
             try {
                 let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'loginUser', email, password }) });
@@ -412,25 +423,27 @@
             const grid = document.getElementById('categories-grid');
             if(!grid) return;
             grid.innerHTML = '';
-            let activeCategories = [...new Set(productsList.map(p => p.category))];
-            if(activeCategories.length === 0) { grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام متاحة.</p>'; return; }
+
+            let disabledCategories = JSON.parse(localStorage.getItem('store_disabled_categories') || '{}');
+            let activeCategories = [...new Set(productsList.map(p => p.category))].filter(cat => !disabledCategories[cat]);
+
+            if(activeCategories.length === 0) { grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد أقسام متاحة حالياً.</p>'; return; }
+
+            activeCategories.sort((a, b) => a.localeCompare(b, 'ar'));
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
 
             activeCategories.forEach(catName => {
-                let count = productsList.filter(p => p.category === catName).length;
+                let logoUrl = categoryLogos[catName] || "";
                 let card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-3.5 rounded-xl flex flex-col justify-between shadow cursor-pointer transition transform hover:-translate-y-0.5";
+                card.className = "bg-slate-900 border border-slate-800 hover:border-amber-400 p-3 rounded-xl flex flex-col items-center justify-center text-center shadow cursor-pointer transition transform hover:-translate-y-0.5 aspect-square";
                 card.onclick = () => openCategory(catName);
+                
+                let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${catName}" class="w-16 h-16 object-contain rounded-lg mb-2 bg-slate-950 p-1 border border-slate-800">` : `<div class="w-16 h-16 rounded-lg bg-slate-800 flex items-center justify-center text-3xl mb-2 border border-slate-700">🏷️</div>`;
+
                 card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-base">🏷️</span>
-                            <span class="text-[10px] bg-slate-800 text-amber-400 px-2 py-0.5 rounded-full font-bold">${count} فئات</span>
-                        </div>
-                        <h3 class="font-bold text-xs text-slate-100 truncate">${catName}</h3>
-                    </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-800/80 text-left">
-                        <span class="text-amber-400 text-[11px] font-bold">تصفح ←</span>
-                    </div>
+                    ${logoHtml}
+                    <h3 class="font-bold text-xs text-slate-100 truncate w-full">${catName}</h3>
                 `;
                 grid.appendChild(card);
             });
@@ -444,28 +457,103 @@
             if(!grid) return;
             grid.innerHTML = '';
 
-            let filteredProducts = productsList.filter(p => p.category === catName);
-            // ترتيب الفئات من الأصغر للأكبر حسب السعر
-            filteredProducts.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+            let disabledProducts = JSON.parse(localStorage.getItem('store_disabled_products') || '{}');
+            let filteredProducts = productsList.filter(p => p.category === catName && !disabledProducts[p.id]);
+            
+            filteredProducts.sort((a, b) => String(a.title).localeCompare(String(b.title), 'ar', {numeric: true}));
+
+            if(filteredProducts.length === 0) {
+                grid.innerHTML = '<p class="text-slate-500 col-span-full text-center py-6">لا توجد فئات متاحة في هذا القسم حالياً.</p>';
+                return;
+            }
+
+            let categoryLogos = JSON.parse(localStorage.getItem('store_category_logos') || '{}');
+            let logoUrl = categoryLogos[catName] || "";
 
             filteredProducts.forEach(p => {
                 let card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-3 rounded-xl flex flex-col justify-between shadow transition hover:border-amber-500/50";
+                card.className = "bg-slate-900 border border-slate-800 p-4 rounded-2xl flex flex-col items-center justify-between shadow transition hover:border-amber-500/50";
+                
+                // أيقونة أكبر حجماً (لوغو القسم أو أيقونة افتراضية)
+                let logoHtml = logoUrl ? `<img src="${logoUrl}" alt="${catName}" class="w-20 h-20 object-contain rounded-xl mb-2 bg-slate-950 p-1 border border-slate-800">` : `<div class="w-20 h-20 rounded-xl bg-slate-800 flex items-center justify-center text-4xl mb-2 border border-slate-700">⚡</div>`;
+
                 card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded font-bold">متوفرة</span>
-                            <span class="text-[10px] text-slate-400 font-mono">${p.codesCount} كود</span>
-                        </div>
-                        <h3 class="font-bold text-xs text-slate-100 truncate">${p.title}</h3>
+                    <div class="flex flex-col items-center w-full">
+                        ${logoHtml}
+                        <!-- فئة البطاقة تحت الأيقونة مباشرة وبشكل واضح -->
+                        <h3 class="font-bold text-sm text-slate-100 truncate w-full text-center mt-1 mb-3">${p.title}</h3>
                     </div>
-                    <div class="mt-2.5 flex justify-between items-center pt-2 border-t border-slate-800/80">
-                        <span class="text-amber-400 font-extrabold text-sm">${p.price} $</span>
-                        <button type="button" onclick="buyProduct('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1 rounded-md text-[11px] font-bold transition cursor-pointer shadow-sm">شراء</button>
+
+                    <div class="w-full space-y-3 pt-3 border-t border-slate-800">
+                        <!-- عداد الكمية -->
+                        <div class="flex items-center justify-between bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+                            <button type="button" onclick="changeQty('${p.id}', -1, ${p.price})" class="text-slate-400 hover:text-white font-bold text-base px-2 cursor-pointer">-</button>
+                            <span id="qty-${p.id}" class="text-xs font-bold text-slate-100">1</span>
+                            <button type="button" onclick="changeQty('${p.id}', 1, ${p.price})" class="text-slate-400 hover:text-white font-bold text-base px-2 cursor-pointer">+</button>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <span id="price-${p.id}" class="text-amber-400 font-extrabold text-base">$ ${parseFloat(p.price).toFixed(2)}</span>
+                            <button type="button" onclick="buyProductWithQty('${p.id}')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer shadow">شراء</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+        }
+
+        // دالة تغيير كمية البطاقات (بحد أقصى 5 وبحد أدنى 1)
+        function changeQty(productId, delta, unitPrice) {
+            let qtyEl = document.getElementById('qty-' + productId);
+            let priceEl = document.getElementById('price-' + productId);
+            if(!qtyEl || !priceEl) return;
+
+            let currentQty = parseInt(qtyEl.innerText) || 1;
+            let newQty = currentQty + delta;
+
+            if (newQty < 1) newQty = 1;
+            if (newQty > 5) {
+                showModal('تنبيه', 'الحد الأقصى للشراء في المرة الواحدة هو 5 بطاقات فقط.', '⚠️');
+                newQty = 5;
+            }
+
+            qtyEl.innerText = newQty;
+            priceEl.innerText = '$ ' + (unitPrice * newQty).toFixed(2);
+        }
+
+        // دالة الشراء بالكمية المحددة
+        async function buyProductWithQty(productId) {
+            let qtyEl = document.getElementById('qty-' + productId);
+            let qty = qtyEl ? parseInt(qtyEl.innerText) || 1 : 1;
+
+            let successCodes = [];
+            let lastNewBalance = currentUser.balance;
+
+            for (let i = 0; i < qty; i++) {
+                try {
+                    let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'buyProduct', email: currentUser.email, productId }) });
+                    let data = await res.json();
+                    if(data.status === 'success') {
+                        successCodes.push(data.code);
+                        lastNewBalance = data.newBalance;
+                    } else {
+                        showModal('تنبيه شراء', data.message || 'فشلت عملية شراء إحدى البطاقات.', '⚠️');
+                        break;
+                    }
+                } catch(e) {
+                    break;
+                }
+            }
+
+            if(successCodes.length > 0) {
+                currentUser.balance = lastNewBalance;
+                let bal = lastNewBalance.toFixed(2) + ' $';
+                document.getElementById('footer-user-balance').innerText = bal;
+                localStorage.setItem('store_user_data', JSON.stringify(currentUser));
+
+                showModal('تمت عملية الشراء بنجاح! 🎉', 'أكواد البطاقات الخاصة بك:\n\n' + successCodes.join('\n'), '🎁');
+                loadStoreData();
+            }
         }
 
         async function submitDepositRequest() {
@@ -509,23 +597,6 @@
                             </tr>
                         `;
                     });
-                }
-            } catch(e) {}
-        }
-
-        async function buyProduct(productId) {
-            try {
-                let res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'buyProduct', email: currentUser.email, productId }) });
-                let data = await res.json();
-                if(data.status === 'success') {
-                    showModal('تم الشراء بنجاح! 🎉', 'كود البطاقة الخاص بك:\n\n' + data.code, '🎁');
-                    currentUser.balance = data.newBalance;
-                    let bal = data.newBalance.toFixed(2) + ' $';
-                    document.getElementById('footer-user-balance').innerText = bal;
-                    localStorage.setItem('store_user_data', JSON.stringify(currentUser));
-                    loadStoreData();
-                } else {
-                    showModal('خطأ في الشراء', data.message || 'فشلت العملية', '❌');
                 }
             } catch(e) {}
         }
